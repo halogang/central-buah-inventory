@@ -1,9 +1,9 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { Eye, Edit3, Trash2, AlertCircle, Plus } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 import { SearchInput } from '@/components/search-input';
+import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,7 +20,8 @@ function formatCurrency(value: number) {
             currency: 'IDR',
             maximumFractionDigits: 0,
         }).format(value);
-    } catch (e) {
+    } catch {
+        // ignore formatting errors, fallback to raw number
         return String(value);
     }
 }

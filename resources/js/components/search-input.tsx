@@ -1,7 +1,8 @@
-import * as React from 'react';
 import { Search } from 'lucide-react';
+import * as React from 'react';
 
-interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+// alias input props directly instead of empty interface
+export type SearchInputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 export function SearchInput(props: SearchInputProps) {
     return (

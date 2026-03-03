@@ -1,9 +1,9 @@
 import { Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { SearchInput } from '@/components/search-input';
 import { Plus, SquarePen, Tag, Trash2, Wallet } from 'lucide-react';
+import { useState } from 'react';
+import { SearchInput } from '@/components/search-input';
+import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [

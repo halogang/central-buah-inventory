@@ -1,8 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
-import React, { useContext, useEffect, useState } from 'react';
-import { useCurrentUrl } from '@/hooks/use-current-url';
+import React, { useContext, useState } from 'react';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
+import { useCurrentUrl } from '@/hooks/use-current-url';
 
 interface NavItemProps {
     label: string;

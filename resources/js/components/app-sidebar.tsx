@@ -1,9 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { LayoutGrid, Package, Warehouse, Wallet, ShoppingCart, ChartColumn } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import { SidebarDropdown, SidebarDropdownProvider } from '@/components/sidebar-dropdown';
 import { NavMain } from '@/components/nav-main';
-import { useCan } from '@/utils/permissions';
+import { SidebarDropdown, SidebarDropdownProvider } from '@/components/sidebar-dropdown';
 import {
     Sidebar,
     SidebarContent,
@@ -14,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
+import { useCan } from '@/utils/permissions';
 
 export function AppSidebar() {
     const can = useCan();

@@ -1,5 +1,5 @@
-import type { Auth } from '@/types/auth';
 import type { route as ziggyRoute } from 'ziggy-js';
+import type { Auth } from '@/types/auth';
 
 declare global {
     const route: typeof ziggyRoute;
