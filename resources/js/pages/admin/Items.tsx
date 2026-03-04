@@ -81,10 +81,6 @@ export default function Items() {
     const [editItem, setEditItem] = useState<Item | null>(null);
     const [search, setSearch] = useState('');
 
-    const totalBadStock = useMemo(() => {
-        return items.reduce((total, item) => total + item.bad_stock, 0);
-    }, [items]);
-
     // form state for create/update
     const emptyForm: ItemForm = {
         icon: '',
@@ -203,7 +199,7 @@ export default function Items() {
                         <div className=" text-xs text-muted-foreground">
                             Bad Stock
                         </div>
-                        <h1 className="text-red-400 text-xl font-semibold">{totalBadStock}</h1>
+                        <h1 className="text-red-400 text-xl font-semibold">{items.reduce((total, item) => total + item.bad_stock, 0)}</h1>
                     </div>
                 </div>
 
