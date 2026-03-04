@@ -20,6 +20,14 @@ class Item extends Model
         'min_stock',
         'bad_stock',
     ];
+    
+    protected $casts = [
+        'purchase_price' => 'integer',
+        'selling_price' => 'integer',
+        'stock' => 'integer',
+        'min_stock' => 'integer',
+        'bad_stock' => 'integer',
+    ];
 
     public function category()
     {

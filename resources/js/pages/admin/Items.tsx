@@ -66,7 +66,7 @@ type ItemForm = {
     selling_price: string;
     stock: string;
     min_stock: string;
-    bad_stock: string;
+    bad_stock: number;
 };
 
 export default function Items() {
@@ -92,7 +92,7 @@ export default function Items() {
         selling_price: '',
         stock: '',
         min_stock: '',
-        bad_stock: '',
+        bad_stock: 0,
     };
     const [form, setForm] = useState(emptyForm);
 
@@ -110,7 +110,7 @@ export default function Items() {
                 selling_price: String(item.selling_price ?? ''),
                 stock: String(item.stock ?? ''),
                 min_stock: String(item.min_stock ?? ''),
-                bad_stock: String(item.bad_stock ?? ''),
+                bad_stock: item.bad_stock ?? 0,
             });
         } else {
             setEditItem(null);
@@ -199,7 +199,7 @@ export default function Items() {
                         <div className=" text-xs text-muted-foreground">
                             Bad Stock
                         </div>
-                        <h1 className="text-red-400 text-xl font-semibold">{items.reduce((total, item) => total + item.bad_stock, 0)}</h1>
+                        <h1 className="text-red-400 text-xl font-semibold">{items.reduce((total, item) => total + Number(item.bad_stock || 0), 0)}</h1>
                     </div>
                 </div>
 
@@ -397,7 +397,7 @@ export default function Items() {
                                         label="Bad Stok"
                                         type="number"
                                         value={form.bad_stock}
-                                        onChange={(e) => setForm({ ...form, bad_stock: e.target.value })}
+                                        onChange={(e) => setForm({ ...form, bad_stock: Number(e.target.value) })}
                                         error={errors.bad_stock}
                                         required
                                         placeholder="0"
