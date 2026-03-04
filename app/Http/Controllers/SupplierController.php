@@ -10,7 +10,7 @@ class SupplierController extends Controller
 {
     public function index()
     {
-        $suppliers = Supplier::all();
+        $suppliers = Supplier::orderBy('updated_at', 'desc')->get();
         return Inertia::render('admin/Suppliers', [
             'suppliers' => $suppliers,
         ]);
@@ -30,7 +30,7 @@ class SupplierController extends Controller
         ]);
 
         Supplier::create($validated);
-        return Inertia::location(route('suppliers.index'));
+        return redirect()->route('master.suppliers.index');
     }
 
     public function show(Supplier $supplier)
@@ -56,12 +56,12 @@ class SupplierController extends Controller
         ]);
 
         $supplier->update($validated);
-        return Inertia::location(route('suppliers.index'));
+        return redirect()->route('master.suppliers.index');
     }
 
     public function destroy(Supplier $supplier)
     {
         $supplier->delete();
-        return Inertia::location(route('suppliers.index'));
+        return redirect()->route('master.suppliers.index');
     }
 }

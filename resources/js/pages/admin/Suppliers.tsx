@@ -1,15 +1,20 @@
-import { Head, usePage } from '@inertiajs/react';
-import { MapPin, Phone, Plus, SquarePen, Trash2, Truck } from 'lucide-react';
-import { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { MapPin, Phone, Plus, SquarePen, Trash2, Truck, X } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+    FormInput,
+    FormTextarea,
+} from '@/components/admin';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { store, update, destroy } from '@/routes/master/suppliers';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Master Supplier',
-        href: '/suppliers',
+        href: '/master/suppliers',
     },
 ];
 
@@ -21,15 +26,86 @@ interface Supplier {
     created_at: string;
 }
 
+type SupplierForm = {
+    name: string;
+    phone: string;
+    address: string;
+};
+
 export default function Suppliers() {
     const { suppliers } = usePage<{ suppliers: Supplier[] }>().props;
+    const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
     const [editItem, setEditItem] = useState<Supplier | null>(null);
     const [search, setSearch] = useState('');
 
+    const emptyForm: SupplierForm = {
+        name: '',
+        phone: '',
+        address: '',
+    };
+    const [form, setForm] = useState(emptyForm);
+
+    const openForm = (item?: Supplier) => {
+        if (item) {
+            setEditItem(item);
+            setForm({
+                name: item.name,
+                phone: item.phone || '',
+                address: item.address || '',
+            });
+        } else {
+            setEditItem(null);
+            setForm(emptyForm);
+        }
+        setShowCreate(true);
+    };
+
+    const closeForm = () => {
+        setShowCreate(false);
+        setEditItem(null);
+        setForm(emptyForm);
+    };
+
+
+    const [deleteItem, setDeleteItem] = useState<Supplier | null>(null);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+
     const filtered = suppliers.filter((s) =>
         s.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    const submitForm = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editItem) {
+            router.put(update(editItem.id), form, {
+                onSuccess: () => {
+                    closeForm();
+                },
+            });
+        } else {
+            router.post(store(), form, {
+                onSuccess: () => closeForm(),
+            });
+        }
+    };
+
+    const confirmDelete = (item: Supplier) => {
+        setDeleteItem(item);
+        setToastMessage(`Hapus ${item.name}?`);
+    };
+
+    const performDelete = () => {
+        if (deleteItem) {
+            router.delete(destroy(deleteItem.id), {
+                onSuccess: () => {
+                    setToastMessage(null);
+                    setDeleteItem(null);
+                },
+            });
+        }
+    };
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -41,7 +117,7 @@ export default function Suppliers() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={() => setShowCreate(true)} size="lg" className='w-full sm:w-fit'>
+                    <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
                         <Plus />
                         Tambah
                     </Button>
@@ -51,8 +127,7 @@ export default function Suppliers() {
                     {filtered.map((s) => (
                         <div
                             key={s.id}
-                            className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border cursor-pointer flex items-center justify-between gap-4"
-                            onClick={() => setEditItem(s)}
+                            className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border flex items-center justify-between gap-4"
                         >
                             <div className="flex items-center gap-4">
                                 <div
@@ -75,36 +150,90 @@ export default function Suppliers() {
                                 </div>  
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'>
-                                    <SquarePen className="size-4 cursor-pointer" onClick={() => setEditItem(s)} />
+                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'
+                                     onClick={() => openForm(s)}>
+                                    <SquarePen className="size-4 cursor-pointer" />
                                 </div>
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'>
-                                    <Trash2 className="size-4 cursor-pointer hover:bg-gray-100" />
+                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'
+                                     onClick={() => confirmDelete(s)}>
+                                    <Trash2 className="size-4 cursor-pointer" />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {showCreate && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Create supplier (placeholder)</h2>
-                            <button onClick={() => setShowCreate(false)}>
-                                Close
-                            </button>
+                {(showCreate || editItem) && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
+                        onClick={() => closeForm()}
+                    >
+                        <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
+                             onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
+                                <h2 className="text-lg font-semibold">
+                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Supplier'}
+                                </h2>
+                                <X className="h-5 w-5 cursor-pointer" onClick={closeForm} />
+                            </div>
+                            <form onSubmit={submitForm} className="space-y-4 px-6">
+                                <FormInput
+                                    label="Nama Supplier"
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    error={errors.name}
+                                    required
+                                    placeholder="Nama supplier..."
+                                />
+                                <FormInput
+                                    label="No. Telepon"
+                                    type="tel"
+                                    value={form.phone}
+                                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                    error={errors.phone}
+                                    placeholder="08123456789"
+                                />
+                                <FormTextarea
+                                    label="Alamat"
+                                    value={form.address}
+                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                                    error={errors.address}
+                                    placeholder="Alamat supplier..."
+                                />
+
+                                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={closeForm}
+                                    >
+                                        Batal
+                                    </Button>
+                                    <Button type="submit">
+                                        Simpan
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
 
-                {editItem && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Edit {editItem.name} (placeholder)</h2>
-                            <button onClick={() => setEditItem(null)}>
-                                Close
-                            </button>
-                        </div>
+                {toastMessage && (
+                    <div className="fixed bottom-4 right-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4">
+                        <span>{toastMessage}</span>
+                        <button
+                            className="text-red-600 font-semibold"
+                            onClick={performDelete}
+                        >
+                            Ya
+                        </button>
+                        <button
+                            className="text-muted-foreground"
+                            onClick={() => setToastMessage(null)}
+                        >
+                            Tidak
+                        </button>
                     </div>
                 )}
             </div>

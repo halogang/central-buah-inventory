@@ -10,7 +10,7 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customers = Customer::all();
+        $customers = Customer::orderBy('updated_at', 'desc')->get();
         return Inertia::render('admin/Customers', [
             'customers' => $customers,
         ]);
@@ -30,7 +30,7 @@ class CustomerController extends Controller
         ]);
 
         Customer::create($validated);
-        return Inertia::location(route('customers.index'));
+        return redirect()->route('master.customers.index');
     }
 
     public function show(Customer $customer)
@@ -56,12 +56,12 @@ class CustomerController extends Controller
         ]);
 
         $customer->update($validated);
-        return Inertia::location(route('customers.index'));
+        return redirect()->route('master.customers.index');
     }
 
     public function destroy(Customer $customer)
     {
         $customer->delete();
-        return Inertia::location(route('customers.index'));
+        return redirect()->route('master.customers.index');
     }
 }

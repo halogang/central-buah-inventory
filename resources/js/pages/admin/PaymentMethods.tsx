@@ -1,15 +1,20 @@
-import { Head, usePage } from '@inertiajs/react';
-import { Plus, SquarePen, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { Plus, SquarePen, Trash2, X } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+    FormInput,
+    FormCheckbox,
+} from '@/components/admin';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { store, update, destroy } from '@/routes/master/payment-methods';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Metode Pembayaran',
-        href: '/payment-methods',
+        href: '/master/payment-methods',
     },
 ];
 
@@ -21,15 +26,91 @@ interface PaymentMethod {
     created_at: string;
 }
 
+type PaymentMethodForm = {
+    name: string;
+    icon: string;
+    status: boolean;
+};
+
 export default function PaymentMethods() {
     const { methods } = usePage<{ methods: PaymentMethod[] }>().props;
+    const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
     const [editItem, setEditItem] = useState<PaymentMethod | null>(null);
     const [search, setSearch] = useState('');
 
+    const emptyForm: PaymentMethodForm = {
+        name: '',
+        icon: '',
+        status: true,
+    };
+    const [form, setForm] = useState(emptyForm);
+
+    const openForm = (item?: PaymentMethod) => {
+        if (item) {
+            setEditItem(item);
+            setForm({
+                name: item.name,
+                icon: item.icon || '',
+                status: item.status === 'active',
+            });
+        } else {
+            setEditItem(null);
+            setForm(emptyForm);
+        }
+        setShowCreate(true);
+    };
+
+    const closeForm = () => {
+        setShowCreate(false);
+        setEditItem(null);
+        setForm(emptyForm);
+    };
+
+    const emojis = ['💵', '🏦', '📱', '💳', '🪙', '💰'];
+
+    const [deleteItem, setDeleteItem] = useState<PaymentMethod | null>(null);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+
     const filtered = methods.filter((m) =>
         m.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    const submitForm = (e: React.FormEvent) => {
+        e.preventDefault();
+        const payload = {
+            name: form.name,
+            icon: form.icon,
+            status: form.status ? 'active' : 'inactive',
+        };
+        if (editItem) {
+            router.put(update(editItem.id), payload, {
+                onSuccess: () => {
+                    closeForm();
+                },
+            });
+        } else {
+            router.post(store(), payload, {
+                onSuccess: () => closeForm(),
+            });
+        }
+    };
+
+    const confirmDelete = (item: PaymentMethod) => {
+        setDeleteItem(item);
+        setToastMessage(`Hapus ${item.name}?`);
+    };
+
+    const performDelete = () => {
+        if (deleteItem) {
+            router.delete(destroy(deleteItem.id), {
+                onSuccess: () => {
+                    setToastMessage(null);
+                    setDeleteItem(null);
+                },
+            });
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -55,7 +136,7 @@ export default function PaymentMethods() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={() => setShowCreate(true)} size="lg" className='w-full sm:w-fit'>
+                    <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
                         <Plus />
                         Tambah
                     </Button>
@@ -66,7 +147,7 @@ export default function PaymentMethods() {
                         <div
                             key={m.id}
                             className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border cursor-pointer flex items-center justify-between gap-4"
-                            onClick={() => setEditItem(m)}
+                            onClick={() => openForm(m)}
                         >
                             <div className="flex items-center gap-4">
                                 <div
@@ -86,36 +167,99 @@ export default function PaymentMethods() {
                                 </div>  
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'>
-                                    <SquarePen className="size-4 cursor-pointer" onClick={() => setEditItem(m)} />
+                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'
+                                     onClick={() => openForm(m)}>
+                                    <SquarePen className="size-4 cursor-pointer" />
                                 </div>
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'>
-                                    <Trash2 className="size-4 cursor-pointer hover:bg-gray-100" />
+                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'
+                                     onClick={() => confirmDelete(m)}>
+                                    <Trash2 className="size-4 cursor-pointer" />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {showCreate && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Create payment method (placeholder)</h2>
-                            <button onClick={() => setShowCreate(false)}>
-                                Close
-                            </button>
+                {(showCreate || editItem) && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
+                        onClick={() => {
+                            setShowCreate(false);
+                            setEditItem(null);
+                        }}
+                    >
+                        <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
+                             onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
+                                <h2 className="text-lg font-semibold">
+                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Metode Pembayaran'}
+                                </h2>
+                                <X className="h-5 w-5 cursor-pointer" onClick={closeForm} />
+                            </div>
+                            <form onSubmit={submitForm} className="space-y-4 px-6">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Pilih ikon</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {emojis.map((emo) => (
+                                            <button
+                                                key={emo}
+                                                type="button"
+                                                onClick={() => setForm((f) => ({ ...f, icon: emo }))}
+                                                className={`w-12 h-12 p-2 text-xl rounded-xl cursor-pointer ${form.icon === emo ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/75'}`}
+                                            >
+                                                {emo}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <FormInput
+                                    label="Nama Metode Pembayaran"
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    error={errors.name}
+                                    required
+                                    placeholder="Nama metode pembayaran..."
+                                />
+                                <FormCheckbox
+                                    label="Aktif"
+                                    checked={form.status}
+                                    onChange={(e) => setForm({ ...form, status: e.target.checked })}
+                                    error={errors.status}
+                                />
+
+                                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={closeForm}
+                                    >
+                                        Batal
+                                    </Button>
+                                    <Button type="submit">
+                                        Simpan
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
 
-                {editItem && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Edit {editItem.name} (placeholder)</h2>
-                            <button onClick={() => setEditItem(null)}>
-                                Close
-                            </button>
-                        </div>
+                {toastMessage && (
+                    <div className="fixed bottom-4 right-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4">
+                        <span>{toastMessage}</span>
+                        <button
+                            className="text-red-600 font-semibold"
+                            onClick={performDelete}
+                        >
+                            Ya
+                        </button>
+                        <button
+                            className="text-muted-foreground"
+                            onClick={() => setToastMessage(null)}
+                        >
+                            Tidak
+                        </button>
                     </div>
                 )}
             </div>

@@ -10,7 +10,7 @@ class WarehouseController extends Controller
 {
     public function index()
     {
-        $warehouses = Warehouse::all();
+        $warehouses = Warehouse::orderBy('updated_at', 'desc')->get();
         return Inertia::render('admin/Warehouses', [
             'warehouses' => $warehouses,
         ]);
@@ -28,11 +28,13 @@ class WarehouseController extends Controller
             'address' => 'nullable|string',
             'capacity' => 'nullable|integer',
             'pic' => 'nullable|string|max:255',
-            'status' => 'required|in:active,nonactive',
+            'status' => 'nullable|in:active,nonactive',
         ]);
 
+        $validated['status'] = $validated['status'] ?? 'nonactive';
+
         Warehouse::create($validated);
-        return Inertia::location(route('warehouses.index'));
+        return redirect()->route('master.warehouses.index');
     }
 
     public function show(Warehouse $warehouse)
@@ -56,16 +58,18 @@ class WarehouseController extends Controller
             'address' => 'nullable|string',
             'capacity' => 'nullable|integer',
             'pic' => 'nullable|string|max:255',
-            'status' => 'required|in:active,nonactive',
+            'status' => 'nullable|in:active,nonactive',
         ]);
 
+        $validated['status'] = $validated['status'] ?? 'nonactive';
+
         $warehouse->update($validated);
-        return Inertia::location(route('warehouses.index'));
+        return redirect()->route('master.warehouses.index');
     }
 
     public function destroy(Warehouse $warehouse)
     {
         $warehouse->delete();
-        return Inertia::location(route('warehouses.index'));
+        return redirect()->route('master.warehouses.index');
     }
 }

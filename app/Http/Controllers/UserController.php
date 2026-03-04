@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->get()->map(function ($user) {
+        $users = User::with('roles')->orderBy('updated_at', 'desc')->get()->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -70,23 +70,30 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => 'nullable|string|min:8',
             'phone' => 'nullable|string',
-            'roles' => 'array',
+            'role_id' => 'required|exists:roles,id',
         ]);
+
+        // dd($validated, $request->all());
+        $validated['password'] = $validated['password'] ?? 'password';
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
             'phone' => $validated['phone'] ?? null,
-        ]);
+        ]); 
 
-        if (!empty($validated['roles'])) {
-            $user->syncRoles($validated['roles']);
+        if (!empty($validated['role_id'])) {
+            $role = Role::findById($validated['role_id']);
+            if ($role) {
+                $user->syncRoles([]);
+                $user->assignRole($role->name);
+            }
         }
 
-        return Inertia::location(route('users.index'));
+        return redirect()->route('master.users.index');
     }
 
     public function show(User $user)
@@ -109,7 +116,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string',
-            'roles' => 'array',
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         $user->update([
@@ -118,16 +125,20 @@ class UserController extends Controller
             'phone' => $validated['phone'] ?? null,
         ]);
 
-        if (!empty($validated['roles'])) {
-            $user->syncRoles($validated['roles']);
+        if (!empty($validated['role_id'])) {
+            $role = Role::findById($validated['role_id']);
+            if ($role) {
+                $user->syncRoles([]);
+                $user->assignRole($role->name);
+            }
         }
 
-        return Inertia::location(route('users.index'));
+        return redirect()->route('master.users.index');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
-        return Inertia::location(route('users.index'));
+        return redirect()->route('master.users.index');
     }
 }

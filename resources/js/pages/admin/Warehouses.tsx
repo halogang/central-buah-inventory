@@ -1,9 +1,15 @@
-import { usePage } from '@inertiajs/react';
-import { Warehouse, MapPin, SquarePen, Trash2, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { Warehouse, MapPin, SquarePen, Trash2, Plus, X } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+    FormInput,
+    FormTextarea,
+    FormSwitch,
+} from '@/components/admin';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { store, update, destroy } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
 
 // helper to add thousands separators
@@ -16,7 +22,7 @@ function formatNumber(value: number | string) {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Master Gudang',
-        href: '/warehouses',
+        href: '/master/warehouses',
     },
 ];
 
@@ -30,18 +36,102 @@ interface Warehouse {
     created_at: string;
 }
 
+type WarehouseForm = {
+    name: string;
+    address: string;
+    capacity: string;
+    pic: string;
+    status: 'active' | 'nonactive';
+};
+
 export default function Warehouses() {
     const { warehouses } = usePage<{ warehouses: Warehouse[] }>().props;
+    const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
     const [editItem, setEditItem] = useState<Warehouse | null>(null);
     const [search, setSearch] = useState('');
+
+    const emptyForm: WarehouseForm = {
+        name: '',
+        address: '',
+        capacity: '',
+        pic: '',
+        status: 'active',
+    };
+    const [form, setForm] = useState(emptyForm);
+
+    const openForm = (item?: Warehouse) => {
+        if (item) {
+            setEditItem(item);
+            setForm({
+                name: item.name,
+                address: item.address || '',
+                capacity: String(item.capacity ?? ''),
+                pic: item.pic || '',
+                status: item.status === 'active' ? 'active' : 'nonactive',
+            });
+        } else {
+            setEditItem(null);
+            setForm(emptyForm);
+        }
+        setShowCreate(true);
+    };
+
+    const closeForm = () => {
+        setShowCreate(false);
+        setEditItem(null);
+        setForm(emptyForm);
+    };
+
+
+    const [deleteItem, setDeleteItem] = useState<Warehouse | null>(null);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     const filtered = warehouses.filter((w) =>
         w.name.toString().toLowerCase().includes(search.toLowerCase())
     );
 
+    const submitForm = (e: React.FormEvent) => {
+        e.preventDefault();
+        const payload = {
+            name: form.name,
+            address: form.address,
+            capacity: Number(form.capacity),
+            pic: form.pic,
+            status: form.status,
+        };
+        if (editItem) {
+            router.put(update(editItem.id), payload, {
+                onSuccess: () => {
+                    closeForm();
+                },
+            });
+        } else {
+            router.post(store(), payload, {
+                onSuccess: () => closeForm(),
+            });
+        }
+    };
+
+    const confirmDelete = (item: Warehouse) => {
+        setDeleteItem(item);
+        setToastMessage(`Hapus ${item.name}?`);
+    };
+
+    const performDelete = () => {
+        if (deleteItem) {
+            router.delete(destroy(deleteItem.id), {
+                onSuccess: () => {
+                    setToastMessage(null);
+                    setDeleteItem(null);
+                },
+            });
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Warehouses" />
             <div className="p-4">
                 <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
                     <SearchInput
@@ -49,7 +139,7 @@ export default function Warehouses() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={() => setShowCreate(true)} size="lg" className='w-full sm:w-fit'>
+                    <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
                         <Plus />
                         Tambah
                     </Button>
@@ -59,8 +149,7 @@ export default function Warehouses() {
                     {filtered.map((w) => (
                         <div
                             key={w.id}
-                            className="flex flex-col gap-4 rounded-xl border border-sidebar-border/70 bg-background px-4 pt-4 pb-6 shadow-sm dark:border-sidebar-border cursor-pointer"
-                            onClick={() => setEditItem(w)}
+                            className="flex flex-col gap-4 rounded-xl border border-sidebar-border/70 bg-background px-4 pt-4 pb-6 shadow-sm dark:border-sidebar-border"
                         >
                             <div className="flex items-start gap-3">
                                 <div className={
@@ -104,10 +193,10 @@ export default function Warehouses() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 justify-end">
-                                <button onClick={() => setEditItem(w)}>
+                                <button onClick={() => openForm(w)}>
                                     <SquarePen className="size-4 text-muted-foreground hover:text-primary" />
                                 </button>
-                                <button>
+                                <button onClick={() => confirmDelete(w)}>
                                     <Trash2 className="size-4 text-muted-foreground hover:text-red-600" />
                                 </button>
                             </div>
@@ -116,25 +205,96 @@ export default function Warehouses() {
                     ))}
                 </div>
 
-                {showCreate && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Create warehouse (placeholder)</h2>
-                            <button onClick={() => setShowCreate(false)}>
-                                Close
-                            </button>
+                {(showCreate || editItem) && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
+                        onClick={() => closeForm()}
+                    >
+                        <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
+                             onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
+                                <h2 className="text-lg font-semibold">
+                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Gudang'}
+                                </h2>
+                                <X className="h-5 w-5 cursor-pointer" onClick={closeForm} />
+                            </div>
+                            <form onSubmit={submitForm} className="space-y-4 px-6">
+                                <FormInput
+                                    label="Nama Gudang"
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    error={errors.name}
+                                    required
+                                    placeholder="Nama gudang..."
+                                />
+                                <FormTextarea
+                                    label="Alamat"
+                                    value={form.address}
+                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                                    error={errors.address}
+                                    placeholder="Alamat gudang..."
+                                />
+                                <FormInput
+                                    label="Kapasitas (unit)"
+                                    type="number"
+                                    value={form.capacity}
+                                    onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                                    error={errors.capacity}
+                                    required
+                                    placeholder="0"
+                                />
+                                <FormInput
+                                    label="PIC (Penanggung Jawab)"
+                                    value={form.pic}
+                                    onChange={(e) => setForm({ ...form, pic: e.target.value })}
+                                    error={errors.pic}
+                                    placeholder="Nama PIC..."
+                                />
+                                {/* <FormStatusRadio
+                                    value={form.status}
+                                    onChange={(val) => setForm({ ...form, status: val })}
+                                    error={errors.status}
+                                /> */}
+                                <FormSwitch
+                                    label="Aktif"
+                                    value={form.status}
+                                    onChange={(val) => setForm({ ...form, status: val })}
+                                    error={errors.status}
+                                />
+
+                                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={closeForm}
+                                    >
+                                        Batal
+                                    </Button>
+                                    <Button type="submit">
+                                        Simpan
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
 
-                {editItem && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Edit {editItem.name} (placeholder)</h2>
-                            <button onClick={() => setEditItem(null)}>
-                                Close
-                            </button>
-                        </div>
+                {toastMessage && (
+                    <div className="fixed bottom-4 right-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4">
+                        <span>{toastMessage}</span>
+                        <button
+                            className="text-red-600 font-semibold"
+                            onClick={performDelete}
+                        >
+                            Ya
+                        </button>
+                        <button
+                            className="text-muted-foreground"
+                            onClick={() => setToastMessage(null)}
+                        >
+                            Tidak
+                        </button>
                     </div>
                 )}
             </div>

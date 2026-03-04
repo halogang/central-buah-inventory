@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Category;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,9 +12,16 @@ class ItemController extends Controller
 {
     public function index()
     {
-        $items = Item::all();
+        $items = Item::with(['category','warehouse'])
+                ->orderBy('updated_at', 'desc')
+                ->get();
+        $categories = Category::all(['id','name']);
+        $warehouses = Warehouse::all(['id','name']);
+
         return Inertia::render('admin/Items', [
             'items' => $items,
+            'categories' => $categories,
+            'warehouses' => $warehouses,
         ]);
     }
 
@@ -27,17 +36,17 @@ class ItemController extends Controller
             'icon' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'unit' => 'required|string|max:50',
+            'unit' => 'required|string|in:kg,sisir,biji,pack',
             'warehouse_id' => 'nullable|exists:warehouses,id',
-            'purchase_price' => 'nullable|numeric',
-            'selling_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'min_stock' => 'nullable|integer',
-            'bad_stock' => 'nullable|integer',
+            'purchase_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'min_stock' => 'nullable|integer|min:0',
+            'bad_stock' => 'nullable|integer|min:0',
         ]);
 
         Item::create($validated);
-        return Inertia::location(route('items.index'));
+        return redirect()->route('master.items.index');
     }
 
     public function show(Item $item)
@@ -60,22 +69,22 @@ class ItemController extends Controller
             'icon' => 'nullable|string|max:255',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'unit' => 'required|string|max:50',
+            'unit' => 'required|string|in:kg,sisir,biji,pack',
             'warehouse_id' => 'nullable|exists:warehouses,id',
-            'purchase_price' => 'nullable|numeric',
-            'selling_price' => 'nullable|numeric',
-            'stock' => 'nullable|integer',
-            'min_stock' => 'nullable|integer',
-            'bad_stock' => 'nullable|integer',
+            'purchase_price' => 'nullable|numeric|min:0',
+            'selling_price' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'min_stock' => 'nullable|integer|min:0',
+            'bad_stock' => 'nullable|integer|min:0',
         ]);
 
         $item->update($validated);
-        return Inertia::location(route('items.index'));
+        return redirect()->route('master.items.index');
     }
 
     public function destroy(Item $item)
     {
         $item->delete();
-        return Inertia::location(route('items.index'));
+        return redirect()->route('master.items.index');
     }
 }

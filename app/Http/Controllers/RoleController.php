@@ -11,7 +11,7 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::with('permissions')->get()->map(function ($role) {
+        $roles = Role::with('permissions')->orderBy('updated_at', 'desc')->get()->map(function ($role) {
             return [
                 'id' => $role->id,
                 'name' => $role->name,
@@ -49,19 +49,21 @@ class RoleController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:roles',
             'description' => 'nullable|string',
-            'permissions' => 'array',
+            'permission_ids' => 'array',
         ]);
+
+        // dd($validated, $request->all());
 
         $role = Role::create([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
         ]);
 
-        if (!empty($validated['permissions'])) {
-            $role->syncPermissions($validated['permissions']);
+        if (!empty($validated['permission_ids'])) {
+            $role->syncPermissions($validated['permission_ids']);
         }
 
-        return Inertia::location(route('roles.index'));
+        return redirect()->route('master.users.index');
     }
 
     public function show(Role $role)
@@ -83,24 +85,26 @@ class RoleController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
             'description' => 'nullable|string',
-            'permissions' => 'array',
+            'permission_ids' => 'array',
         ]);
+
+        // dd($validated, $request->all());
 
         $role->update([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
         ]);
 
-        if (!empty($validated['permissions'])) {
-            $role->syncPermissions($validated['permissions']);
+        if (!empty($validated['permission_ids'])) {
+            $role->syncPermissions($validated['permission_ids']);
         }
 
-        return Inertia::location(route('roles.index'));
+        return redirect()->route('master.users.index');
     }
 
     public function destroy(Role $role)
     {
         $role->delete();
-        return Inertia::location(route('roles.index'));
+        return redirect()->route('master.users.index');
     }
 }

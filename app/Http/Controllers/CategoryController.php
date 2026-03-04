@@ -10,7 +10,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::orderBy('updated_at', 'desc')->get();
         return Inertia::render('admin/Categories', [
             'categories' => $categories,
         ]);

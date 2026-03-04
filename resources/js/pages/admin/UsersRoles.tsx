@@ -1,21 +1,31 @@
-import { Head, usePage } from '@inertiajs/react';
-import { Plus, SquarePen, Trash2, Shield, Eye, User, Mail, Phone } from 'lucide-react';
+import { Head, usePage, router } from '@inertiajs/react';
+import { Plus, SquarePen, Trash2, Shield, Eye, User, Mail, Phone, X } from 'lucide-react';
 import { useState } from 'react';
+import {
+    FormInput,
+    FormSelect,
+    FormTextarea,
+    FormCheckbox,
+} from '@/components/admin';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import * as RoleRoutes from '@/routes/master/roles';
+import * as UserRoutes from '@/routes/master/users';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Pengguna & Role',
-        href: '/users',
+        href: '/master/users',
     },
 ];
 
 interface Role {
     id: number;
     name: string;
+    description?: string;
+    permissions?: Array<{ id: number; name: string }>;
 }
 
 interface UserData {
@@ -23,6 +33,7 @@ interface UserData {
     name: string;
     email: string;
     phone?: string;
+    status_aktif?: boolean;
     roles: Role[];
 }
 
@@ -39,6 +50,20 @@ interface Permission {
     name: string;
 }
 
+type UserForm = {
+    name: string;
+    email: string;
+    phone: string;
+    role_id: string;
+    status_aktif: boolean;
+};
+
+type RoleForm = {
+    name: string;
+    description: string;
+    permission_ids: number[];
+};
+
 export default function UsersRoles() {
     const { users = [], roles = [], permissions = [] } = usePage<{
         users: UserData[];
@@ -46,9 +71,39 @@ export default function UsersRoles() {
         permissions: Permission[];
     }>().props;
 
+    const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
+
     const [activeTab, setActiveTab] = useState<'pengguna' | 'role'>('pengguna');
     const [search, setSearch] = useState('');
     const [simulatedRole, setSimulatedRole] = useState<RoleData | null>(null);
+
+    // User states
+    const [showCreateUser, setShowCreateUser] = useState(false);
+    const [editUser, setEditUser] = useState<UserData | null>(null);
+    const [deleteUserItem, setDeleteUserItem] = useState<UserData | null>(null);
+    const [toastForUser, setToastForUser] = useState<string | null>(null);
+
+    const emptyUserForm: UserForm = {
+        name: '',
+        email: '',
+        phone: '',
+        role_id: '',
+        status_aktif: true,
+    };
+    const [userForm, setUserForm] = useState(emptyUserForm);
+
+    // Role states
+    const [showCreateRole, setShowCreateRole] = useState(false);
+    const [editRole, setEditRole] = useState<RoleData | null>(null);
+    const [deleteRoleItem, setDeleteRoleItem] = useState<RoleData | null>(null);
+    const [toastForRole, setToastForRole] = useState<string | null>(null);
+
+    const emptyRoleForm: RoleForm = {
+        name: '',
+        description: '',
+        permission_ids: [],
+    };
+    const [roleForm, setRoleForm] = useState(emptyRoleForm);
 
     const filteredUsers = users.filter((u) =>
         u.name.toLowerCase().includes(search.toLowerCase())
@@ -57,6 +112,52 @@ export default function UsersRoles() {
     const filteredRoles = roles.filter((r) =>
         r.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    // helpers for user modal
+    const openUserForm = (user?: UserData) => {
+        if (user) {
+            setEditUser(user);
+            setUserForm({
+                name: user.name,
+                email: user.email,
+                phone: user.phone || '',
+                role_id: user.roles.length > 0 ? user.roles[0].id.toString() : '',
+                status_aktif: user.status_aktif ?? true,
+            });
+        } else {
+            setEditUser(null);
+            setUserForm(emptyUserForm);
+        }
+        setShowCreateUser(true);
+    };
+
+    const closeUserForm = () => {
+        setShowCreateUser(false);
+        setEditUser(null);
+        setUserForm(emptyUserForm);
+    };
+
+    // helpers for role modal
+    const openRoleForm = (role?: RoleData) => {
+        if (role) {
+            setEditRole(role);
+            setRoleForm({
+                name: role.name,
+                description: role.description || '',
+                permission_ids: role.permissions?.map(p => p.id) || [],
+            });
+        } else {
+            setEditRole(null);
+            setRoleForm(emptyRoleForm);
+        }
+        setShowCreateRole(true);
+    };
+
+    const closeRoleForm = () => {
+        setShowCreateRole(false);
+        setEditRole(null);
+        setRoleForm(emptyRoleForm);
+    };
 
     const getInitials = (name: string) => {
         return name
@@ -93,6 +194,77 @@ export default function UsersRoles() {
         const index = name.charCodeAt(0) % colors.length;
         return colors[index];
     };
+
+    // User CRUD handlers
+    const submitUserForm = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editUser) {
+            router.put(UserRoutes.update(editUser.id), userForm, {
+                onSuccess: () => {
+                    closeUserForm();
+                },
+            });
+        } else {
+            router.post(UserRoutes.store(), userForm, {
+                onSuccess: () => {
+                    closeUserForm();
+                    setUserForm(emptyUserForm);
+                },
+            });
+        }
+    };
+
+    const confirmDeleteUser = (item: UserData) => {
+        setDeleteUserItem(item);
+        setToastForUser(`Hapus ${item.name}?`);
+    };
+
+    const performDeleteUser = () => {
+        if (deleteUserItem) {
+            router.delete(UserRoutes.destroy(deleteUserItem.id), {
+                onSuccess: () => {
+                    setToastForUser(null);
+                    setDeleteUserItem(null);
+                },
+            });
+        }
+    };
+
+    // Role CRUD handlers
+    const submitRoleForm = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editRole) {
+            router.put(RoleRoutes.update(editRole.id), roleForm, {
+                onSuccess: () => {
+                    closeRoleForm();
+                },
+            });
+        } else {
+            router.post(RoleRoutes.store(), roleForm, {
+                onSuccess: () => {
+                    closeRoleForm();
+                    setRoleForm(emptyRoleForm);
+                },
+            });
+        }
+    };
+
+    const confirmDeleteRole = (item: RoleData) => {
+        setDeleteRoleItem(item);
+        setToastForRole(`Hapus ${item.name}?`);
+    };
+
+    const performDeleteRole = () => {
+        if (deleteRoleItem) {
+            router.delete(RoleRoutes.destroy(deleteRoleItem.id), {
+                onSuccess: () => {
+                    setToastForRole(null);
+                    setDeleteRoleItem(null);
+                },
+            });
+        }
+    };
+    
     
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -119,7 +291,7 @@ export default function UsersRoles() {
                         >
                             Semua
                         </button>
-                        {roles.slice(0, 5).map((role) => (
+                        {roles.map((role) => (
                             <button
                                 key={role.id}
                                 type="button"
@@ -218,7 +390,17 @@ export default function UsersRoles() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button size="lg" className="w-full sm:w-fit">
+                    <Button 
+                        size="lg" 
+                        className="w-full sm:w-fit"
+                        onClick={() => {
+                            if (activeTab === 'pengguna') {
+                                openUserForm();
+                            } else {
+                                openRoleForm();
+                            }
+                        }}
+                    >
                         <Plus />
                         {activeTab === 'pengguna' ? 'Tambah Pengguna' : 'Tambah Role'}
                     </Button>
@@ -272,10 +454,10 @@ export default function UsersRoles() {
                                 </div>
 
                                 <div className="flex items-center gap-2 justify-end pt-2 border-t border-sidebar-border/50">
-                                    <button>
+                                    <button onClick={() => openUserForm(user)}>
                                         <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
                                     </button>
-                                    <button>
+                                    <button onClick={() => confirmDeleteUser(user)}>
                                         <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
                                     </button>
                                 </div>
@@ -335,15 +517,202 @@ export default function UsersRoles() {
                                 </div>
 
                                 <div className="flex items-center gap-2 justify-end pt-2 border-t border-sidebar-border/50">
-                                    <button>
+                                    <button onClick={() => openRoleForm(role)}>
                                         <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
                                     </button>
-                                    <button>
+                                    <button onClick={() => confirmDeleteRole(role)}>
                                         <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
                                     </button>
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* USER CREATE/EDIT MODAL */}
+                {(showCreateUser || editUser) && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
+                        onClick={() => closeUserForm()}
+                    >
+                        <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
+                             onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
+                                <h2 className="text-lg font-semibold">
+                                    {editUser ? `Edit ${editUser.name}` : 'Tambah Pengguna'}
+                                </h2>
+                                <X className="h-5 w-5 cursor-pointer" onClick={closeUserForm} />
+                            </div>
+                            <form onSubmit={submitUserForm} className="space-y-4 px-6">
+                                <FormInput
+                                    label="Nama Lengkap"
+                                    value={userForm.name}
+                                    onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                                    error={errors.name}
+                                    required
+                                    placeholder="Nama lengkap..."
+                                />
+                                <FormInput
+                                    label="Email"
+                                    type="email"
+                                    value={userForm.email}
+                                    onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                                    error={errors.email}
+                                    required
+                                    placeholder="email@example.com"
+                                />
+                                <FormInput
+                                    label="No. Telepon"
+                                    type="tel"
+                                    value={userForm.phone}
+                                    onChange={(e) => setUserForm({ ...userForm, phone: e.target.value })}
+                                    error={errors.phone}
+                                    placeholder="08123456789"
+                                />
+                                <FormSelect
+                                    label="Role"
+                                    value={userForm.role_id}
+                                    onChange={(e) => setUserForm({ ...userForm, role_id: e.target.value })}
+                                    options={roles.map(r => ({ value: r.id.toString(), label: formatRoleName(r.name) }))}
+                                    error={errors.role_id}
+                                    required
+                                />
+                                <FormCheckbox
+                                    label="Status Aktif"
+                                    checked={userForm.status_aktif}
+                                    onChange={(e) => setUserForm({ ...userForm, status_aktif: e.target.checked })}
+                                />
+
+                                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={closeUserForm}
+                                    >
+                                        Batal
+                                    </Button>
+                                    <Button type="submit">
+                                        Simpan
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* ROLE CREATE/EDIT MODAL */}
+                {(showCreateRole || editRole) && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
+                        onClick={() => closeRoleForm()}
+                    >
+                        <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn max-h-[90vh] overflow-y-auto"
+                             onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4 sticky top-0 bg-background">
+                                <h2 className="text-lg font-semibold">
+                                    {editRole ? `Edit ${editRole.name}` : 'Tambah Role'}
+                                </h2>
+                                <X className="h-5 w-5 cursor-pointer" onClick={closeRoleForm} />
+                            </div>
+                            <form onSubmit={submitRoleForm} className="space-y-4 px-6">
+                                <FormInput
+                                    label="Nama Role"
+                                    value={roleForm.name}
+                                    onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
+                                    error={errors.name}
+                                    required
+                                    placeholder="Nama role..."
+                                />
+                                <FormTextarea
+                                    label="Deskripsi"
+                                    value={roleForm.description}
+                                    onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
+                                    error={errors.description}
+                                    placeholder="Deskripsi role..."
+                                />
+                                
+                                <div className="border-t border-sidebar-border pt-4">
+                                    <h3 className="font-semibold text-sm mb-3">Permissions</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        {permissions.map((perm) => (
+                                            <FormCheckbox
+                                                key={perm.id}
+                                                label={perm.name}
+                                                checked={roleForm.permission_ids.includes(perm.id)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setRoleForm({
+                                                            ...roleForm,
+                                                            permission_ids: [...roleForm.permission_ids, perm.id],
+                                                        });
+                                                    } else {
+                                                        setRoleForm({
+                                                            ...roleForm,
+                                                            permission_ids: roleForm.permission_ids.filter(
+                                                                (id) => id !== perm.id
+                                                            ),
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
+                                    <Button
+                                        variant="secondary"
+                                        type="button"
+                                        onClick={closeRoleForm}
+                                    >
+                                        Batal
+                                    </Button>
+                                    <Button type="submit">
+                                        Simpan
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* USER DELETE CONFIRMATION TOAST */}
+                {toastForUser && (
+                    <div className="fixed bottom-4 right-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4 z-40">
+                        <span>{toastForUser}</span>
+                        <button
+                            className="text-red-600 font-semibold"
+                            onClick={performDeleteUser}
+                        >
+                            Ya
+                        </button>
+                        <button
+                            className="text-muted-foreground"
+                            onClick={() => setToastForUser(null)}
+                        >
+                            Tidak
+                        </button>
+                    </div>
+                )}
+
+                {/* ROLE DELETE CONFIRMATION TOAST */}
+                {toastForRole && (
+                    <div className="fixed bottom-4 left-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4 z-40">
+                        <span>{toastForRole}</span>
+                        <button
+                            className="text-red-600 font-semibold"
+                            onClick={performDeleteRole}
+                        >
+                            Ya
+                        </button>
+                        <button
+                            className="text-muted-foreground"
+                            onClick={() => setToastForRole(null)}
+                        >
+                            Tidak
+                        </button>
                     </div>
                 )}
             </div>

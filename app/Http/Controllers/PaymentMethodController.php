@@ -10,7 +10,7 @@ class PaymentMethodController extends Controller
 {
     public function index()
     {
-        $methods = PaymentMethod::all();
+        $methods = PaymentMethod::orderBy('updated_at', 'desc')->get();
         return Inertia::render('admin/PaymentMethods', [
             'methods' => $methods,
         ]);
@@ -30,7 +30,7 @@ class PaymentMethodController extends Controller
         ]);
 
         PaymentMethod::create($validated);
-        return Inertia::location(route('payment_methods.index'));
+        return redirect()->route('master.payment-methods.index');
     }
 
     public function show(PaymentMethod $paymentMethod)
@@ -56,12 +56,12 @@ class PaymentMethodController extends Controller
         ]);
 
         $paymentMethod->update($validated);
-        return Inertia::location(route('payment_methods.index'));
+        return redirect()->route('master.payment-methods.index');
     }
 
     public function destroy(PaymentMethod $paymentMethod)
     {
         $paymentMethod->delete();
-        return Inertia::location(route('payment_methods.index'));
+        return redirect()->route('master.payment-methods.index');
     }
 }
