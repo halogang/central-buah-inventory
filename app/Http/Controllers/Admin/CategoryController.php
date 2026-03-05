@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
     public function index()
     {
         $categories = Category::orderBy('updated_at', 'desc')->get();
-        return Inertia::render('admin/Categories', [
+        return Inertia::render('admin/Categories/Index', [
             'categories' => $categories,
         ]);
     }

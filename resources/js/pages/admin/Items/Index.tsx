@@ -69,7 +69,7 @@ type ItemForm = {
     bad_stock: number;
 };
 
-export default function Items() {
+export default function Index() {
     const { items, categories = [], warehouses = [] } = usePage<{
         items: Item[];
         categories: Category[];
@@ -190,16 +190,16 @@ export default function Items() {
                         <h1 className="text-xl font-semibold">{items.length}</h1>
                     </div>
                     <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Stok Rendah
-                        </div>
-                        <h1 className="text-red-500 text-xl font-semibold">{items.filter(i => i.stock < i.min_stock).length}</h1>
-                    </div>
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
                         <div className=" text-xs text-muted-foreground">
                             Bad Stock
                         </div>
                         <h1 className="text-red-400 text-xl font-semibold">{items.reduce((total, item) => total + Number(item.bad_stock || 0), 0)}</h1>
+                    </div>
+                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
+                        <div className="text-xs text-muted-foreground">
+                            Stok Rendah
+                        </div>
+                        <h1 className="text-red-500 text-xl font-semibold">{items.filter(i => i.stock < i.min_stock).length}</h1>
                     </div>
                 </div>
 

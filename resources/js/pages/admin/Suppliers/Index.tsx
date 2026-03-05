@@ -1,58 +1,58 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { Plus, SquarePen, Trash2, X } from 'lucide-react';
+import { MapPin, Phone, Plus, SquarePen, Trash2, Truck, X } from 'lucide-react';
 import React, { useState } from 'react';
 import {
     FormInput,
-    FormCheckbox,
+    FormTextarea,
 } from '@/components/admin';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { store, update, destroy } from '@/routes/master/payment-methods';
+import { store, update, destroy } from '@/routes/master/suppliers';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Metode Pembayaran',
-        href: '/master/payment-methods',
+        title: 'Master Supplier',
+        href: '/master/suppliers',
     },
 ];
 
-interface PaymentMethod {
+interface Supplier {
     id: number;
     name: string;
-    icon?: string;
-    status: string;
+    phone?: string;
+    address?: string;
     created_at: string;
 }
 
-type PaymentMethodForm = {
+type SupplierForm = {
     name: string;
-    icon: string;
-    status: boolean;
+    phone: string;
+    address: string;
 };
 
-export default function PaymentMethods() {
-    const { methods } = usePage<{ methods: PaymentMethod[] }>().props;
+export default function Index() {
+    const { suppliers } = usePage<{ suppliers: Supplier[] }>().props;
     const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
-    const [editItem, setEditItem] = useState<PaymentMethod | null>(null);
+    const [editItem, setEditItem] = useState<Supplier | null>(null);
     const [search, setSearch] = useState('');
 
-    const emptyForm: PaymentMethodForm = {
+    const emptyForm: SupplierForm = {
         name: '',
-        icon: '',
-        status: true,
+        phone: '',
+        address: '',
     };
     const [form, setForm] = useState(emptyForm);
 
-    const openForm = (item?: PaymentMethod) => {
+    const openForm = (item?: Supplier) => {
         if (item) {
             setEditItem(item);
             setForm({
                 name: item.name,
-                icon: item.icon || '',
-                status: item.status === 'active',
+                phone: item.phone || '',
+                address: item.address || '',
             });
         } else {
             setEditItem(null);
@@ -67,36 +67,30 @@ export default function PaymentMethods() {
         setForm(emptyForm);
     };
 
-    const emojis = ['💵', '🏦', '📱', '💳', '🪙', '💰'];
 
-    const [deleteItem, setDeleteItem] = useState<PaymentMethod | null>(null);
+    const [deleteItem, setDeleteItem] = useState<Supplier | null>(null);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-    const filtered = methods.filter((m) =>
-        m.name.toLowerCase().includes(search.toLowerCase())
+    const filtered = suppliers.filter((s) =>
+        s.name.toLowerCase().includes(search.toLowerCase())
     );
 
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
-        const payload = {
-            name: form.name,
-            icon: form.icon,
-            status: form.status ? 'active' : 'inactive',
-        };
         if (editItem) {
-            router.put(update(editItem.id), payload, {
+            router.put(update(editItem.id), form, {
                 onSuccess: () => {
                     closeForm();
                 },
             });
         } else {
-            router.post(store(), payload, {
+            router.post(store(), form, {
                 onSuccess: () => closeForm(),
             });
         }
     };
 
-    const confirmDelete = (item: PaymentMethod) => {
+    const confirmDelete = (item: Supplier) => {
         setDeleteItem(item);
         setToastMessage(`Hapus ${item.name}?`);
     };
@@ -112,27 +106,14 @@ export default function PaymentMethods() {
         }
     };
 
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Payment Methods" />
+            <Head title="Suppliers" />
             <div className="p-4">
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Total Metode Pembayaran
-                        </div>
-                        <h1 className="text-xl font-semibold">{filtered.length}</h1>
-                    </div>
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Aktif
-                        </div>
-                        <h1 className="text-primary text-xl font-semibold">{filtered.filter(i => i.status === 'active').length}</h1>
-                    </div>
-                </div>
                 <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
                     <SearchInput
-                        placeholder="Cari Metode Pembayaran..."
+                        placeholder="Cari Supplier..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -143,36 +124,38 @@ export default function PaymentMethods() {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {filtered.map((m) => (
+                    {filtered.map((s) => (
                         <div
-                            key={m.id}
-                            className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border cursor-pointer flex items-center justify-between gap-4"
-                            onClick={() => openForm(m)}
+                            key={s.id}
+                            className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border flex items-center justify-between gap-4"
                         >
                             <div className="flex items-center gap-4">
                                 <div
-                                    className="rounded-md p-2 bg-primary/10 text-primary text-lg"
+                                    className="rounded-md p-3 bg-primary/10 text-primary"
                                 >
-                                    {m.icon}
+                                <Truck className="size-5" />
                                 </div>
                                 <div className='flex flex-col gap-0.5'>
                                     <div className="font-semibold text-md">
-                                        {m.name}
+                                        {s.name}
                                     </div>
-                                    <div className={`flex gap-2 items-center text-xs font-medium w-fit py-1 px-2 rounded-full
-                                        ${m.status === 'active' ? 'bg-primary/10 text-primary' : 'text-muted-foreground bg-muted'}
-                                    `}>
-                                        {m.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                                    <div className="flex gap-2 items-center text-xs text-muted-foreground">
+                                        <Phone className="size-3" />
+                                        {s.phone}
+                                    </div>
+                                    <div className="flex gap-2 items-center text-xs text-muted-foreground">
+                                        <MapPin className="size-3" />
+                                        {s.address}
                                     </div>
                                 </div>  
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
                                 <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'
-                                     onClick={() => openForm(m)}>
+                                     onClick={() => openForm(s)}>
                                     <SquarePen className="size-4 cursor-pointer" />
                                 </div>
                                 <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'
-                                     onClick={() => confirmDelete(m)}>
+                                     onClick={() => confirmDelete(s)}>
                                     <Trash2 className="size-4 cursor-pointer" />
                                 </div>
                             </div>
@@ -183,49 +166,40 @@ export default function PaymentMethods() {
                 {(showCreate || editItem) && (
                     <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
-                        onClick={() => {
-                            setShowCreate(false);
-                            setEditItem(null);
-                        }}
+                        onClick={() => closeForm()}
                     >
                         <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
                              onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
                                 <h2 className="text-lg font-semibold">
-                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Metode Pembayaran'}
+                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Supplier'}
                                 </h2>
                                 <X className="h-5 w-5 cursor-pointer" onClick={closeForm} />
                             </div>
                             <form onSubmit={submitForm} className="space-y-4 px-6">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Pilih ikon</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {emojis.map((emo) => (
-                                            <button
-                                                key={emo}
-                                                type="button"
-                                                onClick={() => setForm((f) => ({ ...f, icon: emo }))}
-                                                className={`w-12 h-12 p-2 text-xl rounded-xl cursor-pointer ${form.icon === emo ? 'bg-primary/20 border-2 border-primary' : 'bg-muted hover:bg-muted/75'}`}
-                                            >
-                                                {emo}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
                                 <FormInput
-                                    label="Nama Metode Pembayaran"
+                                    label="Nama Supplier"
                                     value={form.name}
                                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                                     error={errors.name}
                                     required
-                                    placeholder="Nama metode pembayaran..."
+                                    placeholder="Nama supplier..."
                                 />
-                                <FormCheckbox
-                                    label="Aktif"
-                                    checked={form.status}
-                                    onChange={(e) => setForm({ ...form, status: e.target.checked })}
-                                    error={errors.status}
+                                <FormInput
+                                    label="No. Telepon"
+                                    type="tel"
+                                    value={form.phone}
+                                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                    error={errors.phone}
+                                    placeholder="08123456789"
+                                />
+                                <FormTextarea
+                                    label="Alamat"
+                                    value={form.address}
+                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                                    error={errors.address}
+                                    placeholder="Alamat supplier..."
                                 />
 
                                 <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">

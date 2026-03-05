@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\Warehouse;
@@ -15,19 +16,14 @@ class ItemController extends Controller
         $items = Item::with(['category','warehouse'])
                 ->orderBy('updated_at', 'desc')
                 ->get();
-        $categories = Category::all(['id','name']);
+        $categories = Category::where('type', 'barang')->get();
         $warehouses = Warehouse::all(['id','name']);
 
-        return Inertia::render('admin/Items', [
+        return Inertia::render('admin/Items/Index', [
             'items' => $items,
             'categories' => $categories,
             'warehouses' => $warehouses,
         ]);
-    }
-
-    public function create()
-    {
-        return Inertia::render('admin/Items');
     }
 
     public function store(Request $request)
@@ -51,14 +47,7 @@ class ItemController extends Controller
 
     public function show(Item $item)
     {
-        return Inertia::render('admin/Items', [
-            'item' => $item,
-        ]);
-    }
-
-    public function edit(Item $item)
-    {
-        return Inertia::render('admin/Items', [
+        return Inertia::render('admin/Items/Show', [
             'item' => $item,
         ]);
     }

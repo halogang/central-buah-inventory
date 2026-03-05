@@ -21,7 +21,7 @@ interface Category {
     created_at: string;
 }
 
-export default function Categories() {
+export default function Index() {
     const { categories } = usePage<{ categories: Category[] }>().props;
 
     const [showCreate, setShowCreate] = useState(false);

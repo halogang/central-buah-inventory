@@ -1,5 +1,5 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { MapPin, Phone, Plus, SquarePen, Trash2, Truck, X } from 'lucide-react';
+import { MapPin, Phone, Plus, SquarePen, Trash2, Users, X } from 'lucide-react';
 import React, { useState } from 'react';
 import {
     FormInput,
@@ -8,17 +8,17 @@ import {
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { store, update, destroy } from '@/routes/master/suppliers';
+import { store, update, destroy } from '@/routes/master/customers';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Master Supplier',
-        href: '/master/suppliers',
+        title: 'Master Pelanggan',
+        href: '/master/customers',
     },
 ];
 
-interface Supplier {
+interface Customer {
     id: number;
     name: string;
     phone?: string;
@@ -26,27 +26,28 @@ interface Supplier {
     created_at: string;
 }
 
-type SupplierForm = {
+type CustomerForm = {
     name: string;
     phone: string;
     address: string;
 };
 
-export default function Suppliers() {
-    const { suppliers } = usePage<{ suppliers: Supplier[] }>().props;
+export default function Index() {
+    const { customers } = usePage<{ customers: Customer[] }>().props;
     const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
-    const [editItem, setEditItem] = useState<Supplier | null>(null);
+    const [editItem, setEditItem] = useState<Customer | null>(null);
     const [search, setSearch] = useState('');
 
-    const emptyForm: SupplierForm = {
+    const emptyForm: CustomerForm = {
         name: '',
         phone: '',
         address: '',
     };
     const [form, setForm] = useState(emptyForm);
 
-    const openForm = (item?: Supplier) => {
+    // helpers to open/close the create/edit modal and keep form state in sync
+    const openForm = (item?: Customer) => {
         if (item) {
             setEditItem(item);
             setForm({
@@ -68,11 +69,11 @@ export default function Suppliers() {
     };
 
 
-    const [deleteItem, setDeleteItem] = useState<Supplier | null>(null);
+    const [deleteItem, setDeleteItem] = useState<Customer | null>(null);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-    const filtered = suppliers.filter((s) =>
-        s.name.toLowerCase().includes(search.toLowerCase())
+    const filtered = customers.filter((c) =>
+        c.name.toLowerCase().includes(search.toLowerCase())
     );
 
     const submitForm = (e: React.FormEvent) => {
@@ -90,7 +91,7 @@ export default function Suppliers() {
         }
     };
 
-    const confirmDelete = (item: Supplier) => {
+    const confirmDelete = (item: Customer) => {
         setDeleteItem(item);
         setToastMessage(`Hapus ${item.name}?`);
     };
@@ -106,14 +107,13 @@ export default function Suppliers() {
         }
     };
 
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Suppliers" />
+            <Head title="Customers" />
             <div className="p-4">
                 <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
                     <SearchInput
-                        placeholder="Cari Supplier..."
+                        placeholder="Cari Pelanggan..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -124,38 +124,38 @@ export default function Suppliers() {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {filtered.map((s) => (
+                    {filtered.map((c) => (
                         <div
-                            key={s.id}
+                            key={c.id}
                             className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border flex items-center justify-between gap-4"
                         >
                             <div className="flex items-center gap-4">
                                 <div
-                                    className="rounded-md p-3 bg-primary/10 text-primary"
+                                    className="rounded-md p-3 bg-chart-4/10 text-chart-4 dark:bg-chart-3/20 dark:text-chart-3"
                                 >
-                                <Truck className="size-5" />
+                                <Users className="size-5" />
                                 </div>
                                 <div className='flex flex-col gap-0.5'>
                                     <div className="font-semibold text-md">
-                                        {s.name}
+                                        {c.name}
                                     </div>
                                     <div className="flex gap-2 items-center text-xs text-muted-foreground">
                                         <Phone className="size-3" />
-                                        {s.phone}
+                                        {c.phone}
                                     </div>
                                     <div className="flex gap-2 items-center text-xs text-muted-foreground">
                                         <MapPin className="size-3" />
-                                        {s.address}
+                                        {c.address}
                                     </div>
                                 </div>  
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
                                 <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'
-                                     onClick={() => openForm(s)}>
+                                     onClick={() => openForm(c)}>
                                     <SquarePen className="size-4 cursor-pointer" />
                                 </div>
                                 <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'
-                                     onClick={() => confirmDelete(s)}>
+                                     onClick={() => confirmDelete(c)}>
                                     <Trash2 className="size-4 cursor-pointer" />
                                 </div>
                             </div>
@@ -173,18 +173,18 @@ export default function Suppliers() {
                         >
                             <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
                                 <h2 className="text-lg font-semibold">
-                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Supplier'}
+                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Pelanggan'}
                                 </h2>
                                 <X className="h-5 w-5 cursor-pointer" onClick={closeForm} />
                             </div>
                             <form onSubmit={submitForm} className="space-y-4 px-6">
                                 <FormInput
-                                    label="Nama Supplier"
+                                    label="Nama Pelanggan"
                                     value={form.name}
                                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                                     error={errors.name}
                                     required
-                                    placeholder="Nama supplier..."
+                                    placeholder="Nama pelanggan..."
                                 />
                                 <FormInput
                                     label="No. Telepon"
@@ -199,7 +199,7 @@ export default function Suppliers() {
                                     value={form.address}
                                     onChange={(e) => setForm({ ...form, address: e.target.value })}
                                     error={errors.address}
-                                    placeholder="Alamat supplier..."
+                                    placeholder="Alamat pelanggan..."
                                 />
 
                                 <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
