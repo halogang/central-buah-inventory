@@ -42,13 +42,26 @@ class ItemController extends Controller
         ]);
 
         Item::create($validated);
-        return redirect()->route('master.items.index');
+        return redirect()->route('master.items.show', $validated['category_id']);
     }
 
-    public function show(Item $item)
+    public function show($id)
     {
+        $category = Category::findOrFail($id);
+
+        $items = Item::with([
+            'warehouse',
+            'category'
+        ])->where('category_id', $category->id)->get();
+
+        $categories = Category::where('type', 'barang')->get();
+        $warehouses = Warehouse::all(['id','name']);
+
         return Inertia::render('admin/Items/Show', [
-            'item' => $item,
+            'items' => $items,
+            'category' => $category,
+            'categories' => $categories,
+            'warehouses' => $warehouses,
         ]);
     }
 
@@ -68,12 +81,13 @@ class ItemController extends Controller
         ]);
 
         $item->update($validated);
-        return redirect()->route('master.items.index');
+        return redirect()->route('master.items.show', $validated['category_id']);
     }
 
     public function destroy(Item $item)
     {
+        $categoryId = $item->category_id;
         $item->delete();
-        return redirect()->route('master.items.index');
+        return redirect()->route('master.items.show', $categoryId);
     }
 }
