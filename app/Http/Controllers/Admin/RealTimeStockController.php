@@ -20,6 +20,7 @@ class RealTimeStockController extends Controller
         ])->orderBy('updated_at', 'desc')->get();
 
         // dd($items);
+        // dd(resource_path('js/pages/stock/RealTimeStock/Index.tsx'));
 
         return Inertia::render('stock/RealTimeStock/Index', [
             'items' => $items,
