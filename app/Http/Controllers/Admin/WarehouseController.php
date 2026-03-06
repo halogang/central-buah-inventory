@@ -12,7 +12,7 @@ class WarehouseController extends Controller
     public function index()
     {
         $warehouses = Warehouse::orderBy('updated_at', 'desc')->get();
-        return Inertia::render('admin/Warehouses', [
+        return Inertia::render('admin/Warehouses/Index', [
             'warehouses' => $warehouses,
         ]);
     }

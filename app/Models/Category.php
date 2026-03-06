@@ -11,6 +11,7 @@ class Category extends Model
         'name',
         'description',
         'type',
+        'icon'
     ];
 
     public function items()

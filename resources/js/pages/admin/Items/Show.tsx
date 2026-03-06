@@ -1,14 +1,13 @@
-import { SearchInput } from "@/components/search-input";
-import AppLayout from "@/layouts/app-layout";
-import { destroy, index, show } from "@/routes/master/items";
-import type { BreadcrumbItem } from "@/types";
 import { Head, router } from "@inertiajs/react";
 import { ArrowLeft, Edit3, Plus, Trash2, TriangleAlert } from "lucide-react";
-import React, { useState } from "react";
-import Form from "./components/Form";
+import { useState } from "react";
+import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import AppLayout from "@/layouts/app-layout";
 import { notify } from "@/lib/notify";
+import { destroy, index } from "@/routes/master/items";
+import type { BreadcrumbItem } from "@/types";
+import Form from "./components/Form";
 
 interface Category {
     id: number;
@@ -23,7 +22,7 @@ interface Warehouse {
 
 interface Item {
     id: number;
-    icon?: string;
+    image?: string;
     name: string;
     unit: string;
     warehouse?: Warehouse;
@@ -106,8 +105,12 @@ export default function Show({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
+            title: 'Master Barang',
+            href: '/master/items',
+        },
+        {
             title: category.name,
-            href: "/items",
+            href: "/master/items/" + category.id,
         },
     ];
 
@@ -174,7 +177,7 @@ export default function Show({
                 </div>
 
                 {/* Table */}
-                <div className="rounded-xl border bg-background overflow-hidden">
+                <div className="rounded-xl border bg-background overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50">
                             <tr>
@@ -196,9 +199,19 @@ export default function Show({
                                     key={item.id}
                                     className="border-t hover:bg-muted/30 transition"
                                 >
-                                    <td className="p-3 flex items-center gap-2">
+                                   <td className="p-3 flex items-center gap-2">
                                         <span className="text-lg">
-                                            {item.icon}
+                                            {item.image ? (
+                                                <img
+                                                    src={`/${item.image}`}
+                                                    alt={item.image}
+                                                    className="w-8 h-8 object-cover rounded"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 flex items-center justify-center bg-gray-200 rounded text-xs">
+                                                    ?
+                                                </div>
+                                            )}
                                         </span>
                                         {item.name}
                                     </td>

@@ -38,6 +38,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)
                 ->middleware('permission:Pengguna & Role');
         });
+
+    Route::prefix('stok')
+        ->name('stok.')
+        ->middleware('permission:Manajemen Stok')
+        ->group(function () {
+            Route::resource('realtime', \App\Http\Controllers\Admin\RealTimeStockController::class);
+            Route::resource('masuk', \App\Http\Controllers\Admin\StockInController::class);
+            Route::resource('keluar', \App\Http\Controllers\Admin\StockOutController::class);
+        });
+
+    Route::resource('surat-jalan', \App\Http\Controllers\Admin\DeliveryOrderController::class)
+        ->middleware('permission:Surat Jalan');
+
+    Route::resource('invoice', \App\Http\Controllers\Admin\InvoiceController::class)
+        ->middleware('permission:Invoice');
+
+    Route::resource('keuangan', \App\Http\Controllers\Admin\FinanceController::class)
+        ->middleware('permission:Keuangan');
+
+    Route::resource('laporan', \App\Http\Controllers\Admin\ReportController::class)
+        ->middleware('permission:Laporan');
+
+    Route::resource('pos', \App\Http\Controllers\Admin\POSController::class)
+        ->middleware('permission:POS Kasir');
 });
 
 require __DIR__.'/settings.php';

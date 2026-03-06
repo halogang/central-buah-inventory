@@ -29,10 +29,11 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|in:barang,pengeluaran',
+            'icon' => 'nullable|string',
         ]);
 
         Category::create($validated);
-        return Inertia::location(route('categories.index'));
+        return redirect()->route('master.categories.index');
     }
 
     public function show(Category $category)
@@ -55,15 +56,16 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'type' => 'required|in:barang,pengeluaran',
+            'icon' => 'nullable|string',
         ]);
 
         $category->update($validated);
-        return Inertia::location(route('categories.index'));
+        return redirect()->route('master.categories.index');
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
-        return Inertia::location(route('categories.index'));
+        return redirect()->route('master.categories.index');
     }
 }

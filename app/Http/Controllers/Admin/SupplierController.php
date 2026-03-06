@@ -12,7 +12,7 @@ class SupplierController extends Controller
     public function index()
     {
         $suppliers = Supplier::orderBy('updated_at', 'desc')->get();
-        return Inertia::render('admin/Suppliers', [
+        return Inertia::render('admin/Suppliers/Index', [
             'suppliers' => $suppliers,
         ]);
     }

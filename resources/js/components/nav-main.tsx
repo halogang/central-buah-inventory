@@ -8,7 +8,7 @@ import {
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import type { NavItem } from '@/types';
 
-export function NavMain({ items = [] }: { items: NavItem[] }) {
+export function NavMain({ items = [], badge }: { items: NavItem[], badge:string }) {
     const { isCurrentUrl } = useCurrentUrl();
 
     return (
@@ -25,6 +25,11 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                             <Link href={item.href} prefetch>
                                 {item.icon && <item.icon />}
                                 <span>{item.title}</span>
+                                {badge && (
+                                    <span className="ml-auto inline-flex items-center justify-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                        {badge}
+                                    </span>
+                                )}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

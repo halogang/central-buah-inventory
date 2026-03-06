@@ -54,7 +54,7 @@ class UserController extends Controller
 
         // dd($users, $roles, $allPermissions);
 
-        return Inertia::render('admin/UsersRoles', [
+        return Inertia::render('admin/UsersRoles/Index', [
             'users' => $users,
             'roles' => $roles,
             'permissions' => $allPermissions,

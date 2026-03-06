@@ -45,30 +45,30 @@ export function AppSidebar() {
     const showMasterDropdown = can('Master Data') || can('Gudang') || can('Pengguna & Role');
 
     const stockLinks = [
-        { label: 'Stok Realtime', href: '#' },
-        { label: 'Barang Masuk', href: '#' },
-        { label: 'Barang Keluar', href: '#' },
+        { label: 'Stok Realtime', href: '/stok/realtime' },
+        { label: 'Barang Masuk (prototype)', href: '/stok/masuk' },
+        { label: 'Barang Keluar (prototype)', href: '/stok/keluar' },
     ];
 
     const invoiceLinks = [
-        { label: 'Surat Jalan', href: '#' },
-        { label: 'Invoice', href: '#' },
+        { label: 'Surat Jalan (prototype)', href: '/surat-jalan' },
+        { label: 'Invoice (coming soon)', href: '/invoice' },
     ];
 
     const navItems: NavItem[] = [
         {
             title: 'Keuangan',
-            href: '#',
+            href: '/keuangan',
             icon: Wallet,
         },
         {
             title: 'POS Kasir',
-            href: '#',
+            href: '/pos',
             icon: ShoppingCart,
         },
         {
             title: 'Laporan',
-            href: '#',
+            href: '/laporan',
             icon: ChartColumn,
         },
     ];
@@ -89,7 +89,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={dashboardMenu} />
+                <NavMain items={dashboardMenu} badge='' />
                 <SidebarDropdownProvider>
                     {showMasterDropdown && (
                         <SidebarDropdown
@@ -112,7 +112,7 @@ export function AppSidebar() {
                         items={invoiceLinks}
                     />
                 </SidebarDropdownProvider>
-                <NavMain items={navItems} />
+                <NavMain items={navItems} badge='Coming Soon' />
             </SidebarContent>
         </Sidebar>
     );

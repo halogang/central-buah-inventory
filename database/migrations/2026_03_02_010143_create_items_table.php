@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->string('icon')->nullable();
+            $table->string('image')->nullable();
             $table->string('name');
             $table->unsignedBigInteger('category_id');
             $table->string('unit')->default('kg');

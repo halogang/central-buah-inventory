@@ -1,10 +1,13 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { Plus, SquarePen, Tag, Trash2, Wallet } from 'lucide-react';
 import { useState } from 'react';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { notify } from '@/lib/notify';
+import { destroy } from '@/routes/master/categories';
 import type { BreadcrumbItem } from '@/types';
+import Form from './components/Form';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,18 +21,49 @@ interface Category {
     name: string;
     description?: string;
     type: string;
+    icon: string;
     created_at: string;
 }
 
 export default function Index() {
     const { categories } = usePage<{ categories: Category[] }>().props;
 
-    const [showCreate, setShowCreate] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [editCat, setEditCat] = useState<Category | null>(null);
     const [search, setSearch] = useState('');
     const [activeTab, setActiveTab] = useState<'barang' | 'pengeluaran'>(
         'barang'
     );
+
+    const openCreate = () => {
+        setEditCat(null);
+        setShowForm(true);
+    };
+    const openEdit = (category: Category) => {
+        setEditCat(category);
+        setShowForm(true);
+    }
+
+    const confirmDelete = (category: Category) => {
+        notify.confirmDelete({
+            message: `Hapus ${category.name}?`,
+            onConfirm: () => performDelete(category),
+        })
+    }
+    const performDelete = (category: Category) => {
+        const loading = notify.loading("Mennghapus kategori...")
+
+        router.delete(destroy(category.id), {
+            onSuccess: () => {
+                notify.dismiss(loading)
+                notify.success(`${category.name} berhasil dihapus`)
+            },
+            onError: () => {
+                notify.dismiss(loading)
+                notify.error(`Gagal menghapus ${category.name}`)
+            },
+        })
+    }
 
     const filtered = categories
         .filter((c) => c.type === activeTab)
@@ -43,7 +77,7 @@ export default function Index() {
                     <button
                         type="button"
                         onClick={() => setActiveTab('barang')}
-                        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                        className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
                             activeTab === 'barang'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -55,7 +89,7 @@ export default function Index() {
                     <button
                         type="button"
                         onClick={() => setActiveTab('pengeluaran')}
-                        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                        className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
                             activeTab === 'pengeluaran'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -72,7 +106,7 @@ export default function Index() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={() => setShowCreate(true)} size="lg" className='w-full sm:w-fit'>
+                    <Button onClick={openCreate} size="lg" className='w-full sm:w-fit cursor-pointer'>
                         <Plus />
                         Tambah
                     </Button>
@@ -89,14 +123,14 @@ export default function Index() {
                                 <div
                                     className={`rounded-md p-3 ${
                                         cat.type === 'barang'
-                                            ? 'bg-primary/10 text-primary'
-                                            : 'bg-chart-4/20 text-chart-4 dark:bg-chart-3/20 dark:text-chart-3'
+                                            ? 'bg-primary/10 text-primary text-3xl'
+                                            : 'bg-chart-4/20 text-chart-4 dark:bg-chart-3/20 dark:text-chart-3 text-3xl'
                                     }`}
                                 >
                                     {cat.type === 'barang' ? (
-                                        <Tag className="size-5" />
+                                        cat.icon ?? <Tag className="size-5" />
                                     ) : (
-                                        <Wallet className="size-5" />
+                                        cat.icon ?? <Wallet className="size-5" />
                                     )}
                                 </div>
                                 <div>
@@ -112,36 +146,24 @@ export default function Index() {
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
                                 <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'>
-                                    <SquarePen className="size-4 cursor-pointer" onClick={() => setEditCat(cat)} />
+                                    <SquarePen className="size-4 cursor-pointer" onClick={() => openEdit(cat)} />
                                 </div>
                                 <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'>
-                                    <Trash2 className="size-4 cursor-pointer hover:bg-gray-100" />
+                                    <Trash2 className="size-4 cursor-pointer hover:bg-gray-100" 
+                                        onClick={() => confirmDelete(cat)}
+                                    />
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {showCreate && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Create category (placeholder)</h2>
-                            <button onClick={() => setShowCreate(false)}>
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {editCat && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <h2>Edit {editCat.name} (placeholder)</h2>
-                            <button onClick={() => setEditCat(null)}>
-                                Close
-                            </button>
-                        </div>
-                    </div>
+                {showForm && (
+                    <Form
+                        category={editCat}
+                        onClose={()=>setShowForm(false)}
+                        activeTab={activeTab}
+                    />
                 )}
             </div>
         </AppLayout>

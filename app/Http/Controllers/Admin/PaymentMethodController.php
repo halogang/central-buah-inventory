@@ -12,7 +12,7 @@ class PaymentMethodController extends Controller
     public function index()
     {
         $methods = PaymentMethod::orderBy('updated_at', 'desc')->get();
-        return Inertia::render('admin/PaymentMethods', [
+        return Inertia::render('admin/PaymentMethods/Index', [
             'methods' => $methods,
         ]);
     }

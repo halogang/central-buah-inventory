@@ -9,7 +9,7 @@ use App\Models\Warehouse;
 class Item extends Model
 {
     protected $fillable = [
-        'icon',
+        'image',
         'name',
         'category_id',
         'unit',
@@ -37,5 +37,12 @@ class Item extends Model
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image
+            ? asset($this->image)
+            : null;
     }
 }

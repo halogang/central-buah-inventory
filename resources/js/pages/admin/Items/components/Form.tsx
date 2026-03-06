@@ -1,10 +1,10 @@
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { FormInput, FormSelect } from "@/components/admin";
 import { router } from "@inertiajs/react";
-import { store, update } from "@/routes/master/items";
+import { X } from "lucide-react";
 import { useState } from "react";
+import { FormImageUpload, FormInput, FormSelect } from "@/components/admin";
+import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notify";
+import { store, update } from "@/routes/master/items";
 
 export default function ItemForm({
     item,
@@ -14,10 +14,8 @@ export default function ItemForm({
     onClose,
 }: any) {
 
-    const emojis = ['🥭','🍎','🍉','🍌','🍊','🍇','🍍','🍓','🥝','🥑'];
-
     const emptyForm = {
-        icon: '',
+        image: null as File | null,
         name: '',
         category_id: String(category.id),
         unit: 'kg',
@@ -31,7 +29,7 @@ export default function ItemForm({
 
     const [form, setForm] = useState(
         item ? {
-            icon: item.icon || '',
+            image: null as File | null,
             name: item.name,
             category_id: String(item.category?.id || ''),
             unit: item.unit,
@@ -47,27 +45,38 @@ export default function ItemForm({
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const payload = {
-            ...form,
-            purchase_price: Number(form.purchase_price),
-            selling_price: Number(form.selling_price),
-            stock: Number(form.stock),
-            min_stock: Number(form.min_stock),
-            bad_stock: Number(form.bad_stock),
-        };
+        const payload = new FormData();
+
+        payload.append('name', form.name);
+        payload.append('category_id', form.category_id);
+        payload.append('unit', form.unit);
+        payload.append('warehouse_id', form.warehouse_id);
+        payload.append('purchase_price', String(form.purchase_price));
+        payload.append('selling_price', String(form.selling_price));
+        payload.append('stock', String(form.stock));
+        payload.append('min_stock', String(form.min_stock));
+        payload.append('bad_stock', String(form.bad_stock));
+
+        if (form.image) {
+            payload.append('image', form.image);
+        }
 
         if (item) {
+            payload.append('_method', 'PUT')
+
             router.put(update(item.id), payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil diperbarui`)
                     onClose()
                 },
-                onError: () => {
-                    notify.error(`Gagal memperbarui ${form.name}`)
+                onError: (errors: Record<string, string>) => {
+                    notify.error(Object.values(errors).join('\n'))
                 },
             })
         } else {
             router.post(store(), payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil ditambahkan`)
                     onClose()
@@ -97,26 +106,12 @@ export default function ItemForm({
 
                 <form onSubmit={submitForm} className="space-y-4 px-6">
 
-                    {/* EMOJI */}
-                    <div>
-                        <label className="text-sm font-medium">Emoji</label>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {emojis.map((emo) => (
-                                <button
-                                    key={emo}
-                                    type="button"
-                                    onClick={() => setForm({...form, icon: emo})}
-                                    className={`w-12 h-12 text-xl rounded-xl ${
-                                        form.icon === emo
-                                            ? "bg-primary/20 border border-primary"
-                                            : "bg-muted"
-                                    }`}
-                                >
-                                    {emo}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    <FormImageUpload
+                        label="Gambar"
+                        preview={item?.image ? item.image : undefined}
+                        onChange={(file) => setForm({ ...form, image: file })}
+                        hint="maksimal 2MB"
+                    />
 
                     {/* FORM GRID */}
                     <div className="grid grid-cols-2 gap-4">
@@ -136,6 +131,30 @@ export default function ItemForm({
                                 value:String(c.id),
                                 label:c.name
                             }))}
+                        />
+
+                        <FormSelect
+                            label="Satuan"
+                            value={form.unit}
+                            onChange={(e)=>setForm({...form,unit:e.target.value})}
+                            options={[
+                                {
+                                    value: 'kg',
+                                    label: 'Kg',
+                                },
+                                {
+                                    value: 'sisir',
+                                    label: 'Sisir',
+                                },
+                                {
+                                    value: 'biji',
+                                    label: 'Biji',
+                                },
+                                {
+                                    value: 'pack',
+                                    label: 'Pack',
+                                },
+                            ]}
                         />
 
                         <FormSelect

@@ -12,7 +12,7 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = Customer::orderBy('updated_at', 'desc')->get();
-        return Inertia::render('admin/Customers', [
+        return Inertia::render('admin/Customers/Index', [
             'customers' => $customers,
         ]);
     }
