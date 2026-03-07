@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class StockOpnameItem extends Model
+class OpnameStockItem extends Model
 {
     use HasFactory;
 
@@ -17,9 +17,9 @@ class StockOpnameItem extends Model
         'difference'
     ];
 
-    public function stockOpname()
+    public function opnameStock()
     {
-        return $this->belongsTo(StockOpname::class);
+        return $this->belongsTo(OpnameStock::class);
     }
 
     public function item()

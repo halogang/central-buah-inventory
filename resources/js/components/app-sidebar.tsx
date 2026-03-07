@@ -44,35 +44,34 @@ export function AppSidebar() {
 
     const showMasterDropdown = can('Master Data') || can('Gudang') || can('Pengguna & Role');
 
-    const stockLinks = [
-        { label: 'Stok Realtime', href: '/stok/realtime' },
-        // { label: 'Barang Masuk (prototype)', href: '/stok/masuk' },
-        // { label: 'Barang Keluar (prototype)', href: '/stok/keluar' },
-        { label: 'Stok Opname (coming soon)', href: '' },
+    const stockItems = [
+        { permission: 'Manajemen Stok', label: 'Stok Realtime', href: '/stok/realtime' },
+        { permission: 'Manajemen Stok', label: 'Stok Opname (coming soon)', href: '/stok/stok-opname' },
     ];
+    const stockLinks = stockItems
+        .filter((item) => can(item.permission))
+        .map(({ label, href }) => ({ label, href }));
 
-    const invoiceLinks = [
-        { label: 'Surat Jalan (prototype)', href: '/surat-jalan' },
-        { label: 'Invoice (coming soon)', href: '/invoice' },
+    const invoiceItems = [
+        { permission: 'Surat Jalan', label: 'Surat Jalan', href: '/surat-jalan' },
+        { permission: 'Invoice', label: 'Invoice (coming soon)', href: '/invoice' },
     ];
+    const invoiceLinks = invoiceItems
+        .filter((item) => can(item.permission))
+        .map(({ label, href }) => ({ label, href }));
 
-    const navItems: NavItem[] = [
-        {
-            title: 'Keuangan',
-            href: '/keuangan',
-            icon: Wallet,
-        },
-        {
-            title: 'POS Kasir',
-            href: '/pos',
-            icon: ShoppingCart,
-        },
-        {
-            title: 'Laporan',
-            href: '/laporan',
-            icon: ChartColumn,
-        },
+    const navItemsRaw = [
+        { permission: 'Keuangan', title: 'Keuangan', href: '/keuangan', icon: Wallet },
+        { permission: 'POS Kasir', title: 'POS Kasir', href: '/pos', icon: ShoppingCart },
+        { permission: 'Laporan', title: 'Laporan', href: '/laporan', icon: ChartColumn },
     ];
+    const navItems: NavItem[] = navItemsRaw
+        .filter((item) => can(item.permission))
+        .map(({ title, href, icon }) => ({ title, href, icon }));
+
+    
+    const showStockDropdown = stockLinks.length > 0;
+    const showInvoiceDropdown = invoiceLinks.length > 0;
 
 
     return (
@@ -100,18 +99,23 @@ export function AppSidebar() {
                             items={masterLinks}
                         />
                     )}
-                    <SidebarDropdown
-                        sectionKey="stock"
-                        title="Manajemen Stok"
-                        icon={Warehouse}
-                        items={stockLinks}
-                    />
-                    <SidebarDropdown
-                        sectionKey="invoice"
-                        title="Surat Jalan & Invoice"
-                        icon={Package}
-                        items={invoiceLinks}
-                    />
+                    {showStockDropdown && (
+                        <SidebarDropdown
+                            sectionKey="stock"
+                            title="Manajemen Stok"
+                            icon={Warehouse}
+                            items={stockLinks}
+                        />
+                    )}
+
+                    {showInvoiceDropdown && (
+                        <SidebarDropdown
+                            sectionKey="invoice"
+                            title="Surat Jalan & Invoice"
+                            icon={Package}
+                            items={invoiceLinks}
+                        />
+                    )}
                 </SidebarDropdownProvider>
                 <NavMain items={navItems} badge='Coming Soon' />
             </SidebarContent>

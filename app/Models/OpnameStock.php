@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class StockOpname extends Model
+class OpnameStock extends Model
 {
     use HasFactory;
 
@@ -28,6 +28,6 @@ class StockOpname extends Model
 
     public function items()
     {
-        return $this->hasMany(StockOpnameItem::class);
+        return $this->hasMany(OpnameStockItem::class);
     }
 }

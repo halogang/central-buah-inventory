@@ -37,7 +37,7 @@ class DeliveryOrderController extends Controller
 
         
 
-        return Inertia::render('DeliveryOrder/Index', [
+        return Inertia::render('admin/DeliveryOrder/Index', [
             'deliveryOrders' => $deliveryOrders,
             'suppliers' => Supplier::select('id','name')->get(),
             'items' => Item::select('id','name')->get(),

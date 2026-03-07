@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_opnames', function (Blueprint $table) {
+        Schema::create('opname_stock_items', function (Blueprint $table) {
             $table->id();
-            $table->string('opname_number')->unique();
-            $table->date('date');
-            $table->foreignId('warehouse_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('checked_by');
-            $table->text('note');
+            $table->foreignId('stock_opname_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('item_id')->constrained()->cascadeOnDelete();
+            $table->integer('system_stock');
+            $table->integer('physical_stock');
+            $table->integer('difference');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_opnames');
+        Schema::dropIfExists('opname_stock_items');
     }
 };

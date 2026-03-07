@@ -22,7 +22,7 @@ class RealTimeStockController extends Controller
         // dd($items);
         // dd(resource_path('js/pages/stock/RealTimeStock/Index.tsx'));
 
-        return Inertia::render('stock/RealTimeStock/Index', [
+        return Inertia::render('admin/StockManagement/RealTimeStock/Index', [
             'items' => $items,
         ]);
     }

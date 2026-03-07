@@ -45,17 +45,20 @@ class FortifyServiceProvider extends ServiceProvider
                         'Master Data'       => 'master.items.index',
                         'Gudang'            => 'master.warehouses.index',
                         'Pengguna & Role'   => 'master.users.index',
-                        'Manajemen Stok'    => 'dashboard',
-                        'Surat Jalan'       => 'dashboard',
-                        'Invoice'           => 'dashboard',
-                        'POS Kasir'         => 'dashboard',
-                        'Keuangan'          => 'dashboard',
-                        'Laporan'           => 'dashboard',
+                        'Manajemen Stok'    => 'stok.real-time.index',
+                        'Surat Jalan'       => 'surat-jalan.index',
+                        'Invoice'           => 'invoice.index',
+                        'POS Kasir'         => 'pos.index',
+                        'Keuangan'          => 'keuangan.index',
+                        'Laporan'           => 'laporan.index',
                     ];
 
-                    foreach ($redirectMap as $permission => $route) {
-                        if ($user->can($permission) && Route::has($route)) {
-                            return redirect()->route($route);
+                    $permissions = $user->getAllPermissions()->pluck('name');
+
+                    foreach ($permissions as $permission) {
+                        if (isset($redirectMap[$permission]) && Route::has($redirectMap[$permission])) {
+
+                            return redirect()->route($redirectMap[$permission]);
                         }
                     }
 

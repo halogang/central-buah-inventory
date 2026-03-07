@@ -44,9 +44,9 @@ class Item extends Model
         return $this->hasMany(DeliveryOrderItem::class);
     }
 
-    public function stockOpnameItems()
+    public function opnameStockItems()
     {
-        return $this->hasMany(StockOpnameItem::class);
+        return $this->hasMany(OpnameStockItem::class);
     }
 
     public function getImageUrlAttribute()

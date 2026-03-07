@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('realtime', \App\Http\Controllers\Admin\RealTimeStockController::class);
             Route::resource('masuk', \App\Http\Controllers\Admin\StockInController::class);
             Route::resource('keluar', \App\Http\Controllers\Admin\StockOutController::class);
+            Route::resource('stok-opname', \App\Http\Controllers\Admin\OpnameStockController::class);
         });
 
     Route::resource('surat-jalan', DeliveryOrderController::class)
