@@ -1,8 +1,14 @@
 import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
+
+import StatsCard from '@/components/dashboard/StatsCard';
+import InvoiceCard from '@/components/dashboard/InvoiceCard';
+import LowStockCard from '@/components/dashboard/LowStockCard';
+import TransactionList from '@/components/dashboard/TransactionList';
+import { statsData, transactions, lowStockProducts, unpaidInvoices } from "@/data/dashboard";
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,24 +17,45 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+/* =========================
+   PAGE
+========================= */
+
 export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
+
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
+                {/* Welcome Banner */}
+                <div
+                    className="rounded-xl p-6 md:p-8 text-primary-foreground bg-linear-to-r from-primary to-chart-4 dark:to-chart-3"
+                >
+                    <h2 className="text-xl md:text-2xl font-bold">
+                        Selamat Datang, Admin! 👋
+                    </h2>
+                    <p className="mt-1 text-sm opacity-90">
+                        Berikut ringkasan aktivitas toko hari ini.
+                    </p>
                 </div>
-                <div className="relative min-h-screen flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {statsData.map((stat) => (
+                        <StatsCard key={stat.label} {...stat} />
+                    ))}
+                </div>
+
+                {/* Main Content */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="lg:col-span-2">
+                        <TransactionList transactions={transactions} />
+                    </div>
+
+                    <div className="space-y-6">
+                        <LowStockCard products={lowStockProducts} />
+                        <InvoiceCard invoices={unpaidInvoices} />
+                    </div>
                 </div>
             </div>
         </AppLayout>

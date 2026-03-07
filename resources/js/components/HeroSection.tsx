@@ -15,12 +15,14 @@ const HeroSection = () => (
         The all-in-one inventory system for fruit distributors. Track stock, manage suppliers, create delivery orders, and generate invoices — effortlessly.
       </p>
       <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-        <Button size="lg" variant="secondary" className="text-base px-8">
-          View Products
-        </Button>
-        <Button size="lg" className="text-base px-8">
+        <a href="#products">
+          <Button size="lg" variant="secondary" className="text-base px-8 cursor-pointer  ">
+            View Products
+          </Button>
+        </a>
+        {/* <Button size="lg" className="text-base px-8">
           Get Started
-        </Button>
+        </Button> */}
       </div>
     </div>
   </section>

@@ -39,6 +39,16 @@ class Item extends Model
         return $this->belongsTo(Warehouse::class);
     }
 
+    public function deliveryOrderItems()
+    {
+        return $this->hasMany(DeliveryOrderItem::class);
+    }
+
+    public function stockOpnameItems()
+    {
+        return $this->hasMany(StockOpnameItem::class);
+    }
+
     public function getImageUrlAttribute()
     {
         return $this->image

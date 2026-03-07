@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\HomeController;
+use \App\Http\Controllers\Admin\DeliveryOrderController;
 
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -51,8 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('keluar', \App\Http\Controllers\Admin\StockOutController::class);
         });
 
-    Route::resource('surat-jalan', \App\Http\Controllers\Admin\DeliveryOrderController::class)
+    Route::resource('surat-jalan', DeliveryOrderController::class)
         ->middleware('permission:Surat Jalan');
+
+    Route::get('/surat-jalan/preview-number/{type}', [DeliveryOrderController::class, 'previewNumber']);
 
     Route::resource('invoice', \App\Http\Controllers\Admin\InvoiceController::class)
         ->middleware('permission:Invoice');

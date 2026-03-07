@@ -46,8 +46,9 @@ export function AppSidebar() {
 
     const stockLinks = [
         { label: 'Stok Realtime', href: '/stok/realtime' },
-        { label: 'Barang Masuk (prototype)', href: '/stok/masuk' },
-        { label: 'Barang Keluar (prototype)', href: '/stok/keluar' },
+        // { label: 'Barang Masuk (prototype)', href: '/stok/masuk' },
+        // { label: 'Barang Keluar (prototype)', href: '/stok/keluar' },
+        { label: 'Stok Opname (coming soon)', href: '' },
     ];
 
     const invoiceLinks = [
