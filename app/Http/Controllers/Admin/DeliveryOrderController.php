@@ -48,7 +48,6 @@ class DeliveryOrderController extends Controller
     {
         $validated = $request->validate([
             'do_number' => 'required|string|max:255',
-            'date' => 'required|date',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'status' => 'required|in:draft,sent,done',
             'type' => 'required|in:in,out',
@@ -68,7 +67,7 @@ class DeliveryOrderController extends Controller
             // 1️⃣ Create Delivery Order
             $deliveryOrder = DeliveryOrder::create([
                 'do_number' => $doNumber,
-                'date' => $validated['date'],
+                'date' => now(),
                 'supplier_id' => $validated['supplier_id'],
                 'type' => $validated['type'],
                 'status' => $validated['status'],

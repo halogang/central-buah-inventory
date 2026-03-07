@@ -27,7 +27,6 @@ export default function Form({
 
     const emptyForm = {
         do_number: "",
-        date: "",
         supplier_id: "",
         status: "draft",
         items: [
@@ -173,17 +172,6 @@ export default function Form({
                             <span className="font-semibold text-sm">{doNumber}</span>
                         </div>
                     </div>
-
-                    {/* DATE */}
-                    <FormInput
-                        label="Tanggal"
-                        type="date"
-                        value={form.date}
-                        onChange={(e) =>
-                            setForm({ ...form, date: e.target.value })
-                        }
-                        required
-                    />
 
                     {/* SUPPLIER */}
                     <FormSelect

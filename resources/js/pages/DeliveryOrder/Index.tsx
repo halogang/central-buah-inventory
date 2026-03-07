@@ -282,7 +282,7 @@ export default function Index({ deliveryOrders, suppliers, items }: Props) {
             </div>
 
             {/* FORM MODAL */}
-            {/* {openForm && ( */}
+            {openForm && (
                 <Form
                     data={selectedData}
                     suppliers={suppliers}
@@ -290,7 +290,7 @@ export default function Index({ deliveryOrders, suppliers, items }: Props) {
                     type={activeTab}
                     onClose={() => setOpenForm(false)}
                 />
-            {/* )} */}
+            )} 
 
         </AppLayout>
     )
