@@ -1,5 +1,5 @@
+import { Menu, X} from "lucide-react";
 import { useState } from "react";
-import { Menu, X, Leaf } from "lucide-react";
 import AppLogoIcon from '@/components/app-logo-icon';
 
 const navLinks = ["Home", "Products", "About", "Contact"];

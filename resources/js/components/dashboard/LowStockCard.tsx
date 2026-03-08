@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { Product } from "@/types/dashboard";
+import type { Product } from "@/types/dashboard";
 
 const LowStockItem = ({ product }: { product: Product }) => (
   <div className="bg-red-500/5 border border-red-500/25 rounded-lg p-3">

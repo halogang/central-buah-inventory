@@ -1,4 +1,4 @@
-import { Transaction, Product, Invoice, StatCard } from "@/types/dashboard";
+import type { Transaction, Product, Invoice, StatCard } from "@/types/dashboard";
 
 export const statsData: StatCard[] = [
   { label: "Total Produk", value: "12", trend: "+3", icon: "package", color: "success" },

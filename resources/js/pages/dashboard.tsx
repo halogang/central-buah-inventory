@@ -1,13 +1,13 @@
 import { Head } from '@inertiajs/react';
+
+import InvoiceCard from '@/components/dashboard/InvoiceCard';
+import LowStockCard from '@/components/dashboard/LowStockCard';
+import StatsCard from '@/components/dashboard/StatsCard';
+import TransactionList from '@/components/dashboard/TransactionList';
+import { statsData, transactions, lowStockProducts, unpaidInvoices } from "@/data/dashboard";
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
-
-import StatsCard from '@/components/dashboard/StatsCard';
-import InvoiceCard from '@/components/dashboard/InvoiceCard';
-import LowStockCard from '@/components/dashboard/LowStockCard';
-import TransactionList from '@/components/dashboard/TransactionList';
-import { statsData, transactions, lowStockProducts, unpaidInvoices } from "@/data/dashboard";
 
 
 const breadcrumbs: BreadcrumbItem[] = [

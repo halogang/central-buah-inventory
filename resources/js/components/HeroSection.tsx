@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-fruits.jpg";
+import { Button } from "@/components/ui/button";
 
 const HeroSection = () => (
   <section id="home" className="relative pt-16 overflow-hidden transition-all">

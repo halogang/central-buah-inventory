@@ -1,7 +1,7 @@
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
-import { Transaction } from "@/types/dashboard";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "@inertiajs/react";
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import type { Transaction } from "@/types/dashboard";
 
 const statusStyles: Record<string, string> = {
   selesai: "bg-primary/10 text-primary border-0",

@@ -1,4 +1,4 @@
-import { Invoice } from "@/types/dashboard";
+import type { Invoice } from "@/types/dashboard";
 
 const formatCurrency = (n: number) =>
   `Rp ${n.toLocaleString("id-ID")}`;

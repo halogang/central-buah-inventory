@@ -1,11 +1,11 @@
-import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import FeaturesSection from "@/components/FeaturesSection";
-import ItemsSection from "@/components/ItemsSection";
+import { usePage } from "@inertiajs/react";
 import AboutSection from "@/components/AboutSection";
 import CTASection from "@/components/CTASection";
+import FeaturesSection from "@/components/FeaturesSection";
 import Footer from "@/components/Footer";
-import { usePage } from "@inertiajs/react";
+import HeroSection from "@/components/HeroSection";
+import ItemsSection from "@/components/ItemsSection";
+import Navbar from "@/components/Navbar";
 
 interface Category {
     id: number;

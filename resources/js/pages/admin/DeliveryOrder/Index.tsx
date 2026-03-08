@@ -1,5 +1,4 @@
 import { Head } from "@inertiajs/react"
-import { useState, useMemo } from "react"
 import {
     ArrowDownToLine,
     ArrowUpToLine,
@@ -11,6 +10,7 @@ import {
     Truck,
     Edit3
 } from "lucide-react"
+import { useState, useMemo } from "react"
 
 import { SearchInput } from "@/components/search-input"
 import { Button } from "@/components/ui/button"

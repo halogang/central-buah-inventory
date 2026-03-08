@@ -1,5 +1,5 @@
 import { Package, Boxes, TrendingUp, AlertTriangle, ArrowUpRight } from "lucide-react";
-import { StatCard } from "@/types/dashboard";
+import type { StatCard } from "@/types/dashboard";
 
 const iconMap = {
   package: Package,

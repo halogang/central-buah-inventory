@@ -10,7 +10,7 @@ class OpnameStockItem extends Model
     use HasFactory;
 
     protected $fillable = [
-        'stock_opname_id',
+        'opname_stock_id',
         'item_id',
         'system_stock',
         'physical_stock',

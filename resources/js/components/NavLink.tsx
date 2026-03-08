@@ -1,4 +1,5 @@
-import { forwardRef, AnchorHTMLAttributes } from "react";
+import type { AnchorHTMLAttributes } from "react";
+import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface NavLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {

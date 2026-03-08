@@ -1,9 +1,9 @@
+import { Image, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/helpers/format";
 import { SearchInput } from "./search-input";
-import { Image, X } from "lucide-react";
 
 interface Category {
   id: number;
@@ -29,7 +29,7 @@ interface Props {
 }
 
   
-const ItemsSection = ({ items = [], categories = [] }: Props) => {
+const ItemsSection = ({ categories = [] }: Props) => {
 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [search, setSearch] = useState("");
