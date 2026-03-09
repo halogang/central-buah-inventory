@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\WebsiteInfo;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,6 +38,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+            'websiteInfo' => fn () => WebsiteInfo::first(),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
