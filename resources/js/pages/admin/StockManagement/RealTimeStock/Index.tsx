@@ -33,6 +33,7 @@ interface Category {
 interface Item {
     id: number;
     image: string;
+    image_url: string;
     name: string;
     category?: Category;
     unit: string;
@@ -322,7 +323,7 @@ function FilterButton({ active, children, ...props }: any) {
 function ItemImage({ item }: { item: Item }) {
     return item.image ? (
         <img
-            src={item.image.startsWith("http") ? item.image : `/${item.image}`}
+            src={item.image.startsWith("http") ? item.image : item.image_url}
             className="h-12 w-16 rounded object-cover"
         />
     ) : (
