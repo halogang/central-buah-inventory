@@ -127,7 +127,7 @@ export default function Form({
                         value={form.name}
                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                         required
-                        placeholder="Nama gudang..."
+                        placeholder="Nama kategori..."
                     />
                     <FormTextarea
                         label="Deskripsi"
