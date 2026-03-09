@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\File;
 class ItemController extends Controller
 {
     // default upload path (nanti bisa kamu ubah sendiri)
-    private $uploadPath = '../../public_html/images/category';
+    private $uploadPath = '/public_html/images/path';
+    private $savePath = '/public_html/images/path';
 
     public function index()
     {
@@ -64,7 +65,7 @@ class ItemController extends Controller
 
             $image->move($destination, $filename);
 
-            $validated['image'] = $this->uploadPath.'/'.$filename;
+            $validated['image'] = $this->savePath.'/'.$filename;
         }
 
         Item::create($validated);

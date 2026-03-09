@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\File;
 
 class CategoryController extends Controller
 {
-    private $uploadPath = '../../public_html/images/items';
+    private $uploadPath = '../public_html/images/category';
+    private $savePath = '/public_html/images/category';
     
     public function index()
     {
@@ -51,7 +52,7 @@ class CategoryController extends Controller
 
             $image->move($destination, $filename);
 
-            $validated['image'] = $this->uploadPath.'/'.$filename;
+            $validated['image'] = $this->savePath.'/'.$filename;
         }
 
         if ($validated['type'] === 'pengeluaran') {
