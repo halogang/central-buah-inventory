@@ -26,6 +26,7 @@ interface Item {
   selling_price: number;
   stock: number;
   image?: string; 
+  image_url?: string; 
 }
 
 interface Props {
@@ -171,7 +172,7 @@ const ItemsSection = ({ categories = [] }: Props) => {
                     {/* IMAGE */}
                     {item.image ? (
                         <img
-                            src={`/${item.image}`}
+                            src={item.image_url}
                             alt={item.image}
                             className="w-16 h-16 object-cover rounded-lg"
                         />

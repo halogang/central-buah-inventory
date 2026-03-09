@@ -31,6 +31,7 @@ interface Warehouse {
 interface Item {
     id: number;
     image?: string;
+    image_url?: string;
     name: string;
     unit?: Unit;
     warehouse?: Warehouse;
@@ -185,7 +186,7 @@ export default function Show({
                                         <span className="text-lg">
                                             {item.image ? (
                                                 <img
-                                                    src={`/${item.image}`}
+                                                    src={item.image_url}
                                                     alt={item.image}
                                                     className="w-8 h-8 object-cover rounded"
                                                 />
