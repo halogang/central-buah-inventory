@@ -62,12 +62,9 @@ export default function ItemForm({
         }
 
         if (item) {
-            payload.append('_method', 'PUT')
+            payload.append('_method', 'PUT');
 
-           router.post(update(item.id), {
-                ...payload,
-                _method: 'put'
-            }, {
+            router.post(update(item.id), payload, {
                 forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil diperbarui`)
@@ -84,8 +81,8 @@ export default function ItemForm({
                     notify.success(`${form.name} berhasil ditambahkan`)
                     onClose()
                 },
-                onError: () => {
-                    notify.error(`Gagal menambahkan ${form.name}`)
+                onError: (errors) => {
+                    notify.error(Object.values(errors).join('\n'))
                 },
             })
         }
