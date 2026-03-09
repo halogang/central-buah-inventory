@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\File;
 class ItemController extends Controller
 {
     // default upload path (nanti bisa kamu ubah sendiri)
-    private $uploadPath = '/public_html/images/path';
-    private $savePath = '/public_html/images/path';
+    private $uploadPath = '/public_html/images/items';
+    private $savePath = '/images/items';
 
     public function index()
     {
