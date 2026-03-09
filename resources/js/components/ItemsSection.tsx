@@ -75,11 +75,14 @@ const ItemsSection = ({ categories = [] }: Props) => {
             // jumlah produk
             const productCount = categoryItems.length;
 
-            // average selling price
-            const avgSelling =
-              productCount > 0
-                ? categoryItems.reduce((sum, item) => sum + item.selling_price, 0) / productCount
-                : 0;
+            // Hitung harga minimal dan maksimal
+            let minSelling = 0;
+            let maxSelling = 0;
+
+            if (productCount > 0) {
+              minSelling = Math.min(...categoryItems.map(item => item.selling_price));
+              maxSelling = Math.max(...categoryItems.map(item => item.selling_price));
+            }
 
             //jumlah stok
             const totalStock =
@@ -107,7 +110,13 @@ const ItemsSection = ({ categories = [] }: Props) => {
                 </div>
                 <div className="p-4">
                   <h3 className="font-display font-semibold text-card-foreground">{category.name}</h3>
-                  <p className="mt-1 text-sm font-medium text-primary">{formatCurrency(avgSelling)}/kg</p>
+                  {productCount > 0 ? (
+                    <p className="mt-1 text-sm font-medium text-primary">
+                      {formatCurrency(minSelling)} - {formatCurrency(maxSelling)}/kg
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm font-medium text-muted-foreground">Belum ada produk</p>
+                  )}
                   <div className="mt-2 flex items-center justify-between">
                     <Badge variant={totalStock > 0 ? "default" : "destructive"} className="text-xs">
                       {totalStock > 0 ? `Stock: ${totalStock} kg` : "Stok kosong"}
