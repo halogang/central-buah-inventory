@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react";
 import { AlertTriangle } from "lucide-react";
 import type { Product } from "@/types/dashboard";
 
@@ -17,9 +18,12 @@ const LowStockItem = ({ product }: { product: Product }) => (
 
 const LowStockCard = ({ products }: { products: Product[] }) => (
   <div className="bg-card rounded-xl border border-border shadow-card p-5">
-    <div className="flex items-center gap-2 mb-4">
-      <AlertTriangle size={18} className="text-orange-500" />
-      <h2 className="font-semibold text-foreground">Stok Menipis</h2>
+    <div className="flex justify-between items-center">
+      <div className="flex items-center gap-2 mb-4">
+        <AlertTriangle size={18} className="text-orange-500" />
+        <h2 className="font-semibold text-foreground">Stok Menipis</h2>
+      </div>
+      <Link href={"/stok/realtime"} className="text-sm font-medium text-primary hover:underline">Lihat Semua</Link>
     </div>
     <div className="space-y-3">
       {products.map((p) => (

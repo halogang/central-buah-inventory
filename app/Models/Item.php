@@ -5,14 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\Warehouse;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Item extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'image',
         'name',
         'category_id',
-        'unit',
+        'unit_id',
         'warehouse_id',
         'purchase_price',
         'selling_price',
@@ -28,6 +31,13 @@ class Item extends Model
         'min_stock' => 'integer',
         'bad_stock' => 'integer',
     ];
+
+    protected $appends = ['image_url'];
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
 
     public function category()
     {

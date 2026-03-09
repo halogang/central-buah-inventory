@@ -8,16 +8,21 @@ import { SearchInput } from "./search-input";
 interface Category {
   id: number;
   name: string;
-  icon: string;
+  image_url?: string;
   description?: string;
   items?: Item[];
+}
+
+interface Unit {
+  id: number;
+  unit_code: string
 }
 
 interface Item {
   id: number;
   name: string;
   category?: Category;
-  unit: string;
+  unit?: Unit;
   selling_price: number;
   stock: number;
   image?: string; 
@@ -51,9 +56,12 @@ const ItemsSection = ({ categories = [] }: Props) => {
     <section id="products" className="py-20 md:py-28">
       <div className="container mx-auto px-4">
 
-        <h2 className="font-display text-3xl md:text-4xl font-bold text-center">
-          Fruit Categories
+        <h2 className="font-display text-primary text-3xl md:text-4xl font-bold text-center mb-2">
+          Katalog Buah
         </h2>
+        <p className="font-display text-muted-foreground text-lg md:text-xl text-center">
+          Pilihan buah segar berkualitas tinggi
+        </p>
 
         {/* CATEGORY GRID */}
         <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -79,33 +87,26 @@ const ItemsSection = ({ categories = [] }: Props) => {
               : 0;
 
             return (
-              // <div
-              //   key={category.id}
-              //   className="bg-card rounded-lg shadow-card p-6 text-center hover:-translate-y-1 transition"
-              // >
-              //   <div className="text-4xl mb-3">{category.icon ?? "🍎"}</div>
-
-              //   <h3 className="font-semibold">{category.name}</h3>
-
-              //   <Button
-              //     variant="outline"
-              //     size="sm"
-              //     className="w-full mt-4"
-              //     // onClick={() => setSelectedCategory(category)}
-              //   >
-              //     Lihat Produk
-              //   </Button>
-              // </div>
               <div
                 key={category.id}
                 className="group bg-card rounded-lg overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
               >
-                <div className={`h-40 bg-muted-foreground flex items-center justify-center`}>
-                  <div className="text-4xl mb-3">{category.icon ?? "🍎"}</div>
+                <div className="h-40 bg-muted flex items-center justify-center overflow-hidden">
+                  {category.image_url ? (
+                    <img
+                      src={category.image_url}
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+                      <Image className="w-10 h-10" />
+                    </div>
+                  )}
                 </div>
                 <div className="p-4">
                   <h3 className="font-display font-semibold text-card-foreground">{category.name}</h3>
-                  <p className="mt-1 text-sm font-medium text-primary">{formatCurrency(avgSelling)}</p>
+                  <p className="mt-1 text-sm font-medium text-primary">{formatCurrency(avgSelling)}/kg</p>
                   <div className="mt-2 flex items-center justify-between">
                     <Badge variant={totalStock > 0 ? "default" : "destructive"} className="text-xs">
                       {totalStock > 0 ? `Stock: ${totalStock} kg` : "Stok kosong"}
@@ -194,7 +195,7 @@ const ItemsSection = ({ categories = [] }: Props) => {
                         variant={item.stock > 0 ? "default" : "destructive"}
                       >
                         {item.stock > 0
-                          ? `Stock ${item.stock} ${item.unit}`
+                          ? `Stok ${item.stock} ${item.unit?.unit_code}`
                           : "Stok kosong"}
                       </Badge>
                     </div>

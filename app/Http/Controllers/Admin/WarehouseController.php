@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Item;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -40,8 +42,14 @@ class WarehouseController extends Controller
 
     public function show(Warehouse $warehouse)
     {
-        return Inertia::render('admin/Warehouses', [
+        $items = Item::with('category', 'unit')->where('warehouse_id', $warehouse->id)->get();
+        $categories = Category::all();
+        // dd($items);
+
+        return Inertia::render('admin/Warehouses/Show', [
             'warehouse' => $warehouse,
+            'items' => $items,
+            'categories' => $categories
         ]);
     }
 

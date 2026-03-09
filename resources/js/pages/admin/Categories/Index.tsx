@@ -22,6 +22,8 @@ interface Category {
     description?: string;
     type: string;
     icon: string;
+    image: string;
+    image_url: string;
     created_at: string;
 }
 
@@ -121,14 +123,24 @@ export default function Index() {
                         >
                             <div className="flex items-center gap-4">
                                 <div
-                                    className={`rounded-md p-3 ${
-                                        cat.type === 'barang'
-                                            ? 'bg-primary/10 text-primary text-3xl'
-                                            : 'bg-chart-4/20 text-chart-4 dark:bg-chart-3/20 dark:text-chart-3 text-3xl'
+                                    className={`rounded-xl overflow-hidden flex items-center justify-center ${
+                                        cat.type === "barang" && cat.image
+                                            ? "p-0"
+                                            : cat.type === "barang"
+                                            ? "bg-primary/10 text-primary p-3 text-3xl"
+                                            : "bg-chart-4/20 text-chart-4 dark:bg-chart-3/20 dark:text-chart-3 p-3 text-xl"
                                     }`}
                                 >
-                                    {cat.type === 'barang' ? (
-                                        cat.icon ?? <Tag className="size-5" />
+                                    {cat.type === "barang" ? (
+                                        cat.image ? (
+                                            <img
+                                                src={cat.image_url}
+                                                alt={cat.name}
+                                                className="w-12 h-12 object-cover rounded-lg"
+                                            />
+                                        ) : (
+                                            <Tag className="size-5" />
+                                        )
                                     ) : (
                                         cat.icon ?? <Wallet className="size-5" />
                                     )}

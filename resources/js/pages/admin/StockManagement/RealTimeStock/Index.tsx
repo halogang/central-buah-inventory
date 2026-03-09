@@ -4,24 +4,23 @@ import { useState } from "react";
 import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/layouts/app-layout";
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem } from "@/types";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Stok Real-Time',
-        href: '/stok/realtime',
-    }
+        title: "Stok Real-Time",
+        href: "/stok/realtime",
+    },
 ];
 
 function formatCurrency(value: number) {
     try {
-        return new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
             maximumFractionDigits: 0,
         }).format(value);
     } catch {
-        // ignore formatting errors, fallback to raw number
         return String(value);
     }
 }
@@ -29,7 +28,6 @@ function formatCurrency(value: number) {
 interface Category {
     id: number;
     name: string;
-    description?: string;
 }
 
 interface Item {
@@ -43,33 +41,33 @@ interface Item {
     stock: number;
     min_stock: number;
     bad_stock: number;
-    created_at: string;
 }
 
 export default function Index() {
-    const { items } = usePage<{
-        items: Item[];
-        errors?: Record<string, string>;
-    }>().props;
-    const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'safe' | 'low' | 'bad'>('all');
+    const { items } = usePage<{ items: Item[] }>().props;
+
+    const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] =
+        useState<"all" | "safe" | "low" | "bad">("all");
 
     const filtered = items.filter((item) => {
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+        const matchesSearch = item.name
+            .toLowerCase()
+            .includes(search.toLowerCase());
 
         const cleanStock = item.stock - item.bad_stock;
 
         let matchesStatus = true;
 
-        if (statusFilter === 'safe') {
+        if (statusFilter === "safe") {
             matchesStatus = item.bad_stock === 0 && cleanStock >= item.min_stock;
         }
 
-        if (statusFilter === 'bad') {
+        if (statusFilter === "bad") {
             matchesStatus = item.bad_stock > 0;
         }
 
-        if (statusFilter === 'low') {
+        if (statusFilter === "low") {
             matchesStatus = cleanStock < item.min_stock;
         }
 
@@ -77,101 +75,105 @@ export default function Index() {
     });
 
     const itemTotal = items.length;
-    const stockTotal = items.reduce((total, item) => total + Number(item.stock || 0), 0);
+
+    const stockTotal = items.reduce(
+        (total, item) => total + Number(item.stock || 0),
+        0
+    );
 
     const stockValueTotal = items.reduce(
-        (total, item) => total + (item.stock * item.selling_price),
+        (total, item) => total + item.stock * item.selling_price,
         0
     );
 
     const badStockValueTotal = items.reduce(
-        (total, item) => total + (item.bad_stock * item.selling_price),
+        (total, item) => total + item.bad_stock * item.selling_price,
         0
     );
 
-    const cleanStockValueTotal = items.reduce(
-        (total, item) => {
-            const cleanStock = item.stock - item.bad_stock;
-            return total + (cleanStock * item.selling_price);
-        },
-        0
-    );
-     
+    const cleanStockValueTotal = items.reduce((total, item) => {
+        const cleanStock = item.stock - item.bad_stock;
+        return total + cleanStock * item.selling_price;
+    }, 0);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Stok Real-Time" />
+
             <div className="space-y-6 p-4">
-                <div className="grid grid-cols-5 gap-4 mb-4">
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Total Item
-                        </div>
-                        <h1 className="text-lg font-semibold">{itemTotal}</h1>
-                    </div>
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Total Stok
-                        </div>
-                        <h1 className="text-green-500 text-lg font-semibold">{stockTotal}</h1>
-                    </div>
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Nilai Stok
-                        </div>
-                        <h1 className="text-lg font-semibold">{formatCurrency(stockValueTotal)}</h1>
-                    </div>
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className=" text-xs text-muted-foreground">
-                            Nilai Bad Stock
-                        </div>
-                        <h1 className="text-red-400 text-lg font-semibold">{formatCurrency(badStockValueTotal)}</h1>
-                    </div>
-                    <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>
-                        <div className="text-xs text-muted-foreground">
-                            Nilai Stok Bersih
-                        </div>
-                        <h1 className="text-green-500 text-lg font-semibold">{formatCurrency(cleanStockValueTotal)}</h1>
-                    </div>
+
+                {/* SUMMARY */}
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+
+                    <SummaryCard title="Total Item" value={itemTotal} />
+
+                    <SummaryCard
+                        title="Total Stok"
+                        value={stockTotal}
+                        color="text-green-500"
+                    />
+
+                    <SummaryCard
+                        title="Nilai Stok"
+                        value={formatCurrency(stockValueTotal)}
+                    />
+
+                    <SummaryCard
+                        title="Nilai Bad Stock"
+                        value={formatCurrency(badStockValueTotal)}
+                        color="text-red-400"
+                    />
+
+                    <SummaryCard
+                        title="Nilai Stok Bersih"
+                        value={formatCurrency(cleanStockValueTotal)}
+                        color="text-green-500"
+                    />
                 </div>
 
-                <div className="flex gap-2 items-center mb-4">
+                {/* FILTER */}
+                <div className="flex flex-col md:flex-row gap-3 md:items-center">
+
                     <SearchInput
                         placeholder="Cari Barang..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button
-                        variant={statusFilter === 'all' ? 'default' : 'outline'}
-                        onClick={() => setStatusFilter('all')}
-                    >
-                        Semua
-                    </Button>
 
-                    <Button
-                        variant={statusFilter === 'safe' ? 'default' : 'outline'}
-                        onClick={() => setStatusFilter('safe')}
-                    >
-                        Aman
-                    </Button>
+                    <div className="flex gap-2">
+                        <FilterButton
+                            active={statusFilter === "all"}
+                            onClick={() => setStatusFilter("all")}
+                        >
+                            Semua
+                        </FilterButton>
 
-                    <Button
-                        variant={statusFilter === 'low' ? 'default' : 'outline'}
-                        onClick={() => setStatusFilter('low')}
-                    >
-                        Menipis
-                    </Button>
+                        <FilterButton
+                            active={statusFilter === "safe"}
+                            onClick={() => setStatusFilter("safe")}
+                        >
+                            Aman
+                        </FilterButton>
 
-                    <Button
-                        variant={statusFilter === 'bad' ? 'default' : 'outline'}
-                        onClick={() => setStatusFilter('bad')}
-                    >
-                        Bad Stock
-                    </Button>
+                        <FilterButton
+                            active={statusFilter === "low"}
+                            onClick={() => setStatusFilter("low")}
+                        >
+                            Menipis
+                        </FilterButton>
+
+                        <FilterButton
+                            active={statusFilter === "bad"}
+                            onClick={() => setStatusFilter("bad")}
+                        >
+                            Bad Stock
+                        </FilterButton>
+                    </div>
                 </div>
 
-                {/* Table */}
-                <div className="rounded-xl border bg-background overflow-x-auto font-semibold">
+                {/* DESKTOP TABLE */}
+                <div className="hidden md:block rounded-xl border bg-background overflow-x-auto">
+
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50">
                             <tr>
@@ -188,46 +190,33 @@ export default function Index() {
                             {filtered.map((i) => {
 
                                 const cleanStock = i.stock - i.bad_stock;
-                                const cleanStockValue = cleanStock * i.selling_price;
+                                const cleanStockValue =
+                                    cleanStock * i.selling_price;
 
-                                let status = "Aman";
-                                let statusStyle = "text-green-700 dark:text-green-400 bg-green-100";
-
-                                if (i.bad_stock > 0) {
-                                    status = "Bad Stock";
-                                    statusStyle = "text-red-700 dark:text-red-400 bg-red-100";
-                                }
-
-                                if (cleanStock < i.bad_stock) {
-                                    status = "Menipis";
-                                    statusStyle = "text-yellow-700 dark:text-yellow-400 bg-yellow-100";
-                                }
+                                const { status, style } = getStatus(i);
 
                                 return (
                                     <tr
                                         key={i.id}
-                                        className="border-t hover:bg-muted/30 transition"
+                                        className="border-t hover:bg-muted/30"
                                     >
-                                        <td className="p-3 flex items-center gap-2">
-                                            {i.image ? (
-                                                <img
-                                                    src={i.image.startsWith('http') ? i.image : `/${i.image}`}
-                                                    alt={i.name}
-                                                    className="h-12 w-20 rounded object-cover"
-                                                    />
-                                            ) : (
-                                                <div className="flex h-12 w-20 items-center justify-center rounded bg-gray-200 dark:bg-gray-600">
-                                                    <Eye className="h-5 w-5 text-gray-400" />
-                                                </div>
-                                            )}
+                                        <td className="p-3 flex items-center gap-3">
+
+                                            <ItemImage item={i} />
+
                                             <div className="flex flex-col">
-                                                {i.name}
-                                                <span className="text-muted-foreground font-normal">{i.category?.name}</span>
+                                                <span className="font-semibold">
+                                                    {i.name}
+                                                </span>
+
+                                                <span className="text-muted-foreground text-xs">
+                                                    {i.category?.name}
+                                                </span>
                                             </div>
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            {i.stock} <span className="text-muted-foreground font-normal">{i.unit}</span>
+                                            {i.stock} {i.unit}
                                         </td>
 
                                         <td className="p-3 text-center">
@@ -238,35 +227,149 @@ export default function Index() {
                                             {cleanStock}
                                         </td>
 
-                                        <td className="p-3 text-right text-green-600 dark:text-green-400">
+                                        <td className="p-3 text-right text-green-600">
                                             {formatCurrency(cleanStockValue)}
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            <span
-                                                className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyle}`}
-                                            >
-                                                {status}
-                                            </span>
+                                            <StatusBadge
+                                                status={status}
+                                                style={style}
+                                            />
                                         </td>
                                     </tr>
-                                )
+                                );
                             })}
-
-                            {/* {filteredItems.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="text-center p-6 text-muted-foreground"
-                                    >
-                                        Tidak ada barang dalam kategori ini
-                                    </td>
-                                </tr>
-                            )} */}
                         </tbody>
                     </table>
                 </div>
+
+                {/* MOBILE CARD LIST */}
+                <div className="grid gap-3 md:hidden">
+
+                    {filtered.map((i) => {
+
+                        const cleanStock = i.stock - i.bad_stock;
+                        const cleanStockValue =
+                            cleanStock * i.selling_price;
+
+                        const { status, style } = getStatus(i);
+
+                        return (
+                            <div
+                                key={i.id}
+                                className="border rounded-xl p-3 bg-background shadow-sm"
+                            >
+                                <div className="flex items-center gap-3">
+
+                                    <ItemImage item={i} />
+
+                                    <div className="flex-1">
+                                        <div className="font-semibold">
+                                            {i.name}
+                                        </div>
+
+                                        <div className="text-xs text-muted-foreground">
+                                            {i.category?.name}
+                                        </div>
+                                    </div>
+
+                                    <StatusBadge status={status} style={style} />
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-2 mt-3 text-sm">
+
+                                    <Info label="Stok" value={`${i.stock} ${i.unit}`} />
+
+                                    <Info label="Bad" value={i.bad_stock} />
+
+                                    <Info label="Bersih" value={cleanStock} />
+
+                                    <Info
+                                        label="Nilai"
+                                        value={formatCurrency(cleanStockValue)}
+                                        className="col-span-3"
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </AppLayout>
-    )
+    );
+}
+
+/* COMPONENTS */
+
+function SummaryCard({ title, value, color = "" }: any) {
+    return (
+        <div className="rounded-xl border bg-background p-4 text-center shadow-sm">
+            <div className="text-xs text-muted-foreground">{title}</div>
+            <h1 className={`text-lg font-semibold ${color}`}>{value}</h1>
+        </div>
+    );
+}
+
+function FilterButton({ active, children, ...props }: any) {
+    return (
+        <Button variant={active ? "default" : "outline"} {...props}>
+            {children}
+        </Button>
+    );
+}
+
+function ItemImage({ item }: { item: Item }) {
+    return item.image ? (
+        <img
+            src={item.image.startsWith("http") ? item.image : `/${item.image}`}
+            className="h-12 w-16 rounded object-cover"
+        />
+    ) : (
+        <div className="h-12 w-16 flex items-center justify-center bg-muted rounded">
+            <Eye className="h-5 w-5 text-muted-foreground" />
+        </div>
+    );
+}
+
+function StatusBadge({ status, style }: any) {
+    return (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${style}`}>
+            {status}
+        </span>
+    );
+}
+
+function Info({ label, value, className = "" }: any) {
+    return (
+        <div className={`flex flex-col ${className}`}>
+            <span className="text-xs text-muted-foreground">{label}</span>
+            <span className="font-semibold">{value}</span>
+        </div>
+    );
+}
+
+function getStatus(item: Item) {
+
+    const cleanStock = item.stock - item.bad_stock;
+
+    if (item.bad_stock > 0) {
+        return {
+            status: "Bad Stock",
+            style: "text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/20",
+        };
+    }
+
+    if (cleanStock < item.min_stock) {
+        return {
+            status: "Menipis",
+            style:
+                "text-yellow-700 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20",
+        };
+    }
+
+    return {
+        status: "Aman",
+        style: "text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/20",
+    };
 }

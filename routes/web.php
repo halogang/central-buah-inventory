@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\HomeController;
 use \App\Http\Controllers\Admin\DeliveryOrderController;
+use App\Http\Controllers\Admin\WebsiteInfoController;
 
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -25,11 +26,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('permission:Master Data')
         ->group(function () {
 
+            Route::get('website-info', [WebsiteInfoController::class, 'index'])
+                ->name('website-info.index');
+
+            Route::put('website-info/{websiteInfo}', [WebsiteInfoController::class, 'update'])
+                ->name('website-info.update');
+
             Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
             Route::resource('suppliers', \App\Http\Controllers\Admin\SupplierController::class);
             Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
             Route::resource('payment-methods', \App\Http\Controllers\Admin\PaymentMethodController::class);
             Route::resource('items', \App\Http\Controllers\Admin\ItemController::class);
+            Route::resource('units', \App\Http\Controllers\Admin\UnitController::class);
+            Route::resource('carts', \App\Http\Controllers\Admin\CartController::class);
 
             // Gudang requires explicit Gudang permission
             Route::resource('warehouses', \App\Http\Controllers\Admin\WarehouseController::class)
@@ -37,6 +46,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Users and Roles require Pengguna & Role permission
             Route::resource('users', \App\Http\Controllers\Admin\UserController::class)
+                ->middleware('permission:Pengguna & Role');
+            Route::put('users/{user}/password', [\App\Http\Controllers\Admin\UserController::class, 'updatePassword'])
+                ->name('users.password.update')
                 ->middleware('permission:Pengguna & Role');
 
             Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)

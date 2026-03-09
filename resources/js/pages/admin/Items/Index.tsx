@@ -1,5 +1,5 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { Eye } from 'lucide-react';
+import { Eye, Tag } from 'lucide-react';
 import { useState } from 'react';
 import { SearchInput } from '@/components/search-input';
 import AppLayout from '@/layouts/app-layout';
@@ -27,9 +27,17 @@ function formatCurrency(value: number) {
 }
 
 interface Category {
+    id: number
+    name: string
+    icon?: string
+    image?: string
+    image_url?: string
+    description?: string
+}
+
+interface Unit {
     id: number;
     name: string;
-    icon: string;
     description?: string;
 }
 
@@ -38,7 +46,7 @@ interface Item {
     icon?: string;
     name: string;
     category?: Category;
-    unit: string;
+    unit?: Unit;
     purchase_price: number;
     selling_price: number;
     stock: number;
@@ -155,7 +163,22 @@ export default function Index() {
                                 className="flex flex-col gap-4 rounded-xl border border-sidebar-border/70 bg-background px-4 pt-4 pb-6 shadow-sm dark:border-sidebar-border hover:bg-muted/50 hover:scale-102 transition"
                             >
                                 <div className="flex items-start gap-3">
-                                    <div className="text-4xl text-center p-3 bg-muted-foreground/20 rounded-2xl">{i.icon}</div>
+                                    <div className="flex items-center justify-center rounded-2xl overflow-hidden">
+                                        {i.image_url ? (
+                                            <img
+                                                src={i.image_url}
+                                                alt={i.name}
+                                                className="w-14 h-14 object-cover rounded-xl"
+                                            />
+                                        ) : (
+                                            i.icon?
+                                            <div className="text-4xl text-center p-3 bg-muted-foreground/20 rounded-2xl">
+                                                {i.icon}
+                                            </div>
+                                            :
+                                            <Tag className='size-5' />
+                                        )}
+                                    </div>
                                     <div>
                                         <div className="font-semibold text-sm">
                                             {i.name}

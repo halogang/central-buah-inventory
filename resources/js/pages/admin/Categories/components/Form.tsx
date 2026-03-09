@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react";
 import { X } from "lucide-react";
 import { useState } from "react";
-import { FormInput } from "@/components/admin";
+import { FormImageUpload, FormInput } from "@/components/admin";
 import FormTextarea from "@/components/admin/FormTextarea";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notify";
@@ -13,14 +13,14 @@ export default function Form({
     onClose,
 }: any) {
 
-    const emojis = ['🥭','🍎','🍉','🍌','🍊','🍇','🍍','🍓','🥝','🥑'];
     const types = ['barang', 'pengeluaran']
 
     const emptyForm = {
         name: '',
         description: '',
         type: activeTab,
-        icon: '',
+        image: null as File | null,
+        image_url: null as File | null,
     };
 
     const [form, setForm] = useState(
@@ -28,7 +28,8 @@ export default function Form({
             name: category.name,
             description: category.description,
             type: category.type,
-            icon: category.icon,
+            image: category.image,
+            image_url: category.image_url,
         } : emptyForm
     );
 
@@ -37,7 +38,7 @@ export default function Form({
 
         const payload = {
             ...form,
-            icon: form.icon,
+            image: form.image,
             type: form.type,
         };
 
@@ -66,32 +67,19 @@ export default function Form({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs overflow-y-auto p-4"
             onClick={onClose}
         >
-            <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
+            <div className="bg-background rounded-lg w-full max-w-2xl shadow-lg max-h-[90vh] flex flex-col"
                     onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
+                <div className="flex justify-between items-center border-b border-sidebar-border py-4 px-6 mb-4">
                     <h2 className="text-lg font-semibold">
                         {category ? `Edit ${category.name}` : 'Tambah Kategori'}
                     </h2>
                     <X className="h-5 w-5 cursor-pointer" onClick={onClose} />
                 </div>
-                <form onSubmit={submitForm} className="space-y-4 px-6">
-                    <FormInput
-                        label="Nama Kategori"
-                        value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        required
-                        placeholder="Nama gudang..."
-                    />
-                    <FormTextarea
-                        label="Deskripsi"
-                        value={form.description}
-                        onChange={(e) => setForm({ ...form, description: e.target.value })}
-                        placeholder="Deskripsi kategori..."
-                    />  
+                <form onSubmit={submitForm} className="space-y-4 px-6 overflow-y-auto flex-1 py-6">
                     <div>
                         <label className="text-sm font-medium">Tipe</label>
 
@@ -100,7 +88,13 @@ export default function Form({
                                 <button
                                     key={type}
                                     type="button"
-                                    onClick={() => setForm({ ...form, type })}
+                                    onClick={() =>
+                                        setForm({
+                                            ...form,
+                                            type,
+                                            image: type === "pengeluaran" ? null : form.image,
+                                        })
+                                    }
                                     className={`
                                         flex-1 py-3 rounded-xl font-semibold transition cursor-pointer
                                         ${
@@ -115,27 +109,27 @@ export default function Form({
                             ))}
                         </div>
                     </div>
-                    {/* EMOJI */}
-                    <div>
-                        <label className="text-sm font-medium">Emoji</label>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {emojis.map((emo) => (
-                                <button
-                                    key={emo}
-                                    type="button"
-                                    onClick={() => setForm({...form, icon: emo})}
-                                    className={`w-12 h-12 text-xl rounded-xl cursor-pointer ${
-                                        form.icon === emo
-                                            ? "bg-primary/20 border border-primary"
-                                            : "bg-muted"
-                                    }`}
-                                >
-                                    {emo}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
+                    {form.type !== "pengeluaran" && (
+                        <FormImageUpload 
+                            label="Gambar"
+                            preview={form?.image ? form.image_url : undefined}
+                            onChange={(file) => setForm({ ...form, image: file })}
+                            hint="maksimal 2MB"
+                        />
+                    )}
+                    <FormInput
+                        label="Nama Kategori"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        required
+                        placeholder="Nama gudang..."
+                    />
+                    <FormTextarea
+                        label="Deskripsi"
+                        value={form.description}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                        placeholder="Deskripsi kategori..."
+                    />  
                     <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
                         <Button
                             variant="secondary"

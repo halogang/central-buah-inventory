@@ -15,6 +15,12 @@ interface Category {
     description?: string;
 }
 
+interface Unit {
+    id: number;
+    unit_code: string;
+    description?: string;
+}
+
 interface Warehouse {
     id: number;
     name: string;
@@ -24,7 +30,7 @@ interface Item {
     id: number;
     image?: string;
     name: string;
-    unit: string;
+    unit?: Unit;
     warehouse?: Warehouse;
     category?: Category;
     purchase_price: number;
@@ -51,11 +57,13 @@ export default function Show({
     items,
     categories,
     warehouses,
+    units
 }: {
     category: Category;
     items: Item[];
     categories: Category[];
     warehouses: Warehouse[];
+    units: Unit[];
 }) {
     const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState<Item | null>(null);
@@ -220,7 +228,7 @@ export default function Show({
                                         {item.warehouse?.name || "-"}
                                     </td>
 
-                                    <td className="p-3">{item.unit}</td>
+                                    <td className="p-3">{item.unit?.unit_code}</td>
 
                                     <td className="p-3 text-right">
                                         {formatCurrency(item.purchase_price)}
@@ -295,6 +303,7 @@ export default function Show({
                         category={category}
                         categories={categories}
                         warehouses={warehouses}
+                        units={units}
                         onClose={()=>setShowForm(false)}
                     />
                 )}

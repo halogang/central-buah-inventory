@@ -8,17 +8,17 @@ import { store, update } from "@/routes/master/items";
 
 export default function ItemForm({
     item,
-    category,
     categories,
     warehouses,
+    units,
     onClose,
 }: any) {
 
     const emptyForm = {
         image: null as File | null,
         name: '',
-        category_id: String(category.id),
-        unit: 'kg',
+        category_id: '',
+        unit_id: '',
         warehouse_id: '',
         purchase_price: '',
         selling_price: '',
@@ -32,7 +32,7 @@ export default function ItemForm({
             image: null as File | null,
             name: item.name,
             category_id: String(item.category?.id || ''),
-            unit: item.unit,
+            unit_id: String(item.unit?.id || ''),
             warehouse_id: String(item.warehouse?.id || ''),
             purchase_price: String(item.purchase_price ?? ''),
             selling_price: String(item.selling_price ?? ''),
@@ -49,7 +49,7 @@ export default function ItemForm({
 
         payload.append('name', form.name);
         payload.append('category_id', form.category_id);
-        payload.append('unit', form.unit);
+        payload.append('unit_id', form.unit_id);
         payload.append('warehouse_id', form.warehouse_id);
         payload.append('purchase_price', String(form.purchase_price));
         payload.append('selling_price', String(form.selling_price));
@@ -108,7 +108,7 @@ export default function ItemForm({
 
                     <FormImageUpload
                         label="Gambar"
-                        preview={item?.image ? item.image : undefined}
+                        preview={item?.image ? item.image_url : undefined}
                         onChange={(file) => setForm({ ...form, image: file })}
                         hint="maksimal 2MB"
                     />
@@ -135,26 +135,12 @@ export default function ItemForm({
 
                         <FormSelect
                             label="Satuan"
-                            value={form.unit}
-                            onChange={(e)=>setForm({...form,unit:e.target.value})}
-                            options={[
-                                {
-                                    value: 'kg',
-                                    label: 'Kg',
-                                },
-                                {
-                                    value: 'sisir',
-                                    label: 'Sisir',
-                                },
-                                {
-                                    value: 'biji',
-                                    label: 'Biji',
-                                },
-                                {
-                                    value: 'pack',
-                                    label: 'Pack',
-                                },
-                            ]}
+                            value={form.unit_id}
+                            onChange={(e)=>setForm({...form,unit_id:e.target.value})}
+                            options={units.map((c:any)=>({
+                                value:String(c.id),
+                                label:c.unit_code
+                            }))}
                         />
 
                         <FormSelect

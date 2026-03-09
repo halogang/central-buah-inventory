@@ -1,0 +1,234 @@
+import { router } from "@inertiajs/react"
+import { X, Shield } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { notify } from "@/lib/notify"
+import type { RoleData, Permission } from "../types"
+
+interface Props {
+    open: boolean
+    onClose: () => void
+    role: RoleData | null
+    permissions: Permission[]
+}
+
+export default function RoleFormModal({
+    open,
+    onClose,
+    role,
+    permissions
+}: Props) {
+
+    const [form, setForm] = useState({
+        name: "",
+        description: "",
+        permission_ids: [] as number[]
+    })
+
+    useEffect(() => {
+
+        if (role) {
+            setForm({
+                name: role.name,
+                description: role.description || "",
+                permission_ids: role.permissions.map(p => p.id)
+            })
+        } else {
+            setForm({
+                name: "",
+                description: "",
+                permission_ids: []
+            })
+        }
+
+    }, [role])
+
+    if (!open) return null
+
+    const togglePermission = (id: number) => {
+
+        if (form.permission_ids.includes(id)) {
+
+            setForm({
+                ...form,
+                permission_ids: form.permission_ids.filter(p => p !== id)
+            })
+
+        } else {
+
+            setForm({
+                ...form,
+                permission_ids: [...form.permission_ids, id]
+            })
+
+        }
+
+    }
+
+    const submit = (e: React.FormEvent) => {
+
+        e.preventDefault()
+
+        if (role) {
+            router.put(`/master/roles/${role.id}`, form, {
+                onSuccess: () => {
+                    notify.success(`${form.name} berhasil diperbarui`);
+                    onClose();
+                },
+                onError: (errors: Record<string, string>) => {
+                    notify.error(Object.values(errors).join('\n'));
+                },
+            })
+        } else {
+            router.post(`/master/roles`, form, {
+                onSuccess: () => {
+                    notify.success(`${form.name} berhasil ditambahkan`);
+                    onClose();
+                },
+                onError: (errors: Record<string, string>) => {
+                    notify.error(Object.values(errors).join('\n'));
+                },
+            })
+        }
+
+    }
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+            onClick={onClose}
+        >
+
+            <div
+                className="bg-background rounded-2xl w-full max-w-3xl shadow-lg animate-in zoom-in-95"
+                onClick={(e) => e.stopPropagation()}
+            >
+
+                {/* Header */}
+
+                <div className="flex items-center justify-between px-6 py-4 border-b border-sidebar-border">
+
+                    <div className="flex items-center gap-2">
+                        <Shield className="size-5 text-primary" />
+                        <h2 className="text-lg font-semibold">
+                            {role ? "Edit Role" : "Tambah Role"}
+                        </h2>
+                    </div>
+
+                    <X
+                        className="size-5 cursor-pointer text-muted-foreground hover:text-foreground"
+                        onClick={onClose}
+                    />
+
+                </div>
+
+                {/* Form */}
+
+                <form
+                    onSubmit={submit}
+                    className="p-6 space-y-5 max-h-[80vh] overflow-y-auto"
+                >
+
+                    {/* Name */}
+
+                    <div>
+                        <label className="text-sm font-medium">
+                            Nama Role
+                        </label>
+
+                        <input
+                            className="mt-1 w-full rounded-lg border border-sidebar-border px-3 py-2 text-sm"
+                            placeholder="manager, admin, spv..."
+                            value={form.name}
+                            onChange={(e) =>
+                                setForm({ ...form, name: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    {/* Description */}
+
+                    <div>
+                        <label className="text-sm font-medium">
+                            Deskripsi
+                        </label>
+
+                        <textarea
+                            className="mt-1 w-full rounded-lg border border-sidebar-border px-3 py-2 text-sm"
+                            placeholder="Deskripsi role..."
+                            value={form.description}
+                            onChange={(e) =>
+                                setForm({ ...form, description: e.target.value })
+                            }
+                        />
+                    </div>
+
+                    {/* Permissions */}
+
+                    <div>
+
+                        <div className="font-medium mb-3">
+                            Permissions
+                        </div>
+
+                        <div className="grid md:grid-cols-3 gap-3">
+
+                            {permissions.map((perm) => {
+
+                                const checked = form.permission_ids.includes(perm.id)
+
+                                return (
+                                    <div
+                                        key={perm.id}
+                                        onClick={() => togglePermission(perm.id)}
+                                        className={`cursor-pointer border rounded-lg px-3 py-2 text-sm flex items-center justify-between
+                                        ${checked
+                                                ? "border-primary bg-primary/5"
+                                                : "border-sidebar-border"
+                                            }`}
+                                    >
+
+                                        <span>
+                                            {perm.name}
+                                        </span>
+
+                                        <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            readOnly
+                                        />
+
+                                    </div>
+                                )
+
+                            })}
+
+                        </div>
+
+                    </div>
+
+                    {/* Actions */}
+
+                    <div className="flex justify-end gap-2 pt-4 border-t border-sidebar-border">
+
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={onClose}
+                        >
+                            Batal
+                        </Button>
+
+                        <Button type="submit">
+                            Simpan
+                        </Button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    )
+}

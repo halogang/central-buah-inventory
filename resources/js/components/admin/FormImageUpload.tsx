@@ -67,7 +67,7 @@ export default function FormImageUpload({
 
                     <img
                         src={currentPreview}
-                        alt="Preview"
+                        alt={currentPreview}
                         className="h-40 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-600"
                     />
 

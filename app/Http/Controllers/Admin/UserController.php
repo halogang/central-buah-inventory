@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -17,6 +18,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'username' => $user->username,
                 'phone' => $user->phone ?? null,
                 'roles' => $user->roles->map(function ($role) {
                     return [
@@ -70,6 +72,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'nullable|string|min:8',
             'phone' => 'nullable|string',
@@ -81,6 +84,7 @@ class UserController extends Controller
 
         $user = User::create([
             'name' => $validated['name'],
+            'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
             'phone' => $validated['phone'] ?? null,
@@ -95,6 +99,20 @@ class UserController extends Controller
         }
 
         return redirect()->route('master.users.index');
+    }
+
+    public function updatePassword(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password'])
+        ]);
+
+        return redirect()->route('master.users.index')
+            ->with('success', 'Password berhasil diperbarui');
     }
 
     public function show(User $user)
@@ -115,16 +133,25 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string',
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        $user->update([
+        $data = [
             'name' => $validated['name'],
+            'username' => $validated['username'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
-        ]);
+        ];
+
+        if (!empty($validated['password'])) {
+            $data['password'] = bcrypt($validated['password']);
+        }
+
+        $user->update($data);
 
         if (!empty($validated['role_id'])) {
             $role = Role::findById($validated['role_id']);

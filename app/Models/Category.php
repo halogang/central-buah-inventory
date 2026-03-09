@@ -11,11 +11,21 @@ class Category extends Model
         'name',
         'description',
         'type',
+        'image',
         'icon'
     ];
+
+    protected $appends = ['image_url'];
 
     public function items()
     {
         return $this->hasMany(Item::class);
+    }
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image
+            ? asset($this->image)
+            : null;
     }
 }

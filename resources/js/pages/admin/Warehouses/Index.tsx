@@ -1,5 +1,5 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { Warehouse, MapPin, SquarePen, Trash2, Plus, X } from 'lucide-react';
+import { Warehouse, MapPin, SquarePen, Trash2, Plus, X, Eye } from 'lucide-react';
 import React, { useState } from 'react';
 import {
     FormInput,
@@ -9,7 +9,7 @@ import {
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { store, update, destroy } from '@/routes/master/warehouses';
+import { store, update, destroy, show } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
 
 // helper to add thousands separators
@@ -193,6 +193,9 @@ export default function Warehouses() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 justify-end">
+                                <button onClick={() => router.get(show(w))}>
+                                    <Eye className="size-4 text-muted-foreground hover:text-primary" />
+                                </button>
                                 <button onClick={() => openForm(w)}>
                                     <SquarePen className="size-4 text-muted-foreground hover:text-primary" />
                                 </button>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Category;
+use App\Models\Unit;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,19 +14,22 @@ use Illuminate\Support\Facades\File;
 class ItemController extends Controller
 {
     // default upload path (nanti bisa kamu ubah sendiri)
-    private $uploadPath = 'images/items';
+    private $uploadPath = '../../public_html/images/category';
 
     public function index()
     {
-        $items = Item::with(['category','warehouse'])
+        $items = Item::with(['category','warehouse', 'unit'])
                 ->orderBy('updated_at', 'desc')
                 ->get();
 
         $categories = Category::where('type', 'barang')->get();
 
+        $units = Unit::all();
+
         return Inertia::render('admin/Items/Index', [
             'items' => $items,
             'categories' => $categories,
+            'units' => $units,
         ]);
     }
 
@@ -35,7 +39,7 @@ class ItemController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'unit' => 'required|string|in:kg,sisir,biji,pack',
+            'unit_id' => 'required|exists:units,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'purchase_price' => 'nullable|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
@@ -74,17 +78,22 @@ class ItemController extends Controller
 
         $items = Item::with([
             'warehouse',
-            'category'
+            'category',
+            'unit'
         ])->where('category_id', $category->id)->get();
+
+        // dd($items);
 
         $categories = Category::where('type', 'barang')->get();
         $warehouses = Warehouse::all(['id','name']);
+        $units = Unit::all();
 
         return Inertia::render('admin/Items/Show', [
             'items' => $items,
             'category' => $category,
             'categories' => $categories,
             'warehouses' => $warehouses,
+            'units' => $units,
         ]);
     }
 
@@ -96,7 +105,7 @@ class ItemController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'unit' => 'required|string|in:kg,sisir,biji,pack',
+            'unit_id' => 'required|exists:units,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'purchase_price' => 'nullable|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',

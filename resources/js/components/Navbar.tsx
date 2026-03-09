@@ -4,17 +4,30 @@ import AppLogoIcon from '@/components/app-logo-icon';
 
 const navLinks = ["Home", "Products", "About", "Contact"];
 
-const Navbar = () => {
+interface WebsiteInfo {
+  id: number;
+  nama_usaha: string;
+  alamat: string;
+  kontak: string;
+  jam_operasional: string;
+  link_maps: string
+}
+
+interface NavbarProps {
+  websiteInfo: WebsiteInfo
+}
+
+const Navbar = ({ websiteInfo }: NavbarProps) => {
   const [open, setOpen] = useState(false);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/75 backdrop-blur-md">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+      <div className="container mx-auto flex items-center justify-between h-16 px-12">
         <a href="#" className="flex items-center gap-2 font-display text-xl font-bold text-muted">
           <div className="flex aspect-square size-10 items-center justify-center rounded-md">
               <AppLogoIcon />
           </div>
-          Central Buah
+          {websiteInfo.nama_usaha}
         </a>
 
         {/* Desktop */}

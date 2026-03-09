@@ -14,12 +14,26 @@ interface Category {
     description?: string;
 }
 
+interface WebsiteInfo {
+  id: number;
+  nama_usaha: string;
+  alamat: string;
+  kontak: string;
+  jam_operasional: string;
+  link_maps: string
+}
+
+interface Unit {
+  id: number;
+  unit_code: string;
+}
+
 interface Item {
     id: number;
     icon?: string;
     name: string;
     category?: Category;
-    unit: string;
+    unit?: Unit;
     purchase_price: number;
     selling_price: number;
     stock: number;
@@ -29,21 +43,22 @@ interface Item {
 }
 
 export default function Home() {
-  const { items, categories = [] } = usePage<{
+  const { items, categories = [], websiteInfo } = usePage<{
       items: Item[];
       categories: Category[];
+      websiteInfo: WebsiteInfo;
       errors?: Record<string, string>;
   }>().props;
 
   return (
     <div className="min-h-screen scroll-smooth">
-      <Navbar />
-      <HeroSection />
+      <Navbar websiteInfo={websiteInfo}/>
+      <HeroSection websiteInfo={websiteInfo} />
       <FeaturesSection />
       <ItemsSection items={items} categories={categories} />
       <AboutSection />
       <CTASection />
-      <Footer />
+      <Footer websiteInfo={websiteInfo}/>
     </div>
   )
 }

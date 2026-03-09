@@ -1,3 +1,4 @@
+import { Link } from "@inertiajs/react";
 import type { Invoice } from "@/types/dashboard";
 
 const formatCurrency = (n: number) =>
@@ -15,7 +16,10 @@ const InvoiceItem = ({ invoice }: { invoice: Invoice }) => (
 
 const InvoiceCard = ({ invoices }: { invoices: Invoice[] }) => (
   <div className="bg-card rounded-xl border border-border shadow-card p-5">
-    <h2 className="font-semibold text-foreground mb-4">Invoice Belum Lunas</h2>
+    <div className="flex items-center justify-between">
+      <h2 className="font-semibold text-foreground mb-4">Invoice Belum Lunas</h2>
+      <Link href={"/invoice"} className="text-sm font-medium text-primary hover:underline">Lihat Semua</Link>
+    </div>
     <div className="space-y-3">
       {invoices.map((inv) => (
         <InvoiceItem key={inv.id} invoice={inv} />

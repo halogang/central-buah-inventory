@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('name');
             $table->unsignedBigInteger('category_id');
-            $table->string('unit')->default('kg');
+            $table->foreignId('unit_id')->constrained()->cascadeOnDelete();
             $table->unsignedBigInteger('warehouse_id')->nullable();
             $table->decimal('purchase_price', 15, 2)->default(0);
             $table->decimal('selling_price', 15, 2)->default(0);

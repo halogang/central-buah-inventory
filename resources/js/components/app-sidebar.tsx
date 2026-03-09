@@ -29,7 +29,11 @@ export function AppSidebar() {
         : [];
 
     const masterItems: Array<{ permission: string; label: string; href: string }> = [
+        { permission: 'Master Data', label: 'Info Website', href: '/master/website-info' },
         { permission: 'Master Data', label: 'Barang', href: '/master/items' },
+        { permission: 'Master Data', label: 'Unit', href: '/master/units' },
+        { permission: 'Master Data', label: 'Cabang', href: '/master/units' },
+        { permission: 'Master Data', label: 'Keranjang', href: '/master/carts' },
         { permission: 'Gudang', label: 'Gudang', href: '/master/warehouses' },
         { permission: 'Master Data', label: 'Kategori', href: '/master/categories' },
         { permission: 'Master Data', label: 'Supplier', href: '/master/suppliers' },
@@ -46,11 +50,11 @@ export function AppSidebar() {
 
     const stockItems = [
         { permission: 'Manajemen Stok', label: 'Stok Realtime', href: '/stok/realtime' },
-        { permission: 'Manajemen Stok', label: 'Stok Opname (coming soon)', href: '/stok/stok-opname' },
+        { permission: 'Manajemen Stok', label: 'Stok Opname', href: '/stok/stok-opname' },
     ];
     const stockLinks = stockItems
         .filter((item) => can(item.permission))
-        .map(({ label, href }) => ({ label, href }));
+        .map(({ label, href }) => ({ label, href }));   
 
     const invoiceItems = [
         { permission: 'Surat Jalan', label: 'Surat Jalan', href: '/surat-jalan' },

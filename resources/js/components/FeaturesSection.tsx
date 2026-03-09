@@ -1,22 +1,18 @@
-import { Package, ArrowLeftRight, Truck, FileText, BarChart3 } from "lucide-react";
+import {Truck, Leaf, ShieldCheck, Star } from "lucide-react";
 
 const features = [
-  { icon: Package, title: "Stock Management", desc: "Real-time tracking of all fruit inventory across your warehouse." },
-  { icon: ArrowLeftRight, title: "Stock In & Out", desc: "Record incoming and outgoing goods with full audit trail." },
-  { icon: Truck, title: "Delivery Orders", desc: "Create and manage delivery orders for seamless logistics." },
-  { icon: FileText, title: "Invoices & Payments", desc: "Generate invoices and track payment status automatically." },
-  { icon: BarChart3, title: "Stock Reports", desc: "Comprehensive reports and analytics to optimize operations." },
+  { icon: Leaf, title: "100% Segar", desc: "Buah dipetik langsung dari kebun dan dikirim fresh ke toko kami." },
+  { icon: Truck, title: "Antar Gratis", desc: "Buah dipetik langsung dari kebun dan dikirim fresh ke toko kami." },
+  { icon: ShieldCheck, title: "Garansi Kualitas", desc: "Jaminan pengembalian jika buah tidak sesuai kualitas." },
+  { icon: Star, title: "Buah Pilihan", desc: "Seleksi ketat dari petani terpercaya, lokal maupun import." },
 ];
 
 const FeaturesSection = () => (
   <section className="py-20 md:py-28 bg-muted/50">
     <div className="container mx-auto px-4">
       <h2 className="font-display text-3xl md:text-4xl font-bold text-center text-foreground">
-        Powerful Features
+        Mengapa Memilih Kami?
       </h2>
-      <p className="mt-3 text-center text-muted-foreground max-w-xl mx-auto">
-        Everything you need to run your fruit distribution business efficiently.
-      </p>
       <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((f) => (
           <div
