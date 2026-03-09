@@ -5,6 +5,7 @@ interface WebsiteInfo {
   nama_usaha: string;
   alamat: string;
   kontak: string;
+  email: string;
   jam_operasional: string;
   link_maps: string
 }
@@ -44,7 +45,7 @@ const Footer = ({ websiteInfo }: FooterProps) => (
             </div>
             <div className="flex gap-2 items-center">
               <Mail size={16}/>
-              <p>{websiteInfo.alamat}</p>
+              <p>{websiteInfo.email}</p>
             </div>
           </div>
         </div>

@@ -18,8 +18,9 @@ class WebsiteInfoController extends Controller
                 ['id' => 1],
                 [
                     'nama_usaha' => 'Nama Usaha',
-                    'alamat' => '-',
-                    'kontak' => '-',
+                    'alamat' => 'Jl. Radjiman',
+                    'kontak' => '08123456789',
+                    'email' => 'centralbuah@gmail.com',
                     'jam_operasional' => '08:00 - 17:00',
                     'link_maps' => null,
                 ]
@@ -37,7 +38,7 @@ class WebsiteInfoController extends Controller
             'nama_usaha' => 'required|string',
             'alamat' => 'required|string',
             'kontak' => 'required|string',
-            // 'email' => 'nullable|email',
+            'email' => 'nullable|email',
             // 'npwp' => 'nullable|string',
             'jam_operasional' => 'required|string',
             'link_maps' => 'nullable|url',

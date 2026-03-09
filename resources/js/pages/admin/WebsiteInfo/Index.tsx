@@ -20,6 +20,7 @@ export default function WebsiteInfoIndex({ info }: any) {
         nama_usaha: info?.nama_usaha || '',
         alamat: info?.alamat || '',
         kontak: info?.kontak || '',
+        email: info?.email || '',
         jam_operasional: info?.jam_operasional || '',
         link_maps: info?.link_maps || '',
     })
@@ -68,6 +69,13 @@ export default function WebsiteInfoIndex({ info }: any) {
                         value={form.kontak}
                         onChange={(e) =>
                             setForm({ ...form, kontak: e.target.value })
+                        }
+                    />
+                    <FormInput
+                        label="Email"
+                        value={form.email}
+                        onChange={(e) =>
+                            setForm({ ...form, email: e.target.value })
                         }
                     />
 

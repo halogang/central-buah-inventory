@@ -19,6 +19,7 @@ interface WebsiteInfo {
   nama_usaha: string;
   alamat: string;
   kontak: string;
+  email: string;
   jam_operasional: string;
   link_maps: string
 }

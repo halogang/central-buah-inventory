@@ -10,6 +10,7 @@ import { Citrus, Warehouse, TrendingUp, Truck, User, Lock } from 'lucide-react';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { usePage } from '@inertiajs/react';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 type Props = {
     status?: string;
@@ -54,7 +55,7 @@ export default function Login({
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-12 h-12 rounded-xl bg-primary-foreground/20 flex items-center justify-center">
-                                <Citrus className="w-7 h-7 text-primary-foreground" />
+                                <AppLogoIcon />/
                             </div>
 
                             <span className="text-2xl font-bold text-primary-foreground tracking-tight">
@@ -111,11 +112,11 @@ export default function Login({
                         {/* mobile logo */}
                         <div className="lg:hidden flex items-center gap-3 mb-10">
                             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                                <Citrus className="w-6 h-6 text-primary-foreground" />
+                                <AppLogoIcon />
                             </div>
 
                             <span className="text-xl font-bold">
-                                Central Buah
+                                {websiteInfo.nama_usaha}
                             </span>
                         </div>
 
