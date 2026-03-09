@@ -44,6 +44,7 @@ export default function Form({
 
         if (category) {
             router.put(update(category.id), payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil diperbarui`)
                     onClose()
@@ -54,6 +55,7 @@ export default function Form({
             })
         } else {
             router.post(store(), payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil ditambahkan`)
                     onClose()

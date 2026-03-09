@@ -134,7 +134,7 @@ class ItemController extends Controller
 
             $image->move($destination, $filename);
 
-            $validated['image'] = $this->uploadPath.'/'.$filename;
+            $validated['image'] = $this->savePath.'/'.$filename;
         }
 
         $item->update($validated);
