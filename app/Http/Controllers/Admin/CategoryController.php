@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\File;
 
 class CategoryController extends Controller
 {
-    private $uploadPath = '../public_html/images/categories';
+    private $uploadPath = '../../public_html/images/categories';
     private $savePath = '/images/categories';
     
     public function index()
