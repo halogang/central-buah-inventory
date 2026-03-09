@@ -64,15 +64,18 @@ export default function ItemForm({
         if (item) {
             payload.append('_method', 'PUT')
 
-            router.put(update(item.id), payload, {
+           router.post(update(item.id), {
+                ...payload,
+                _method: 'put'
+            }, {
                 forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil diperbarui`)
                     onClose()
                 },
-                onError: (errors: Record<string, string>) => {
+                onError: (errors) => {
                     notify.error(Object.values(errors).join('\n'))
-                },
+                }
             })
         } else {
             router.post(store(), payload, {

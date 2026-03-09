@@ -43,7 +43,10 @@ export default function Form({
         };
 
         if (category) {
-            router.put(update(category.id), payload, {
+            router.post(update(category.id), {
+                ...payload,
+                _method: 'put'
+            }, {
                 forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.name} berhasil diperbarui`)
