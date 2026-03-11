@@ -13,10 +13,15 @@ use App\Models\Item;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class DeliveryOrderController extends Controller
 {
+    private $evidenceUploadPath = '../../public_html/images/delivery-orders';
+    private $evidenceSavePath = '/images/delivery-orders';  
+
+    private $signatureUploadPath = '../../public_html/images/signatures';
+    private $signatureSavePath = '/images/signatures';
 
     public function index()
     {
@@ -124,9 +129,14 @@ class DeliveryOrderController extends Controller
 
         // upload evidence
         if ($request->hasFile('evidence')) {
-            $validated['evidence'] = $request
-                ->file('evidence')
-                ->store('delivery-orders','public');
+            $file = $request->file('evidence');
+            $filename = time().'_'.$file->getClientOriginalName();
+            $destination = public_path($this->evidenceUploadPath);
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $validated['evidence'] = $this->evidenceSavePath.'/'.$filename;
         }
 
         // save signatures
@@ -282,13 +292,23 @@ class DeliveryOrderController extends Controller
              */
             if ($request->hasFile('evidence')) {
 
-                if ($deliveryOrder->evidence) {
-                    Storage::disk('public')->delete($deliveryOrder->evidence);
+                if ($deliveryOrder->evidence && File::exists(public_path($deliveryOrder->evidence))) {
+                    File::delete(public_path($deliveryOrder->evidence));
                 }
 
-                $validated['evidence'] = $request
-                    ->file('evidence')
-                    ->store('delivery-orders', 'public');
+                $file = $request->file('evidence');
+
+                $filename = time().'_'.$file->getClientOriginalName();
+
+                $destination = public_path($this->evidenceUploadPath);
+
+                if (!File::exists($destination)) {
+                    File::makeDirectory($destination, 0755, true);
+                }
+
+                $file->move($destination, $filename);
+
+                $validated['evidence'] = $this->evidenceSavePath.'/'.$filename;
             }
 
 
@@ -459,7 +479,6 @@ class DeliveryOrderController extends Controller
 
     private function saveSignature($base64)
     {
-
         if (!$base64) return null;
 
         $image = str_replace('data:image/png;base64,', '', $base64);
@@ -467,12 +486,18 @@ class DeliveryOrderController extends Controller
 
         $fileName = 'signature_' . uniqid() . '.png';
 
-        Storage::disk('public')->put(
-            'signatures/' . $fileName,
+        $destination = public_path($this->signatureUploadPath);
+
+        if (!File::exists($destination)) {
+            File::makeDirectory($destination, 0755, true);
+        }
+
+        File::put(
+            $destination.'/'.$fileName,
             base64_decode($image)
         );
 
-        return 'signatures/' . $fileName;
+        return $this->signatureSavePath.'/'.$fileName;
     }
 
 
@@ -557,19 +582,19 @@ class DeliveryOrderController extends Controller
             /**
              * 2️⃣ Hapus file evidence
              */
-            if ($deliveryOrder->evidence) {
-                Storage::disk('public')->delete($deliveryOrder->evidence);
+            if ($deliveryOrder->evidence && File::exists(public_path($deliveryOrder->evidence))) {
+                File::delete(public_path($deliveryOrder->evidence));
             }
 
             /**
              * 3️⃣ Hapus signature
              */
-            if ($deliveryOrder->sender_signature) {
-                Storage::disk('public')->delete($deliveryOrder->sender_signature);
+            if ($deliveryOrder->sender_signature && File::exists(public_path($deliveryOrder->sender_signature))) {
+                File::delete(public_path($deliveryOrder->sender_signature));
             }
 
-            if ($deliveryOrder->receiver_signature) {
-                Storage::disk('public')->delete($deliveryOrder->receiver_signature);
+            if ($deliveryOrder->receiver_signature && File::exists(public_path($deliveryOrder->receiver_signature))) {
+                File::delete(public_path($deliveryOrder->receiver_signature));
             }
 
             /**
