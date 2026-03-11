@@ -5,6 +5,7 @@ import {
     FormInput,
     FormTextarea,
     FormSwitch,
+    FormSelect,
 } from '@/components/admin';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
@@ -26,26 +27,32 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface User {
+    id: number;
+    name: string;
+}
+
 interface Warehouse {
     id: number;
     name: string;
     address?: string;
-    capacity: number;
-    pic?: string;
-    status: string;
-    created_at: string;
+    user_id?: number | null;
+    user?: User | null;
+    status: 'active' | 'nonactive';
 }
 
 type WarehouseForm = {
     name: string;
     address: string;
-    capacity: string;
-    pic: string;
+    user_id: string;
     status: 'active' | 'nonactive';
 };
 
 export default function Warehouses() {
-    const { warehouses } = usePage<{ warehouses: Warehouse[] }>().props;
+    const { warehouses, users } = usePage<{
+        warehouses: Warehouse[]
+        users: User[]
+    }>().props
     const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
     const [editItem, setEditItem] = useState<Warehouse | null>(null);
@@ -54,28 +61,27 @@ export default function Warehouses() {
     const emptyForm: WarehouseForm = {
         name: '',
         address: '',
-        capacity: '',
-        pic: '',
+        user_id: '',
         status: 'active',
-    };
+    }
     const [form, setForm] = useState(emptyForm);
 
     const openForm = (item?: Warehouse) => {
         if (item) {
-            setEditItem(item);
+            setEditItem(item)
             setForm({
                 name: item.name,
                 address: item.address || '',
-                capacity: String(item.capacity ?? ''),
-                pic: item.pic || '',
+                user_id: String(item.user_id ?? ''),
                 status: item.status === 'active' ? 'active' : 'nonactive',
-            });
+            })
         } else {
-            setEditItem(null);
-            setForm(emptyForm);
+            setEditItem(null)
+            setForm(emptyForm)
         }
-        setShowCreate(true);
-    };
+
+        setShowCreate(true)
+    }
 
     const closeForm = () => {
         setShowCreate(false);
@@ -96,10 +102,9 @@ export default function Warehouses() {
         const payload = {
             name: form.name,
             address: form.address,
-            capacity: Number(form.capacity),
-            pic: form.pic,
+            user_id: form.user_id || null,
             status: form.status,
-        };
+        }
         if (editItem) {
             router.put(update(editItem.id), payload, {
                 onSuccess: () => {
@@ -181,15 +186,12 @@ export default function Warehouses() {
                             <div className="flex items-center gap-2 justify-between">
                                 <div className="w-full text-center px-2 py-3 bg-chart-4/4 dark:bg-chart-3/3 rounded-lg text-xs">
                                     <div className="text-md text-muted-foreground">
-                                        Kapasitas
-                                    </div>
-                                    <div className="text-sm font-semibold">{formatNumber(w.capacity)} unit</div>
-                                </div>
-                                <div className="w-full text-center px-2 py-3 bg-chart-4/4 dark:bg-chart-3/3 rounded-lg text-xs">
-                                    <div className="text-md text-muted-foreground">
                                         PIC
                                     </div>
-                                    <div className="text-sm font-semibold">{w.pic}</div>
+
+                                    <div className="text-sm font-semibold">
+                                        {w.user?.name ?? '-'}
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 justify-end">
@@ -238,21 +240,20 @@ export default function Warehouses() {
                                     error={errors.address}
                                     placeholder="Alamat gudang..."
                                 />
-                                <FormInput
-                                    label="Kapasitas (unit)"
-                                    type="number"
-                                    value={form.capacity}
-                                    onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                                    error={errors.capacity}
-                                    required
-                                    placeholder="0"
-                                />
-                                <FormInput
-                                    label="PIC (Penanggung Jawab)"
-                                    value={form.pic}
-                                    onChange={(e) => setForm({ ...form, pic: e.target.value })}
-                                    error={errors.pic}
-                                    placeholder="Nama PIC..."
+                                <FormSelect
+                                    label="PIC Gudang"
+                                    value={form.user_id}
+                                    onChange={(e) =>
+                                        setForm({ ...form, user_id: e.target.value })
+                                    }
+                                    error={errors.user_id}
+                                    options={[
+                                        { value: '', label: 'Pilih PIC' },
+                                        ...users.map((u: any) => ({
+                                            value: String(u.id),
+                                            label: u.name,
+                                        })),
+                                    ]}
                                 />
                                 {/* <FormStatusRadio
                                     value={form.status}

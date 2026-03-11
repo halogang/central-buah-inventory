@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react";
 import { X } from "lucide-react";
 import { useState } from "react";
-import { FormInput } from "@/components/admin";
+import { FormInput, FormTextarea } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notify";
 import { store, update } from "@/routes/master/carts";
@@ -13,16 +13,16 @@ export default function Form({
 
     const emptyForm = {
         name: '',
-        unit_id: '',
-        weight: ''
+        cart_code: '',
+        note: ''
     };
 
     const [form, setForm] = useState(
         cart
             ? {
                   name: cart.name ?? '',
-                  unit_id: String(cart.unit?.id || ''),
-                  weight: cart.weight
+                  cart_code: cart.cart_code ?? '',
+                  note: cart.note ?? ''
               }
             : emptyForm
     );
@@ -32,8 +32,8 @@ export default function Form({
 
         const payload = {
             name: form.name,
-            unit_jd: form.unit_id,
-            weight: form.weight,
+            cart_code: form.cart_code,
+            note: form.note,
         };
 
         if (cart) {
@@ -78,13 +78,30 @@ export default function Form({
                 <form onSubmit={submitForm} className="space-y-4 px-6">
 
                     <FormInput
-                        label="Kode Unit"
+                        label="Nama"
                         value={form.name}
                         onChange={(e) =>
                             setForm({ ...form, name: e.target.value })
                         }
                         required
-                        placeholder="Contoh: kg, pcs, box..."
+                    />
+                    
+                    <FormInput
+                        label="Kode Keranjang"
+                        value={form.cart_code}
+                        onChange={(e) =>
+                            setForm({ ...form, cart_code: e.target.value })
+                        }
+                        required
+                    />
+
+                    <FormTextarea
+                        label="Keteragan"
+                        value={form.note}
+                        onChange={(e) =>
+                            setForm({ ...form, note: e.target.value })
+                        }
+                        required
                     />
 
 

@@ -1,5 +1,5 @@
 import { router } from "@inertiajs/react"
-import { X } from "lucide-react"
+import { Eye, EyeOff, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notify"
@@ -20,6 +20,8 @@ export default function PasswordModal({
     const [password, setPassword] = useState("")
     const [confirm, setConfirm] = useState("")
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     if (!open || !user) return null
 
@@ -82,13 +84,25 @@ export default function PasswordModal({
                             Password Baru
                         </label>
 
-                        <input
-                            type="password"
-                            className="mt-1 w-full rounded-lg border border-sidebar-border px-3 py-2 text-sm"
-                            placeholder="********"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                className="mt-1 w-full rounded-lg border border-sidebar-border px-3 py-2 text-sm"
+                                placeholder="********"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <button 
+                                type='button'
+                                onClick={() => setShowPassword(!showPassword)}
+                                className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-foreground'>
+                                {showPassword ? (
+                                    <EyeOff className='w-4 h-4' />
+                                ) : (
+                                    <Eye className='w-4 h-4' /> 
+                                )}
+                            </button>
+                        </div>
 
                         {errors.password && (
                             <p className="text-xs text-red-500 mt-1">
@@ -104,13 +118,25 @@ export default function PasswordModal({
                             Konfirmasi Password
                         </label>
 
-                        <input
-                            type="password"
-                            className="mt-1 w-full rounded-lg border border-sidebar-border px-3 py-2 text-sm"
-                            placeholder="********"
-                            value={confirm}
-                            onChange={(e) => setConfirm(e.target.value)}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                className="mt-1 w-full rounded-lg border border-sidebar-border px-3 py-2 text-sm"
+                                placeholder="********"
+                                value={confirm}
+                                onChange={(e) => setConfirm(e.target.value)}
+                            />
+                            <button 
+                                type='button'
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-foreground'>
+                                {showConfirmPassword ? (
+                                    <EyeOff className='w-4 h-4' />
+                                ) : (
+                                    <Eye className='w-4 h-4' /> 
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Actions */}
@@ -121,11 +147,12 @@ export default function PasswordModal({
                             type="button"
                             variant="secondary"
                             onClick={onClose}
+                            className="cursor-pointer"
                         >
                             Batal
                         </Button>
 
-                        <Button type="submit">
+                        <Button type="submit" className="cursor-pointer">
                             Update Password
                         </Button>
 

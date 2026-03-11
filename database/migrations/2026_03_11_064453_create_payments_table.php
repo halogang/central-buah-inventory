@@ -11,12 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('warehouses', function (Blueprint $table) {
+        Schema::create('payments', function (Blueprint $table) {
+
             $table->id();
-            $table->string('name');
-            $table->text('address')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->enum('status', ['active', 'nonactive'])->default('active');
+
+            $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
+
+            $table->decimal('amount', 15, 2);
+
+            $table->string('method');
+            $table->string('evidence')->nullable();
+
+            $table->text('note')->nullable();
+
+            $table->date('date');
+
             $table->timestamps();
         });
     }
@@ -26,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('warehouses');
+        Schema::dropIfExists('payments');
     }
 };

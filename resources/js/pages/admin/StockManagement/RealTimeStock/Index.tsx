@@ -30,13 +30,18 @@ interface Category {
     name: string;
 }
 
+interface Unit {
+    id: number;
+    unit_code: string;
+}
+
 interface Item {
     id: number;
     image: string;
     image_url: string;
     name: string;
     category?: Category;
-    unit: string;
+    unit?: Unit;
     purchase_price: number;
     selling_price: number;
     stock: number;
@@ -217,15 +222,15 @@ export default function Index() {
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            {i.stock} {i.unit}
+                                            {i.stock} {i.unit?.unit_code}
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            {i.bad_stock}
+                                            {i.bad_stock} {i.unit?.unit_code}
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            {cleanStock}
+                                            {cleanStock} {i.unit?.unit_code}
                                         </td>
 
                                         <td className="p-3 text-right text-green-600">
@@ -280,11 +285,11 @@ export default function Index() {
 
                                 <div className="grid grid-cols-3 gap-2 mt-3 text-sm">
 
-                                    <Info label="Stok" value={`${i.stock} ${i.unit}`} />
+                                    <Info label="Stok" value={`${i.stock} ${i.unit?.unit_code}`} />
 
-                                    <Info label="Bad" value={i.bad_stock} />
+                                    <Info label="Bad" value={`${i.bad_stock} ${i.unit?.unit_code}`} />
 
-                                    <Info label="Bersih" value={cleanStock} />
+                                    <Info label="Bersih" value={`${cleanStock} ${i.unit?.unit_code}`} />
 
                                     <Info
                                         label="Nilai"

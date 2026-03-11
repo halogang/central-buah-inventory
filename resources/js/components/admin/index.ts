@@ -7,3 +7,4 @@ export { default as FormTextarea } from './FormTextarea';
 export { default as FormSwitch } from './FormSwitch';
 export { default as FormStatusRadio } from './FormStatusRadio';
 export { default as FormImageUpload } from './FormImageUpload';
+export { default as FormSignature } from './FormSignature';

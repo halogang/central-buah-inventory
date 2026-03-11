@@ -36,6 +36,8 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request);
+
         $validated = $request->validate([
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'name' => 'required|string|max:255',

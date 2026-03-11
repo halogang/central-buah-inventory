@@ -10,15 +10,18 @@ class DeliveryOrder extends Model
     use HasFactory;
 
     protected $fillable = [
+        'date',
         'do_number',
         'type',
-        'date',
         'supplier_id',
+        'customer_id',
         'sender_name',
         'receiver_name',
         'evidence',
         'status',
-        'sign',
+        'sender_signature',
+        'receiver_signature',
+        'total_amount',
         'note'
     ];
 
@@ -29,6 +32,11 @@ class DeliveryOrder extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function items()

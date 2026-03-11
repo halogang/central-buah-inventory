@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('unit_id')->constrained()->cascadeOnDelete();
-            $table->integer('weight');
+            $table->string('cart_code');
+            $table->string('note');
             $table->timestamps();
         });
     }

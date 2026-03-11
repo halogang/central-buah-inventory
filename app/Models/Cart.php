@@ -11,12 +11,7 @@ class Cart extends Model
 
     protected $fillable = [
         'name',
-        'unit_id',
-        'weight',
-    ];  
-
-    public function unit()
-    {
-        return $this->belongsTo(Unit::class);
-    }
+        'cart_code',
+        'note',
+    ];
 }

@@ -17,6 +17,7 @@ class RealTimeStockController extends Controller
         $items = Item::with([
             'category',
             'warehouse',
+            'unit'
         ])->orderBy('updated_at', 'desc')->get();
 
         // dd($items);

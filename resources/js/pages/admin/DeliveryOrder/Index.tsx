@@ -1,4 +1,4 @@
-import { Head } from "@inertiajs/react"
+import { Head, router } from "@inertiajs/react"
 import {
     ArrowDownToLine,
     ArrowUpToLine,
@@ -8,9 +8,11 @@ import {
     Plus,
     Printer,
     Truck,
-    Edit3
+    Edit3,
+    Trash2
 } from "lucide-react"
 import { useState, useMemo } from "react"
+import { destroy } from "@/routes/surat-jalan"
 
 import { SearchInput } from "@/components/search-input"
 import { Button } from "@/components/ui/button"
@@ -18,6 +20,8 @@ import AppLayout from "@/layouts/app-layout"
 import type { BreadcrumbItem } from "@/types"
 
 import Form from "./components/Form"
+import Show from "./components/Show"
+import { notify } from "@/lib/notify"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,6 +36,7 @@ interface DeliveryOrder {
     type: "in" | "out"
     date: string
     supplier: string
+    customer: string
     status: "draft" | "sent" | "done"
     items_count: number
     total_quantity: number
@@ -40,6 +45,12 @@ interface DeliveryOrder {
 interface Supplier {
     id: number
     name: string
+}
+
+interface Customer {
+    id: number
+    name: string
+    phone: string
 }
 
 interface Item {
@@ -51,15 +62,46 @@ interface Props {
     deliveryOrders: DeliveryOrder[]
     suppliers: Supplier[]
     items: Item[]
+    customers: Customer[]
 }
 
-export default function Index({ deliveryOrders, suppliers, items }: Props) {
+export default function Index({ deliveryOrders, suppliers, items, customers }: Props) {
 
     const [activeTab, setActiveTab] = useState<"in" | "out">("in")
     const [search, setSearch] = useState("")
 
     const [openForm, setOpenForm] = useState(false)
     const [selectedData, setSelectedData] = useState<DeliveryOrder | null>(null)
+
+    const [openShow, setOpenShow] = useState(false)
+    const [selected, setSelected] = useState(null)
+
+    const confirmDelete = (delivery: DeliveryOrder) => {
+        notify.confirmDelete({
+            message: `Hapus ${delivery.do_number}?`,
+            onConfirm: () => performDelete(delivery),
+        })
+    }
+    const performDelete = (delivery: DeliveryOrder) => {
+        const loading = notify.loading("Menghapus surat jalan...")
+
+        router.delete(destroy(delivery.id), {
+            onSuccess: () => {
+                notify.dismiss(loading)
+                notify.success(`surat jalan ${delivery.do_number} berhasil dihapus`)
+            },
+            onError: () => {
+                notify.dismiss(loading)
+                notify.error(`Gagal menghapus ${delivery.do_number}`)
+            },
+        })
+    }
+    
+
+    const openDetail = (data:any)=>{
+        setSelected(data)
+        setOpenShow(true)
+    }
 
     // filter data
     const filteredData = useMemo(() => {
@@ -191,35 +233,42 @@ export default function Index({ deliveryOrders, suppliers, items }: Props) {
 
                             {/* HEADER */}
                             <div className="flex justify-between">
+                        
+                                <div className="flex items-start gap-2">
+                                    <div>
+                                        <p className="text-sm font-semibold">
+                                            {delivery.do_number}
+                                        </p>
 
-                                <div>
-                                    <p className="text-sm font-semibold">
-                                        {delivery.do_number}
-                                    </p>
-
-                                    <p className="text-xs text-muted-foreground">
-                                        {delivery.date}
-                                    </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {delivery.date}
+                                        </p>
+                                    </div>
+                                    <span
+                                        className={`text-xs h-fit px-2 py-1 font-bold rounded-full flex items-center ${statusStyle(
+                                            delivery.status
+                                        )}`}
+                                    >
+                                        {delivery.status === 'draft' ? 'Draft' : delivery.status === 'sent' ? 'Dikirim' : 'Selesai'}
+                                    </span>
                                 </div>
 
-                                <span
-                                    className={`text-xs px-2 py-1 rounded-full ${statusStyle(
-                                        delivery.status
-                                    )}`}
-                                >
-                                    {delivery.status}
-                                </span>
+                                {delivery.status === 'draft' && (
+                                    <button onClick={() => confirmDelete(delivery)}>
+                                        <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
+                                    </button>
+                                )}
 
                             </div>
 
                             {/* SUPPLIER */}
                             <div className="flex gap-2 text-sm text-muted-foreground">
                                 <Truck className="size-4" />
-                                {delivery.supplier}
+                                {delivery.type === 'in' ? delivery.supplier : delivery.customer}
                             </div>
 
                             {/* ITEM */}
-                            <div className="flex gap-2 text-sm text-muted-foreground">
+                            <div className="flex gap-2 items-center text-sm text-muted-foreground">
 
                                 <Package className="size-4" />
 
@@ -234,7 +283,7 @@ export default function Index({ deliveryOrders, suppliers, items }: Props) {
                             {/* ACTION */}
                             <div className="flex gap-2">
 
-                                <Button
+                                <Button onClick={() => openDetail(delivery)}
                                     variant="secondary"
                                     className="w-full"
                                 >
@@ -242,18 +291,20 @@ export default function Index({ deliveryOrders, suppliers, items }: Props) {
                                     Detail
                                 </Button>
 
-                                {delivery.status === "draft" && (
+                                {/* {delivery.status === "draft" && ( */}
 
-                                    <Button
-                                        variant="secondary"
-                                        className="w-full"
-                                        onClick={() => openEdit(delivery)}
-                                    >
-                                        <Edit3 className="size-4" />
-                                        Edit
-                                    </Button>
+                                    {delivery.status !== "done" && (
+                                        <Button
+                                            variant="secondary"
+                                            className="w-full"
+                                            onClick={() => openEdit(delivery)}
+                                        >
+                                            <Edit3 className="size-4" />
+                                            Edit
+                                        </Button>
+                                    )}
 
-                                )}
+                                {/* )} */}
 
                                 <Button
                                     variant="secondary"
@@ -287,10 +338,18 @@ export default function Index({ deliveryOrders, suppliers, items }: Props) {
                     data={selectedData}
                     suppliers={suppliers}
                     items={items}
+                    customers={customers}
                     type={activeTab}
                     onClose={() => setOpenForm(false)}
                 />
             )} 
+
+            {openShow && (
+                <Show
+                    data={selected}
+                    onClose={()=>setOpenShow(false)}
+                />
+            )}
 
         </AppLayout>
     )

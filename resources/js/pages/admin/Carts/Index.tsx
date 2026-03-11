@@ -16,17 +16,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Unit {
-    id: number;
-    unit_code: string;
-    description: string;
-}
-
 interface Cart {
     id: number;
     name: string;
-    unit?: Unit;
-    weight: number;
+    cart_code: string;
+    note: string;
 }
 
 export default function Index() {
@@ -54,7 +48,7 @@ export default function Index() {
         })
     }
     const performDelete = (cart: Cart) => {
-        const loading = notify.loading("Mennghapus kategori...")
+        const loading = notify.loading("Menghapus kategori...")
 
         router.delete(destroy(cart.id), {
             onSuccess: () => {
@@ -93,8 +87,8 @@ export default function Index() {
                         <thead className="bg-muted/50">
                             <tr>
                                 <th className="text-left p-3">Nama</th>
-                                <th className="text-left p-3">Kode Unit</th>
-                                <th className="text-left p-3">Berat</th>
+                                <th className="text-left p-3">Kode Keranjang</th>
+                                <th className="text-left p-3">Keterangan</th>
                                 <th className="text-left p-3"></th>
                             </tr>
                         </thead>
@@ -108,10 +102,10 @@ export default function Index() {
                                         {cart.name}
                                     </td>
                                     <td className="p-3">
-                                        {cart.unit?.unit_code}
+                                        {cart.cart_code}
                                     </td>
                                     <td className="p-3">
-                                        {cart.weight}
+                                        {cart.note}
                                     </td>
                                     <td className="p-3 text-center">
                                         <button

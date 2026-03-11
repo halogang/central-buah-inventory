@@ -1,4 +1,4 @@
-import { ImageIcon, X } from 'lucide-react';
+import { ImageIcon, X, Camera } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +9,10 @@ interface FormImageUploadProps {
     preview?: string;
     onChange: (file: File | null) => void;
     accept?: string;
+    icon?: string;
+    title?: string;
+    subtitle?: string;
+    required?: boolean;
 }
 
 export default function FormImageUpload({
@@ -18,6 +22,10 @@ export default function FormImageUpload({
     preview,
     onChange,
     accept = 'image/*',
+    icon,
+    title,
+    subtitle,
+    required,
 }: FormImageUploadProps) {
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -59,6 +67,7 @@ export default function FormImageUpload({
 
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {label}
+                {required && <span className="text-red-500 ml-1">*</span>}
             </label>
 
             {currentPreview ? (
@@ -92,14 +101,18 @@ export default function FormImageUpload({
 
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
 
-                        <ImageIcon className="mb-3 h-10 w-10 text-gray-400" />
+                        {icon === 'camera' ?
+                            <Camera className="mb-1 h-7 w-7 text-gray-400" />
+                            :
+                            <ImageIcon className="mb-1 h-10 w-10 text-gray-400" />
+                        }
 
                         <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-semibold">Click to upload</span>
+                            <span className="font-regular">{title ?? 'Click to upload'}</span>
                         </p>
 
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                            PNG, JPG, WEBP (MAX. 2MB)
+                            { subtitle ?? 'PNG, JPG, WEBP (MAX. 2MB)' }
                         </p>
 
                     </div>
@@ -109,6 +122,7 @@ export default function FormImageUpload({
                         className="hidden"
                         accept={accept}
                         onChange={handleChange}
+                        required={required}
                     />
 
                 </label>

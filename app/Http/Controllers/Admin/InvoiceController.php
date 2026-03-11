@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,7 +14,55 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        return Inertia::render('admin/Invoice/Index');
+
+        $invoices = Invoice::with([
+            'items.item',
+            'payments'
+        ])
+        ->latest()
+        ->get()
+        ->map(function ($invoice) {
+
+            return [
+
+                'id' => $invoice->id,
+                'invoiceNumber' => $invoice->invoice_number,
+                'date' => $invoice->date,
+
+                'total' => $invoice->total,
+                'paid' => $invoice->paid,
+                'remaining' => $invoice->remaining,
+
+                'status' => $invoice->status,
+                'type' => $invoice->type,
+
+                'itemsCount' => $invoice->items->count(),
+
+                'deliveryOrder' => $invoice->deliveryOrder?->do_number,
+
+                'customer' => $invoice->deliveryOrder?->customer?->name,
+                'supplier' => $invoice->deliveryOrder?->supplier?->name,
+
+            ];
+
+        });
+
+        $summary = [
+
+            'totalIn' => Invoice::where('type', 'in')->sum('total'),
+            'remainingIn' => Invoice::where('type', 'in')->sum('remaining'),
+            'paidIn' => Invoice::where('type', 'in')->sum('paid'),
+
+            'totalOut' => Invoice::where('type', 'out')->sum('total'),
+            'remainingOut' => Invoice::where('type', 'out')->sum('remaining'),
+            'paidOut' => Invoice::where('type', 'out')->sum('paid'),
+
+        ];
+
+        return Inertia::render('admin/Invoice/Index', [
+            'invoices' => $invoices,
+            'summary' => $summary
+        ]);
     }
 
     /**

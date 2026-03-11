@@ -1,46 +1,94 @@
 import { router } from "@inertiajs/react"
-import { X, Plus, Trash, FileText } from "lucide-react"
+import { X, Plus, Truck, Package, Image, Trash2, Camera } from "lucide-react"
 import { useEffect, useState } from "react"
 
-import { FormInput } from "@/components/admin"
+import { FormImageUpload, FormInput } from "@/components/admin"
 import FormSelect from "@/components/admin/FormSelect"
 import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notify"
 
 import { store, update } from "@/routes/surat-jalan"
+import { formatCurrency } from "@/helpers/format"
+
+import DeliveryEvidenceSection from "./DeliveryEvidenceSection"
+import DeliveryInfoSection from "./DeliveryInfoSection"
+import DeliveryItemsSection from "./DeliveryItemsSection"
+import DeliverySignatureSection from "./DeliverySignatureSection"
 
 export default function Form({
     data,
     suppliers,
+    customers,
     items,
     type,
     onClose
 }: any) {
 
     const [doNumber, setDoNumber] = useState("");
+    const [selectingItem, setSelectingItem] = useState(false)
+    const [searchItem, setSearchItem] = useState("")
 
     useEffect(() => {
+
+        if (data) return
+
         fetch(`/surat-jalan/preview-number/${type}`)
             .then(res => res.json())
-            .then(res => setDoNumber(res.number));
-    }, [type]);
+            .then(res => {
+                setDoNumber(res.number)
+                setForm((prev:any) => ({
+                    ...prev,
+                    do_number: res.number
+                }))
+            })
+
+    }, [type])
+
+    const filteredItems = items.filter((i:any) =>
+        i.name.toLowerCase().includes(searchItem.toLowerCase())
+    )
+
+    const selectItem = (item:any) => {
+
+        const newItem = {
+            item_id: item.id,
+            name: item.name,
+            image: item.image,
+            image_url: item.image_url,
+            unit: item.unit,
+            quantity: "",
+            bad_stock: "",
+            price: ""
+        }
+
+        setForm({
+            ...form,
+            items: [...form.items, newItem]
+        })
+
+        setSelectingItem(false)
+        setSearchItem("")
+    }
 
     const emptyForm = {
         do_number: "",
         supplier_id: "",
+        customer_id: "",
+        date: "",
         status: "draft",
-        items: [
-            {
-                item_id: "",
-                quantity: "",
-                bad_stock: "",
-                price: ""
-            }
-        ]
+        sender_name: "",
+        receiver_name: "",
+        sender_signature: "",
+        receiver_signature: "",
+        note: "",
+        evidence: null,
+        items: []
     }
 
     const [form, setForm] = useState(
-        data ? data : emptyForm
+        data
+            ? { ...data, items: data.items ?? [] }
+            : emptyForm
     )
 
     const addItem = () => {
@@ -81,9 +129,28 @@ export default function Form({
         })
     }
 
+    const getNetQty = (item:any) => {
+        const qty = Number(item.quantity || 0)
+        const bad = Number(item.bad_stock || 0)
+
+        return qty - bad
+    }
+
+    const getItemTotal = (item:any) => {
+        const net = getNetQty(item)
+        const price = Number(item.price || 0)
+
+        return net * price
+    }
+
+    const totalAmount = (form?.items || []).reduce((sum:number, item:any) => {
+        return sum + getItemTotal(item)
+    }, 0)
+
     const submitForm = (e: React.FormEvent) => {
 
         e.preventDefault()
+        console.log(form) // cek ini
 
         const payload = {
             ...form,
@@ -127,7 +194,7 @@ export default function Form({
     return (
 
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-1"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs px-4"
             onClick={onClose}
         >
 
@@ -136,180 +203,69 @@ export default function Form({
                 onClick={(e) => e.stopPropagation()}
             >
 
-                <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
-
-                    <h2 className="text-lg font-semibold">
-
-                        {data
-                            ? `Edit ${data.do_number}`
-                            : `Buat Surat Jalan ${type === "in" ? "Masuk" : "Keluar"}`
-                        }
-
-                    </h2>
-
-                    <X className="h-5 w-5 cursor-pointer" onClick={onClose} />
-
-                </div>
 
                 <form
                     onSubmit={submitForm}
-                    className="space-y-4 px-6 max-h-[80vh] overflow-y-auto"
+                    className=""
                 >
+                    <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
 
-                    {/* NOMOR SJ */}
-                    <FormInput
-                        label=""
-                        value={doNumber}
-                        onChange={(e) =>
-                            setForm({ ...form, do_number: e.target.value })
-                        }
-                        hidden
-                    />
-                    <div className="p-2 flex items-center gap-2 bg-primary/10 text-primary rounded-lg">
-                        <FileText className="size-5 text-light" />
-                        <div className="flex flex-col">
-                            <span className="text-muted-foreground font-light text-[10px]">NOMOR SURAT JALAN</span>
-                            <span className="font-semibold text-sm">{doNumber}</span>
-                        </div>
+                        <h2 className="text-lg font-semibold">
+
+                            {data
+                                ? `Edit ${data.do_number}`
+                                : `Buat Surat Jalan ${type === "in" ? "Masuk" : "Keluar"}`
+                            }
+
+                        </h2>
+
+                        <X className="h-5 w-5 cursor-pointer" onClick={onClose} />
+
                     </div>
 
-                    {/* SUPPLIER */}
-                    <FormSelect
-                        label="Supplier"
-                        value={form.supplier_id}
-                        onChange={(e) =>
-                            setForm({ ...form, supplier_id: e.target.value })
-                        }
-                        options={suppliers.map((s: any) => ({
-                            label: s.name,
-                            value: s.id
-                        }))}
-                    />
+                    <div className="space-y-4 px-6 max-h-[70vh] overflow-y-auto">
+                        <DeliveryInfoSection
+                            form={form}
+                            suppliers={suppliers}
+                            customers={customers}
+                            type={type}
+                            setForm={setForm}
+                        />
 
-                    {/* STATUS */}
-                    <FormSelect
-                        label="Status"
-                        value={form.status}
-                        onChange={(e) =>
-                            setForm({ ...form, status: e.target.value })
-                        }
-                        options={[
-                            { label: "Draft", value: "draft" },
-                            { label: "Sent", value: "sent" },
-                            { label: "Done", value: "done" }
-                        ]}
-                    />
+                        <DeliveryItemsSection
+                            form={form}
+                            selectingItem={selectingItem}
+                            searchItem={searchItem}
+                            filteredItems={filteredItems}
+                            setSelectingItem={setSelectingItem}
+                            setSearchItem={setSearchItem}
+                            selectItem={selectItem}
+                            updateItem={updateItem}
+                            removeItem={removeItem}
+                            totalAmount={totalAmount}
+                            getNetQty={getNetQty}
+                            getItemTotal={getItemTotal}
+                        />
 
-                    {/* ITEMS */}
+                        {form.status === 'done' && (
+                            <>
+                                <DeliveryEvidenceSection
+                                    form={form}
+                                    setForm={setForm}
+                                />
 
-                    <div className="space-y-3 pt-2">
-
-                        <div className="flex justify-between items-center">
-
-                            <h3 className="font-semibold">
-                                Daftar Barang
-                            </h3>
-
-                            <Button
-                                type="button"
-                                size="sm"
-                                onClick={addItem}
-                            >
-                                <Plus className="size-4" />
-                                Tambah
-                            </Button>
-
-                        </div>
-
-                        {form.items.map((item: any, index: number) => (
-
-                            <div
-                                key={index}
-                                className="grid grid-cols-12 gap-2 items-end border rounded-lg p-3"
-                            >
-
-                                {/* ITEM */}
-                                <div className="col-span-5">
-
-                                    <FormSelect
-                                        label="Barang"
-                                        value={item.item_id}
-                                        onChange={(e) =>
-                                            updateItem(index, "item_id", e.target.value)
-                                        }
-                                        options={items.map((i: any) => ({
-                                            label: i.name,
-                                            value: i.id
-                                        }))}
-                                    />
-
-                                </div>
-
-                                {/* QTY */}
-                                <div className="col-span-3">
-
-                                    <FormInput
-                                        label="Qty"
-                                        type="number"
-                                        value={item.quantity}
-                                        onChange={(e) =>
-                                            updateItem(index, "quantity", e.target.value)
-                                        }
-                                    />
-
-                                </div>
-
-                                {/* BAD STOCK */}
-                                <div className="col-span-3">
-
-                                    <FormInput
-                                        label="Bad Stock"
-                                        type="number"
-                                        value={item.bad_stock}
-                                        onChange={(e) =>
-                                            updateItem(index, "bad_stock", e.target.value)
-                                        }
-                                    />
-
-                                </div>
-
-                                {/* PRICE */}
-                                <div className="col-span-3">
-
-                                    <FormInput
-                                        label="Price"
-                                        type="number"
-                                        value={item.price}
-                                        onChange={(e) =>
-                                            updateItem(index, "price", e.target.value)
-                                        }
-                                    />
-
-                                </div>
-
-                                {/* DELETE */}
-                                <div className="col-span-1">
-
-                                    <Button
-                                        type="button"
-                                        size="icon"
-                                        variant="destructive"
-                                        onClick={() => removeItem(index)}
-                                    >
-                                        <Trash className="size-4" />
-                                    </Button>
-
-                                </div>
-
-                            </div>
-
-                        ))}
-
+                                <DeliverySignatureSection
+                                    form={form}
+                                    setForm={setForm}
+                                    type={type}
+                                />
+                            </>
+                        )}
                     </div>
 
                     {/* ACTION */}
 
-                    <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
+                    <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border px-6">
 
                         <Button
                             variant="secondary"

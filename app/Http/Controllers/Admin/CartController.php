@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
-use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,11 +14,9 @@ class CartController extends Controller
      */
     public function index()
     {
-        $units = Unit::all();
-        $carts = Cart::with('unit')->get();
+        $carts = Cart::all();
 
         return Inertia::render('admin/Carts/Index', [
-            'units' => $units,
             'carts' => $carts
         ]);
     }
@@ -37,10 +34,11 @@ class CartController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'unit_id' => 'required|exists:units,id',
-            'weight' => 'required|integer'
+            'cart_code' => 'required|string',
+            'note' => 'required|string'
         ]);
 
         Cart::create($validated);
@@ -70,8 +68,8 @@ class CartController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'unit_id' => 'required|exists:units,id',
-            'weight' => 'required|integer'
+            'cart_code' => 'required|string',
+            'note' => 'required|string'
         ]);
 
         $cart->update($validated);

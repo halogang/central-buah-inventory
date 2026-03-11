@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\OpnameStock;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -53,17 +54,28 @@ class OpnameStockController extends Controller
             'items' => 'required|array'
         ]);
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($validated) {
+            $date = Carbon::parse($validated['date'])->format('Ymd');
+            $warehouse = $validated['warehouse_id'] ?? '00';
+            // hitung jumlah opname hari ini di gudang yang sama
+            $count = OpnameStock::whereDate('date', $validated['date'])
+                ->where('warehouse_id', $validated['warehouse_id'])
+                ->count() + 1;
+
+            $running = str_pad($count, 4, '0', STR_PAD_LEFT);
+
+            $opnameNumber = "OPN/WH{$warehouse}/{$date}/{$running}";
+            
 
             $opname = OpnameStock::create([
-                'opname_number' => 'OPN-' . now()->format('Ymd'),
-                'date' => $request->date,
-                'warehouse_id' => $request->warehouse_id,
-                'checked_by' => $request->checked_by,
-                'note' => $request->note,
+                'opname_number' => $opnameNumber,
+                'date' => $validated['date'],
+                'warehouse_id' => $validated['warehouse_id'],
+                'checked_by' => $validated['checked_by'],
+                'note' => $validated['note'],
             ]);
 
-            foreach ($request->items as $item) {
+            foreach ($validated['items'] as $item) {
 
                 $difference = $item['physical_stock'] - $item['system_stock'];
 

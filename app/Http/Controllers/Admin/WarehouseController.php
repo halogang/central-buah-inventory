@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Item;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,8 +14,10 @@ class WarehouseController extends Controller
 {
     public function index()
     {
-        $warehouses = Warehouse::orderBy('updated_at', 'desc')->get();
+        $warehouses = Warehouse::with('user')->orderBy('updated_at', 'desc')->get();
+        $users = User::all();
         return Inertia::render('admin/Warehouses/Index', [
+            'users' => $users,
             'warehouses' => $warehouses,
         ]);
     }
@@ -29,8 +32,7 @@ class WarehouseController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
-            'capacity' => 'nullable|integer',
-            'pic' => 'nullable|string|max:255',
+            'user_id' => 'nullable|exists:users,id',
             'status' => 'nullable|in:active,nonactive',
         ]);
 
@@ -65,8 +67,7 @@ class WarehouseController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
-            'capacity' => 'nullable|integer',
-            'pic' => 'nullable|string|max:255',
+            'user_id' => 'nullable|exists:users,id',
             'status' => 'nullable|in:active,nonactive',
         ]);
 

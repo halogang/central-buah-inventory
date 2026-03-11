@@ -10,8 +10,7 @@ class Warehouse extends Model
     protected $fillable = [
         'name',
         'address',
-        'capacity',
-        'pic',
+        'user_id',
         'status',
     ];
 
@@ -23,5 +22,10 @@ class Warehouse extends Model
     public function stockOpnames()
     {
         return $this->hasMany(OpnameStock::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

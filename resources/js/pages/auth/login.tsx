@@ -6,7 +6,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { Citrus, Warehouse, TrendingUp, Truck, User, Lock } from 'lucide-react';
+import { Citrus, Warehouse, TrendingUp, Truck, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { usePage } from '@inertiajs/react';
@@ -23,6 +24,7 @@ export default function Login({
     canResetPassword,
 }: Props) {
     const { websiteInfo } = usePage().props as any;
+    const [showPassword, setShowPassword] = useState(false);
     return (
         <>
             <Head title="Login" />
@@ -184,12 +186,23 @@ export default function Login({
 
                                                 <Input
                                                     id="password"
-                                                    type="password"
+                                                    type={showPassword ? 'text' : 'password'}
                                                     name="password"
                                                     placeholder="Password"
                                                     autoComplete="current-password"
                                                     className="pl-10 h-11"
                                                 />
+
+                                                <button 
+                                                    type='button'
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-foreground'>
+                                                    {showPassword ? (
+                                                        <EyeOff className='w-4 h-4' />
+                                                    ) : (
+                                                        <Eye className='w-4 h-4' /> 
+                                                    )}
+                                                </button>
                                             </div>
 
                                             <InputError message={errors.password} />

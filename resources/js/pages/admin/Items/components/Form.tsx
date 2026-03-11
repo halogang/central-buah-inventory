@@ -17,9 +17,9 @@ export default function ItemForm({
     const emptyForm = {
         image: null as File | null,
         name: '',
-        category_id: '',
-        unit_id: '',
-        warehouse_id: '',
+        category_id: categories?.[0] ? String(categories[0].id) : '',
+        unit_id: units?.[0] ? String(units[0].id) : '',
+        warehouse_id: warehouses?.[0] ? String(warehouses[0].id) : '',
         purchase_price: '',
         selling_price: '',
         stock: '',

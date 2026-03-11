@@ -7,21 +7,37 @@ use Illuminate\Database\Seeder;
 
 class CartSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $carts = [
-            ['name' => 'Keranjang Apel', 'unit_id' => 1, 'weight' => 5],
-            ['name' => 'Keranjang Jambu', 'unit_id' => 1, 'weight' => 4],
-            ['name' => 'Keranjang Durian', 'unit_id' => 1, 'weight' => 6],
-            ['name' => 'Keranjang Pisang', 'unit_id' => 1, 'weight' => 7],
-            ['name' => 'Keranjang Kayu', 'unit_id' => 1, 'weight' => 3],
+            [
+                'name' => 'Keranjang Apel',
+                'cart_code' => 'CRT-APL-01',
+                'note' => 'Kapasitas ±20kg'
+            ],
+            [
+                'name' => 'Keranjang Jambu',
+                'cart_code' => 'CRT-JMB-01',
+                'note' => 'Kapasitas ±15kg'
+            ],
+            [
+                'name' => 'Keranjang Durian',
+                'cart_code' => 'CRT-DRN-01',
+                'note' => 'Keranjang khusus durian (kuat)'
+            ],
+            [
+                'name' => 'Keranjang Pisang',
+                'cart_code' => 'CRT-PSG-01',
+                'note' => 'Keranjang ventilasi'
+            ],
+            [
+                'name' => 'Keranjang Kayu',
+                'cart_code' => 'CRT-KYU-01',
+                'note' => 'Keranjang distribusi'
+            ],
         ];
 
-        foreach($carts as $cart)
-        {
+        foreach ($carts as $cart) {
             Cart::create($cart);
         }
     }
