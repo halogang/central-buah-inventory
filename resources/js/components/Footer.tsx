@@ -53,7 +53,7 @@ const Footer = ({ websiteInfo }: FooterProps) => (
           <h4 className="font-display font-semibold mb-3">Alamat & Jam Operasional</h4>
           <div className="space-y-2 text-sm text-primary-foreground/60">
             <div className="flex gap-2 items-center">
-              <MapPin size={16}/>
+              <MapPin size={16} className="shrink-0"/>
               <p>{websiteInfo.alamat}</p>
             </div>
             <div className="flex gap-2 items-center">
