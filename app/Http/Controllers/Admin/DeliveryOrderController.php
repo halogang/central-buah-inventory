@@ -52,12 +52,15 @@ class DeliveryOrderController extends Controller
                 'receiver_name' => $do->receiver_name,
 
                 'sender_signature' => $do->sender_signature,
-
                 'receiver_signature' => $do->receiver_signature,
+                'evidence' => $do->evidence,
+
+                'sender_signature_url' => $do->sender_signature_url,
+                'receiver_signature_url' => $do->receiver_signature_url,
+                'evidence_url' => $do->evidence_url,
 
                 'notes' => $do->notes,
 
-                'evidence' => $do->evidence,
 
                 'items_count' => $do->items->count(),
                 'total_quantity' => $do->items->sum('quantity'),
@@ -492,8 +495,6 @@ class DeliveryOrderController extends Controller
 
         return $this->signatureSavePath.'/'.$fileName;
     }
-
-
 
     public function previewNumber($type)
     {
