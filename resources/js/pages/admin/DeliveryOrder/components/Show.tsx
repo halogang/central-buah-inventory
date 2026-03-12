@@ -162,7 +162,7 @@ export default function Show({ data, onClose }: Props) {
 
                             {data.sender_signature && (
                                 <img
-                                    src={data.sender_signature}
+                                    src={data.sender_signature_url}
                                     className="h-20 mx-auto mt-2 object-contain"
                                 />
                             )}
@@ -196,7 +196,7 @@ export default function Show({ data, onClose }: Props) {
 
                             {data.receiver_signature && (
                                 <img
-                                    src={data.receiver_signature}
+                                    src={data.receiver_signature_url}
                                     className="h-20 mx-auto object-contain"
                                 />
                             )}
@@ -229,7 +229,7 @@ export default function Show({ data, onClose }: Props) {
                         {data.evidence ? (
 
                             <img
-                                src={data.evidence}
+                                src={data.evidence_url}
                                 className="mx-auto max-h-48 rounded-md"
                             />
 
