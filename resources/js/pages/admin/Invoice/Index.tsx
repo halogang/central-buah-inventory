@@ -26,6 +26,19 @@ const breadcrumbs: BreadcrumbItem[] = [
     }
 ];
 
+interface Item {
+    id: number
+    name: string
+}
+
+interface InvoiceItem {
+    id: number
+    item?: Item
+    quantity: number
+    price: number
+    total: number
+}
+
 interface Invoice {
     id: number 
     invoiceNumber: string 
@@ -35,6 +48,7 @@ interface Invoice {
     remaining: number 
     status: string 
     itemsCount: number 
+    invoiceItems?: InvoiceItem[] 
     deliveryOrder: string 
     supplier: string 
     customer: string 

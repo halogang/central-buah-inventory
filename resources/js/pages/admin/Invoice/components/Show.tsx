@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/helpers/format"
 import { CreditCard, Eye, Printer, X } from "lucide-react"
+import { useState } from "react"
+import Payment from "./Payment"
 
 
 interface Props {
@@ -8,7 +11,14 @@ interface Props {
 }
 
 export default function Show({data, onClose}: Props) {
+    const [openPayment, setOpenPayment] = useState(false)
+
+    const openPayModal = () => {
+        setOpenPayment(true)
+    }
+
     return (
+        <>
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 
@@ -29,19 +39,37 @@ export default function Show({data, onClose}: Props) {
                 <div className="grid grid-cols-2 p-4 gap-4">
                     <div>
                         <p className="text-muted-foreground text-xs font-light">TANGGAL</p>
-                        <p className="text-sm font-semibold">03-03-2026</p>
+                        <p className="text-sm font-semibold">{data.date}</p>
+                    </div>
+                    <div>
+                        <p className="text-muted-foreground text-xs font-light mb-1">STATUS</p>
+                        <p className="text-sm font-semibold">
+                            <span
+                                className={`px-2 py-1 text-xs rounded-full ${
+                                    data.status === 'unpaid' ?
+                                    `bg-red-500/10 text-red-500`
+                                    : data.status === 'partial' ?
+                                    `bg-orange-500/10 text-orange-500`
+                                    : `bg-primary/10 text-primary`
+                                }`}
+                            >
+                                {
+                                    data.status === 'unpaid' ?
+                                    'Belum Lunas'
+                                    : data.status === 'partial' ?
+                                    'Sebagian'
+                                    : 'Lunas'
+                                }
+                            </span>
+                        </p>
                     </div>
                     <div>
                         <p className="text-muted-foreground text-xs font-light">REF SURAT JALAN</p>
-                        <p className="text-sm font-semibold text-primary">SJK/20260220/001</p>
-                    </div>
-                    <div>
-                        <p className="text-muted-foreground text-xs font-light">STATUS</p>
-                        <p className="text-sm font-semibold">03-03-2026</p>
+                        <p className="text-sm font-semibold text-primary">{data.deliveryOrder}</p>
                     </div>
                     <div>
                         <p className="text-muted-foreground text-xs font-light">PELANGGAN</p>
-                        <p className="text-sm font-semibold">03-03-2026</p>
+                        <p className="text-sm font-semibold">{data.type === 'in' ? data.supplier : data.customer}</p>
                     </div>
                 </div>
 
@@ -70,28 +98,33 @@ export default function Show({data, onClose}: Props) {
 
                                 <tbody>
 
-                                    <tr
-                                        // key={i}
-                                        className="border-t"
-                                    >
+                                    {data.invoiceItems.map((item: any) => {
+                                        return (
+                                            <tr
+                                                key={item.id}
+                                                className="border-t"
+                                            >
 
-                                        <td className="p-3">
-                                            Apel Fuji Import
-                                        </td>
+                                                <td className="p-3">
+                                                    {item.item?.name}
+                                                </td>
 
-                                        <td className="p-3 text-center text-muted-foreground">
-                                            20 kg
-                                        </td>
+                                                <td className="p-3 text-center text-muted-foreground">
+                                                    {item.quantity}
+                                                </td>
 
-                                        <td className="p-3 text-right text-muted-foreground">
-                                            Rp. 50.000
-                                        </td>
+                                                <td className="p-3 text-right text-muted-foreground">
+                                                    {formatCurrency(item.price)}
+                                                </td>
 
-                                        <td className="p-3 text-right font-medium">
-                                            Rp. 1.000.000
-                                        </td>
+                                                <td className="p-3 text-right font-medium">
+                                                    {formatCurrency(item.total)}
+                                                </td>
 
-                                    </tr>
+                                            </tr>
+                                        )
+                                    })}
+                                    
                                 </tbody>
 
                             </table>
@@ -100,7 +133,7 @@ export default function Show({data, onClose}: Props) {
 
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-medium">Total</p>
-                            <p className="text-lg font-semibold text-primary">Rp. 1.000.000</p>
+                            <p className="text-lg font-semibold text-primary">{formatCurrency(data.total)}</p>
                         </div>
 
                 </div>
@@ -123,7 +156,7 @@ export default function Show({data, onClose}: Props) {
                     <Button
                         variant="default"
                         className="w-full cursor-pointer"
-                        // onClick={() => openPayModal()}
+                        onClick={() => openPayModal()}
                     >
                         <CreditCard className="size-4" />
                         Input Pembayaran
@@ -132,5 +165,8 @@ export default function Show({data, onClose}: Props) {
                 </div>
             </div>
         </div>
+
+        {openPayment && (<Payment onClose={() => setOpenPayment(false)}/>)}
+        </>
     )
 }

@@ -37,6 +37,7 @@ class InvoiceController extends Controller
                 'type' => $invoice->type,
 
                 'itemsCount' => $invoice->items->count(),
+                'invoiceItems' => $invoice->items,
 
                 'deliveryOrder' => $invoice->deliveryOrder?->do_number,
 

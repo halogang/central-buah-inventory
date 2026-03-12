@@ -154,7 +154,7 @@ export default function Form({
         }
 
         if (data) {
-            payload.append('_method', 'PUT');
+            payload._method='PUT';
 
             router.post(update(data.id), payload, {
 
