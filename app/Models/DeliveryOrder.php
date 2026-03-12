@@ -54,22 +54,18 @@ class DeliveryOrder extends Model
         return $query->where('type', 'out');
     }
 
-    public function getEvidanceUrlAttribute()
+    public function getEvidenceUrlAttribute()
     {
-        return $this->evidance
-            ? asset($this->evidance)
-            : null;
+        return $this->evidence ? asset($this->evidence) : null;
     }
+
     public function getSenderSignatureUrlAttribute()
     {
-        return $this->sender_signature
-            ? asset($this->sender_signature)
-            : null;
+        return $this->sender_signature ? asset($this->sender_signature) : null;
     }
-    public function getReceiverSignatureAttribute()
+
+    public function getReceiverSignatureUrlAttribute()
     {
-        return $this->receiver_signature
-            ? asset($this->receiver_signature)
-            : null;
+        return $this->receiver_signature ? asset($this->receiver_signature) : null;
     }
 }
