@@ -213,7 +213,7 @@ export default function Show({
                                             {item.image ? (
                                                 <img
                                                     src={item.image_url}
-                                                    alt={item.image}
+                                                    alt={item.image_url}
                                                     className="w-8 h-8 object-cover rounded"
                                                 />
                                             ) : (
