@@ -51,19 +51,13 @@ class DeliveryOrderController extends Controller
                 'sender_name' => $do->sender_name,
                 'receiver_name' => $do->receiver_name,
 
-                'sender_signature' => $do->sender_signature
-                    ? asset('storage/'.$do->sender_signature)
-                    : null,
+                'sender_signature' => $do->sender_signature,
 
-                'receiver_signature' => $do->receiver_signature
-                    ? asset('storage/'.$do->receiver_signature)
-                    : null,
+                'receiver_signature' => $do->receiver_signature,
 
                 'notes' => $do->notes,
 
-                'evidence' => $do->evidence
-                    ? asset('storage/'.$do->evidence)
-                    : null,
+                'evidence' => $do->evidence,
 
                 'items_count' => $do->items->count(),
                 'total_quantity' => $do->items->sum('quantity'),
@@ -75,9 +69,7 @@ class DeliveryOrderController extends Controller
                         'item_id' => $item->item_id,
                         'name' => $item->item?->name,
                         'image' => $item->item?->image,
-                        'image_url' => $item->item?->image
-                            ? asset('storage/'.$item->item->image)
-                            : null,
+                        'image_url' => $item->item?->image,
                         'unit' => $item->item?->unit?->unit_code,
 
                         'quantity' => $item->quantity,
