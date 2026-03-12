@@ -154,8 +154,9 @@ export default function Form({
         }
 
         if (data) {
+            payload.append('_method', 'PUT');
 
-            router.put(update(data.id), payload, {
+            router.post(update(data.id), payload, {
 
                 forceFormData: true,
                 onSuccess: () => {

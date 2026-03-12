@@ -227,7 +227,7 @@ class DeliveryOrderController extends Controller
 
     public function update(Request $request, DeliveryOrder $surat_jalan)
     {
-        // dd($surat_jalan, $request->all());
+        dd($surat_jalan, $request->all());
         $deliveryOrder = $surat_jalan;
         
 
