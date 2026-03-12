@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ItemsSection from "@/components/ItemsSection";
 import Navbar from "@/components/Navbar";
+import LocationSection from "@/components/LocationSection";
 
 interface Category {
     id: number;
@@ -59,6 +60,7 @@ export default function Home() {
       <ItemsSection items={items} categories={categories} />
       <AboutSection />
       <CTASection />
+      <LocationSection websiteInfo={websiteInfo}/>
       <Footer websiteInfo={websiteInfo}/>
     </div>
   )

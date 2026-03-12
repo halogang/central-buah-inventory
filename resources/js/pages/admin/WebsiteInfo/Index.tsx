@@ -126,6 +126,7 @@ export default function WebsiteInfoIndex({ info }: any) {
                                 setForm({ ...form, link_maps: e.target.value })
                             }
                             placeholder="https://maps.google.com/..."
+                            hint="Ambil dari Google Maps: Share → Embed a map → salin URL pada src iframe."
                         />
 
                     </div>

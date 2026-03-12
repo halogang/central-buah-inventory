@@ -46,12 +46,15 @@ class OpnameStockController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all(    ));
+
         $validated = $request->validate([
             'date' => 'required|date',
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'checked_by' => 'required|string',
             'note' => 'nullable|string',
-            'items' => 'required|array'
+            'items' => 'required|array',
+            'updateItems' => 'required|boolean'
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -75,16 +78,25 @@ class OpnameStockController extends Controller
                 'note' => $validated['note'],
             ]);
 
-            foreach ($validated['items'] as $item) {
+            foreach ($validated['items'] as $row) {
 
-                $difference = $item['physical_stock'] - $item['system_stock'];
+                $difference = $row['physical_stock'] - $row['system_stock'];
 
                 $opname->items()->create([
-                    'item_id' => $item['item_id'],
-                    'system_stock' => $item['system_stock'],
-                    'physical_stock' => $item['physical_stock'],
+                    'item_id' => $row['item_id'],
+                    'system_stock' => $row['system_stock'],
+                    'physical_stock' => $row['physical_stock'],
                     'difference' => $difference,
                 ]);
+
+                if ($validated['updateItems']) {
+
+                    $itemModel = Item::findOrFail($row['item_id']);
+
+                    $itemModel->update([
+                        'stock' => $row['physical_stock']
+                    ]);
+                }
             }
         });
 

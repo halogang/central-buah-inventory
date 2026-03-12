@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy } from '@/routes/master/payment-methods';
 import type { BreadcrumbItem } from '@/types';
+import { notify } from '@/lib/notify';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -69,46 +70,67 @@ export default function Index() {
 
     const emojis = ['💵', '🏦', '📱', '💳', '🪙', '💰'];
 
-    const [deleteItem, setDeleteItem] = useState<PaymentMethod | null>(null);
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
-
     const filtered = methods.filter((m) =>
         m.name.toLowerCase().includes(search.toLowerCase())
     );
 
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
+
         const payload = {
             name: form.name,
             icon: form.icon,
-            status: form.status ? 'active' : 'inactive',
+            status: form.status ? 'active' : 'nonactive',
         };
         if (editItem) {
-            router.put(update(editItem.id), payload, {
+            router.post(update(editItem.id), {
+                ...payload,
+                _method: 'put'
+            }, {
+                forceFormData: true,
                 onSuccess: () => {
-                    closeForm();
+                    notify.success(`${form.name} berhasil diperbarui`)
+                    closeForm()
                 },
-            });
+                onError: (errors) => {
+                    notify.error(Object.values(errors).join('\n'))
+                }
+            })
         } else {
             router.post(store(), payload, {
-                onSuccess: () => closeForm(),
-            });
+                forceFormData: true,
+                onSuccess: () => {
+                    notify.success(`${form.name} berhasil ditambahkan`)
+                    closeForm()
+                },
+                onError: (errors) => {
+                    notify.error(Object.values(errors).join('\n'))
+                }
+            })
         }
     };
 
-    const confirmDelete = (item: PaymentMethod) => {
-        setDeleteItem(item);
-        setToastMessage(`Hapus ${item.name}?`);
+    const confirmDelete = (method: PaymentMethod) => {
+        notify.confirmDelete({
+            message: `Hapus ${method.name}?`,
+            onConfirm: () => performDelete(method),
+        })
     };
 
-    const performDelete = () => {
-        if (deleteItem) {
-            router.delete(destroy(deleteItem.id), {
+    const performDelete = (method: PaymentMethod) => {
+        if (method) {
+            const loading = notify.loading("Menghapus metode pembayaran...")
+            
+            router.delete(destroy(method.id), {
                 onSuccess: () => {
-                    setToastMessage(null);
-                    setDeleteItem(null);
+                    notify.dismiss(loading)
+                    notify.success(`${method.name} berhasil dihapus`)
                 },
-            });
+                onError: () => {
+                    notify.dismiss(loading)
+                    notify.error(`Gagal menghapus ${method.name}`)
+                },
+            })
         }
     };
 
@@ -147,7 +169,7 @@ export default function Index() {
                         <div
                             key={m.id}
                             className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border cursor-pointer flex items-center justify-between gap-4"
-                            onClick={() => openForm(m)}
+                            // onClick={() => openForm(m)}
                         >
                             <div className="flex items-center gap-4">
                                 <div
@@ -242,24 +264,6 @@ export default function Index() {
                                 </div>
                             </form>
                         </div>
-                    </div>
-                )}
-
-                {toastMessage && (
-                    <div className="fixed bottom-4 right-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4">
-                        <span>{toastMessage}</span>
-                        <button
-                            className="text-red-600 font-semibold"
-                            onClick={performDelete}
-                        >
-                            Ya
-                        </button>
-                        <button
-                            className="text-muted-foreground"
-                            onClick={() => setToastMessage(null)}
-                        >
-                            Tidak
-                        </button>
                     </div>
                 )}
             </div>

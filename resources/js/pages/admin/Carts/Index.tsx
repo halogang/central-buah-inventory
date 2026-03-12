@@ -5,7 +5,7 @@ import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/layouts/app-layout";
 import { notify } from "@/lib/notify";
-import { destroy } from "@/routes/master/units";
+import { destroy } from "@/routes/master/carts";
 import type { BreadcrumbItem } from '@/types';
 import Form from "./components/Form";
 
@@ -48,7 +48,7 @@ export default function Index() {
         })
     }
     const performDelete = (cart: Cart) => {
-        const loading = notify.loading("Menghapus kategori...")
+        const loading = notify.loading("Menghapus keranjang...")
 
         router.delete(destroy(cart.id), {
             onSuccess: () => {

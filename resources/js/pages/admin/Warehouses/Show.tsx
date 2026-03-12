@@ -19,12 +19,19 @@ interface Unit {
     description?: string;
 }
 
+interface User {
+    id: number;
+    name: string;
+}
+
+
 interface Warehouse {
     id: number;
     name: string;
     address: string;
     capacity: number;
-    pic: string;
+    user_id?: number | null;
+    user?: User | null;
     status: string;
 }
 
@@ -75,6 +82,11 @@ export default function Show({
         0
     );
 
+    const totalBadStock = items.reduce(
+        (total, item) => total + Number(item.bad_stock || 0),
+        0
+    );
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Master Gudang',
@@ -115,7 +127,7 @@ export default function Show({
                     <div className="flex flex-col gap-1">
                         <div className="text-sm text-muted-foreground flex items-center gap-1">
                             <User2Icon className="size-4"/>
-                            {warehouse.pic}
+                            {warehouse.user?.name ?? 'gaada'}
                         </div>
                         <div className="text-sm text-muted-foreground flex items-center gap-1">
                             <MapPin className="size-4"/>
@@ -135,19 +147,19 @@ export default function Show({
 
                     <div className="rounded-xl border bg-background p-4 text-center">
                         <div className="text-xs text-muted-foreground">
-                            Kapasitas Stok
+                            Total Stok Barang
                         </div>
                         <h1 className="text-primary text-xl font-semibold">
-                            {formatNumber(warehouse.capacity)}
+                            {formatNumber(totalStock)}
                         </h1>
                     </div>
 
                     <div className="rounded-xl border bg-background p-4 text-center">
                         <div className="text-xs text-muted-foreground">
-                            Total Stok Barang
+                            Total Bad Stock
                         </div>
-                        <h1 className="text-orange-500 text-xl font-semibold">
-                            {formatNumber(totalStock)}
+                        <h1 className="text-red-500 text-xl font-semibold">
+                            {formatNumber(totalBadStock)}
                         </h1>
                     </div>
                 </div>

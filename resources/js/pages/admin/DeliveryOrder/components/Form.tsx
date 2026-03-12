@@ -1,14 +1,10 @@
 import { router } from "@inertiajs/react"
-import { X, Plus, Truck, Package, Image, Trash2, Camera } from "lucide-react"
+import { X} from "lucide-react"
 import { useEffect, useState } from "react"
-
-import { FormImageUpload, FormInput } from "@/components/admin"
-import FormSelect from "@/components/admin/FormSelect"
 import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notify"
 
 import { store, update } from "@/routes/surat-jalan"
-import { formatCurrency } from "@/helpers/format"
 
 import DeliveryEvidenceSection from "./DeliveryEvidenceSection"
 import DeliveryInfoSection from "./DeliveryInfoSection"
@@ -161,6 +157,7 @@ export default function Form({
 
             router.put(update(data.id), payload, {
 
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success("Surat Jalan berhasil diperbarui")
                     onClose()
@@ -176,6 +173,7 @@ export default function Form({
 
             router.post(store(), payload, {
 
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success("Surat Jalan berhasil dibuat")
                     onClose()

@@ -44,6 +44,8 @@ class WarehouseController extends Controller
 
     public function show(Warehouse $warehouse)
     {
+        $warehouse = $warehouse->with('user')->first();
+
         $items = Item::with('category', 'unit')->where('warehouse_id', $warehouse->id)->get();
         $categories = Category::all();
         // dd($items);

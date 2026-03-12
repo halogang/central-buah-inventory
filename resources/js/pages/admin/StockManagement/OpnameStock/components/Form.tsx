@@ -22,6 +22,8 @@ type OpnameItem = {
 
 export default function Form({onClose, warehouses, items, opname} : Props) {
 
+    const [updateItems, setUpdateItems] = useState(false)
+
     const [form, setForm] = useState({
         date: opname?.date.substring(0,10) || '',
         warehouse_id: opname?.warehouse_id || '',
@@ -76,8 +78,7 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
         setRows(updated)
     }
 
-    const submit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const sendRequest = (updateItemsValue: boolean) => {
 
         const payload = new FormData()
 
@@ -85,6 +86,7 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
         payload.append('warehouse_id', String(form.warehouse_id ?? ''))
         payload.append('checked_by', form.checked_by)
         payload.append('note', form.note ?? '')
+        payload.append('updateItems', updateItemsValue ? '1' : '0')
 
         rows.forEach((row, index) => {
             payload.append(`items[${index}][item_id]`, String(row.item_id))
@@ -95,11 +97,6 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
             )
             payload.append(`items[${index}][difference]`, String(row.difference))
         })
-
-        if(rows.some(r => !r.item_id)){
-            notify.error("Semua item harus dipilih")
-            return
-        }
 
         if (opname) {
 
@@ -128,6 +125,51 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
                     notify.error(Object.values(errors).join('\n'))
                 },
             })
+
+        }
+
+    }
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (!form.date) {
+            notify.error("Tanggal harus diisi")
+            return
+        }
+
+        if (!form.checked_by) {
+            notify.error("Field Dicek Oleh harus diisi")
+            return
+        }
+
+        if(rows.some(r => !r.item_id)){
+            notify.error("Semua item harus dipilih")
+            return
+        }
+
+        if(rows.some(r => r.physical_stock === '')){
+            notify.error("Physical stock harus diisi")
+            return
+        }
+
+        const hasDifference = rows.some(r => r.difference !== 0)
+
+        if (hasDifference) {
+
+            const diffCount = rows.filter(r => r.difference !== 0).length
+
+            notify.confirm({
+                message: `${diffCount} item memiliki selisih stok. Perbarui stok item?`,
+                confirmText: "Ya",
+                cancelText: "Tidak",
+                onConfirm: () => sendRequest(true),
+                onCancel: () => sendRequest(false)
+            })
+
+        } else {
+
+            sendRequest(false)
 
         }
     }
@@ -167,7 +209,9 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
                             onChange={(e) => setForm({
                                 ...form,
                                 date: e.target.value
-                            })}/>
+                            })}
+                            required
+                            />
 
                         <div>
                             <label className="text-sm">Gudang</label>
@@ -198,7 +242,9 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
                             onChange={(e) => setForm({
                                 ...form,
                                 checked_by: e.target.value
-                            })}/>
+                            })}
+                            required
+                            />
 
                     </div>
 
@@ -208,7 +254,9 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
                         onChange={(e) => setForm({
                             ...form,
                             note: e.target.value
-                        })}/>
+                        })}
+                        required
+                        />
 
                     <div className="border rounded-lg p-3">
 

@@ -53,7 +53,7 @@ export default function Index() {
         })
     }
     const performDelete = (category: Category) => {
-        const loading = notify.loading("Mennghapus kategori...")
+        const loading = notify.loading("Menghapus kategori...")
 
         router.delete(destroy(category.id), {
             onSuccess: () => {

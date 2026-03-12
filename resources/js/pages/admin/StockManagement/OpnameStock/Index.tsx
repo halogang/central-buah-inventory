@@ -14,9 +14,7 @@ interface Opname {
     date:string
     checked_by:string
     note?:string
-    warehouse?:{
-        name:string
-    }
+    warehouse?: Warehouse
     items_count:number
 }
 
@@ -55,9 +53,15 @@ export default function StockOpnames(){
     const [showForm,setShowForm] = useState(false)
     const [editItem,setEditItem] = useState<Opname | null>(null)
 
-    const filtered = opnames.filter(o =>
-        o.opname_number.toLowerCase().includes(search.toLowerCase())
-    )
+    const filtered = opnames.filter((o) => {
+        const keyword = search.toLowerCase()
+
+        return (
+            o.opname_number.toLowerCase().includes(keyword) ||
+            o.checked_by.toLowerCase().includes(keyword) ||
+            o.warehouse?.name?.toLowerCase().includes(keyword)
+        )
+    })
 
     const openForm = (op?:Opname)=>{
         setEditItem(op || null)
@@ -78,7 +82,7 @@ export default function StockOpnames(){
 
     const deleteData = (opname: Opname) => {
     
-        const loading = notify.loading("Menghapus barang...")
+        const loading = notify.loading("Menghapus opname...")
 
         router.delete(destroy(opname.id), {
             onSuccess: () => {

@@ -58,7 +58,7 @@ export function AppSidebar() {
 
     const invoiceItems = [
         { permission: 'Surat Jalan', label: 'Surat Jalan', href: '/surat-jalan' },
-        { permission: 'Invoice', label: 'Invoice (coming soon)', href: '/invoice' },
+        { permission: 'Invoice', label: 'Invoice', href: '/invoice' },
     ];
     const invoiceLinks = invoiceItems
         .filter((item) => can(item.permission))
