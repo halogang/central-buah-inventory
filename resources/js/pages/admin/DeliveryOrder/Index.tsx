@@ -40,6 +40,12 @@ interface DeliveryOrder {
     status: "draft" | "sent" | "done"
     items_count: number
     total_quantity: number
+    evidence?: string
+    sender_signature?: string
+    receiver_signature?: string
+    evidence_url?: string
+    sender_signature_url?: string
+    receiver_signature_url?: string
 }
 
 interface Supplier {
