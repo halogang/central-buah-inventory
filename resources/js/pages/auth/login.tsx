@@ -1,4 +1,8 @@
 import { Form, Head } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
+import { Citrus, Warehouse, TrendingUp, Truck, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import AppLogoIcon from '@/components/app-logo-icon';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -6,12 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { Citrus, Warehouse, TrendingUp, Truck, User, Lock, Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { usePage } from '@inertiajs/react';
-import AppLogoIcon from '@/components/app-logo-icon';
 
 type Props = {
     status?: string;

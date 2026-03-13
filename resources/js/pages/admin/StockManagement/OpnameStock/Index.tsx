@@ -12,10 +12,15 @@ interface Opname {
     id:number
     opname_number:string
     date:string
-    checked_by:string
+    user?:User
     note?:string
     warehouse?: Warehouse
     items_count:number
+}
+
+interface User {
+    id: number
+    name: string
 }
 
 interface Warehouse {
@@ -43,10 +48,13 @@ function formatDate(date:string){
 
 export default function StockOpnames(){
 
-    const { opnames, warehouses, items } = usePage<{
+    const { opnames, warehouses, items, users, roleName, authUser } = usePage<{
         opnames:Opname[]
         warehouses:Warehouse[]
         items:Item[]
+        users:User[]
+        roleName: string
+        authUser: string
     }>().props
 
     const [search,setSearch] = useState('')
@@ -58,7 +66,7 @@ export default function StockOpnames(){
 
         return (
             o.opname_number.toLowerCase().includes(keyword) ||
-            o.checked_by.toLowerCase().includes(keyword) ||
+            o.user?.name.toLowerCase().includes(keyword) ||
             o.warehouse?.name?.toLowerCase().includes(keyword)
         )
     })
@@ -153,7 +161,7 @@ export default function StockOpnames(){
                         </div>
 
                         <div className="text-xs text-muted-foreground mb-3">
-                            Dicek oleh : {op.checked_by}
+                            Dicek oleh : {op.user?.name}
                         </div>
 
                         <div className="text-xs text-muted-foreground">
@@ -186,8 +194,11 @@ export default function StockOpnames(){
             <Form
                 onClose={closeForm}
                 warehouses={warehouses}
+                users={users}
                 items={items}
                 opname={editItem}
+                roleName={roleName}
+                authUser={authUser}
             />
         )}
 

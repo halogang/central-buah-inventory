@@ -1,5 +1,5 @@
-import SignatureCanvas from "react-signature-canvas"
 import { useRef, useState } from "react"
+import SignatureCanvas from "react-signature-canvas"
 import { Button } from "@/components/ui/button"
 
 interface Props {
@@ -12,22 +12,17 @@ export default function FormSignature({ label, value, onChange }: Props) {
 
   const sigRef = useRef<SignatureCanvas>(null)
 
-  const [history, setHistory] = useState<string[]>([])
-
   const saveSignature = () => {
     if (!sigRef.current) return
 
     const data = sigRef.current
       .getCanvas()
       .toDataURL("image/png")
-
-    setHistory((prev) => [...prev, data])
     onChange(data)
   }
 
   const clear = () => {
     sigRef.current?.clear()
-    setHistory([])
     onChange(null)
   }
 

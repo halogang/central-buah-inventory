@@ -100,7 +100,14 @@ class RolePermissionSeeder extends Seeder
         $users = [
             ['name' => 'Owner', 'username' => 'owner', 'email' => 'owner@mail.com', 'role' => 'owner', 'phone' => '0812-0000-0000'],
             ['name' => 'Admin', 'username' => 'admin', 'email' => 'admin@mail.com', 'role' => 'admin', 'phone' => '0812-0000-0001'],
-            ['name' => 'SPV Gudang', 'username' => 'spv_gudang', 'email' => 'spv@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Lutfi', 'username' => 'lutfi', 'email' => 'lutfi@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Rayhan', 'username' => 'rayhan', 'email' => 'rayhan@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Fardan', 'username' => 'fardan', 'email' => 'fardan@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Josefh', 'username' => 'josefh', 'email' => 'josefh@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Maria', 'username' => 'maria', 'email' => 'maria@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Yefta', 'username' => 'yefta', 'email' => 'yefta@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Nanda', 'username' => 'nanda', 'email' => 'nanda@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
+            ['name' => 'Gusniar', 'username' => 'gusniar', 'email' => 'gusniar@mail.com', 'role' => 'spv_gudang', 'phone' => '0812-0000-0002'],
             ['name' => 'Kasir', 'username' => 'kasir', 'email' => 'kasir@mail.com', 'role' => 'kasir', 'phone' => '0812-0000-0003'],
             ['name' => 'Staff Antar', 'username' => 'staff_antar', 'email' => 'antar@mail.com', 'role' => 'staff_antar', 'phone' => '0812-0000-0004'],
         ];

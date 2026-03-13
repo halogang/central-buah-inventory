@@ -1,6 +1,6 @@
 import { Truck } from "lucide-react"
-import FormSelect from "@/components/admin/FormSelect"
 import { FormInput } from "@/components/admin"
+import FormSelect from "@/components/admin/FormSelect"
 
 export default function DeliveryInfoSection({
     form,

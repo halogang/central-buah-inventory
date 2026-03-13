@@ -11,4 +11,9 @@ class PaymentMethod extends Model
         'icon',
         'status',
     ];
+
+    public function payment()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

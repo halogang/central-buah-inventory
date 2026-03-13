@@ -61,7 +61,7 @@ export default function Show() {
                     </div>
 
                     <div className="text-sm text-muted-foreground">
-                        Dicek oleh : {opname.checked_by}
+                        Dicek oleh : {opname.user?.name}
                     </div>
 
                 </div>

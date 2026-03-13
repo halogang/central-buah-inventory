@@ -22,6 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'username',
+        'signature',
         'email',
         'password',
         'phone',
@@ -56,5 +57,10 @@ class User extends Authenticatable
     public function warehouse()
     {
         return $this->hasOne(Warehouse::class);
+    }
+
+    public function opnameStock()
+    {
+        return $this->hasMany(OpnameStock::class);
     }
 }

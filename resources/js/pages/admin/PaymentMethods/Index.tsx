@@ -8,9 +8,9 @@ import {
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { notify } from '@/lib/notify';
 import { store, update, destroy } from '@/routes/master/payment-methods';
 import type { BreadcrumbItem } from '@/types';
-import { notify } from '@/lib/notify';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

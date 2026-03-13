@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -38,6 +39,7 @@ class InvoiceController extends Controller
 
                 'itemsCount' => $invoice->items->count(),
                 'invoiceItems' => $invoice->items,
+                'payments' => $invoice->payments, 
 
                 'deliveryOrder' => $invoice->deliveryOrder?->do_number,
 
@@ -60,9 +62,12 @@ class InvoiceController extends Controller
 
         ];
 
+        $paymentMethods = PaymentMethod::where('status', 'active')->get();
+
         return Inertia::render('admin/Invoice/Index', [
             'invoices' => $invoices,
-            'summary' => $summary
+            'summary' => $summary,
+            'paymentMethods' => $paymentMethods
         ]);
     }
 

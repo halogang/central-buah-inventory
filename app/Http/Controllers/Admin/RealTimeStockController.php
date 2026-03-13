@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -17,8 +18,27 @@ class RealTimeStockController extends Controller
         $items = Item::with([
             'category',
             'warehouse',
+            'warehouse.user',
             'unit'
         ])->orderBy('updated_at', 'desc')->get();
+
+        $user = Auth::user();
+        $roleName = $user->roles->first()->name;
+
+        if ($roleName == 'spv_gudang') {
+
+            $items = Item::with([
+                'category',
+                'warehouse',
+                'warehouse.user',
+                'unit'
+            ])
+            ->whereHas('warehouse', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get();
+        }
 
         // dd($items);
         // dd(resource_path('js/pages/stock/RealTimeStock/Index.tsx'));

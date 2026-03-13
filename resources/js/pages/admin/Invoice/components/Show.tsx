@@ -1,17 +1,16 @@
+import { Camera, CheckCircle, CircleCheck, CreditCard, Eye, Image, Printer, X } from "lucide-react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/helpers/format"
-import { CreditCard, Eye, Printer, X } from "lucide-react"
-import { useState } from "react"
 import Payment from "./Payment"
 
 
-interface Props {
-    data: any
-    onClose: () => void
-}
-
-export default function Show({data, onClose}: Props) {
+export default function Show({data, paymentMethods, onClose}: any) {
+    const [invoice, setInvoice] = useState(data)
+    
     const [openPayment, setOpenPayment] = useState(false)
+    const [openEvidence, setOpenEvidence] = useState(false)
+    const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null)
 
     const openPayModal = () => {
         setOpenPayment(true)
@@ -23,13 +22,13 @@ export default function Show({data, onClose}: Props) {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 
             <div
-                className="bg-white w-full max-w-6xl rounded-xl shadow-xl overflow-y-hidden max-h-[90vh] flex flex-col">
+                className="bg-white w-full max-w-6xl rounded-xl shadow-xl  overflow-y-auto max-h-[90vh] flex flex-col">
 
                 {/* HEADER */}
 
                 <div className="flex items-center justify-between p-4 border-b shrink-0">
                     <h2 className="font-semibold text-lg">
-                        {data.invoiceNumber}
+                        {invoice.invoiceNumber}
                     </h2>
                     <button onClick={onClose}>
                         <X className="w-5 h-5 cursor-pointer"/>
@@ -39,24 +38,24 @@ export default function Show({data, onClose}: Props) {
                 <div className="grid grid-cols-2 p-4 gap-4">
                     <div>
                         <p className="text-muted-foreground text-xs font-light">TANGGAL</p>
-                        <p className="text-sm font-semibold">{data.date}</p>
+                        <p className="text-sm font-semibold">{invoice.date}</p>
                     </div>
                     <div>
                         <p className="text-muted-foreground text-xs font-light mb-1">STATUS</p>
                         <p className="text-sm font-semibold">
                             <span
                                 className={`px-2 py-1 text-xs rounded-full ${
-                                    data.status === 'unpaid' ?
+                                    invoice.status === 'unpaid' ?
                                     `bg-red-500/10 text-red-500`
-                                    : data.status === 'partial' ?
+                                    : invoice.status === 'partial' ?
                                     `bg-orange-500/10 text-orange-500`
                                     : `bg-primary/10 text-primary`
                                 }`}
                             >
                                 {
-                                    data.status === 'unpaid' ?
+                                    invoice.status === 'unpaid' ?
                                     'Belum Lunas'
-                                    : data.status === 'partial' ?
+                                    : invoice.status === 'partial' ?
                                     'Sebagian'
                                     : 'Lunas'
                                 }
@@ -65,11 +64,11 @@ export default function Show({data, onClose}: Props) {
                     </div>
                     <div>
                         <p className="text-muted-foreground text-xs font-light">REF SURAT JALAN</p>
-                        <p className="text-sm font-semibold text-primary">{data.deliveryOrder}</p>
+                        <p className="text-sm font-semibold text-primary">{invoice.deliveryOrder}</p>
                     </div>
                     <div>
                         <p className="text-muted-foreground text-xs font-light">PELANGGAN</p>
-                        <p className="text-sm font-semibold">{data.type === 'in' ? data.supplier : data.customer}</p>
+                        <p className="text-sm font-semibold">{invoice.type === 'in' ? invoice.supplier : invoice.customer}</p>
                     </div>
                 </div>
 
@@ -98,7 +97,7 @@ export default function Show({data, onClose}: Props) {
 
                                 <tbody>
 
-                                    {data.invoiceItems.map((item: any) => {
+                                    {invoice.invoiceItems.map((item: any) => {
                                         return (
                                             <tr
                                                 key={item.id}
@@ -133,9 +132,69 @@ export default function Show({data, onClose}: Props) {
 
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-medium">Total</p>
-                            <p className="text-lg font-semibold text-primary">{formatCurrency(data.total)}</p>
+                            <p className="text-lg font-semibold text-primary">{formatCurrency(invoice.total)}</p>
                         </div>
 
+                </div>
+
+                {invoice.payments && invoice.payments.length > 0 && (
+                    <div className="p-4 flex flex-col gap-2">
+
+                        <p className="text-xs text-muted-foreground font-medium">
+                            RIWAYAT PEMBAYARAN
+                        </p>
+
+                        {invoice.payments.map((payment: any) => (
+
+                            <div
+                                key={payment.id}
+                                className="rounded-lg bg-muted flex justify-between items-center p-3"
+                            >
+
+                                <div className="flex flex-col gap-1">
+
+                                    <span className="font-bold">
+                                        {formatCurrency(payment.amount)}
+                                    </span>
+
+                                    <p className="text-xs text-muted-foreground">
+                                        {payment.date}
+                                    </p>
+
+                                </div>
+
+                                <div className="flex items-center gap-2">
+
+                                    {payment.evidence && (
+                                        <button
+                                            onClick={() => {
+                                                setSelectedEvidence(payment.evidence)
+                                                setOpenEvidence(true)
+                                            }}
+                                            className="rounded-full px-2 py-1 text-xs bg-primary/10 text-primary flex gap-1 items-center justify-center cursor-pointer"
+                                        >
+                                            <Image className="size-4" />
+                                            <p>Bukti</p>
+                                        </button>
+                                    )}
+
+                                    <CircleCheck className="size-5 text-primary" />
+
+                                </div>
+
+                            </div>
+
+                        ))}
+
+                    </div>
+                )}
+                <div className="px-4 pb-4 flex justify-between items-center">
+                    <p className="text-md text-muted-foreground">
+                        Sisa Tagihan
+                    </p>
+                    <p className={`text-md ${invoice.remaining <= 0 ? 'text-primary' : 'text-red-500'} font-bold`}>
+                        {formatCurrency(invoice.remaining)}
+                    </p>
                 </div>
 
                 <div className="flex gap-2 p-4">
@@ -153,20 +212,52 @@ export default function Show({data, onClose}: Props) {
 
                     {/* )} */}
 
-                    <Button
-                        variant="default"
-                        className="w-full cursor-pointer"
-                        onClick={() => openPayModal()}
-                    >
-                        <CreditCard className="size-4" />
-                        Input Pembayaran
-                    </Button>
+                    {invoice.remaining > 0 && (
+                        <Button
+                            variant="default"
+                            className="w-full cursor-pointer"
+                            onClick={() => openPayModal()}
+                        >
+                            <CreditCard className="size-4" />
+                            Input Pembayaran
+                        </Button>
+                    )}
 
                 </div>
             </div>
         </div>
 
-        {openPayment && (<Payment onClose={() => setOpenPayment(false)}/>)}
+        {openPayment && (
+            <Payment
+                invoice={invoice}
+                paymentMethods={paymentMethods}
+                onClose={() => setOpenPayment(false)}
+                onSuccess={(updatedInvoice: any) => setInvoice(updatedInvoice)}
+            />
+        )}
+        {openEvidence && selectedEvidence && (
+            <div
+                className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-6"
+                onClick={() => setOpenEvidence(false)}
+            >
+                <div
+                    className="relative bg-white rounded-xl p-4 max-w-3xl w-full"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button
+                        className="absolute right-3 top-3"
+                        onClick={() => setOpenEvidence(false)}
+                    >
+                        <X className="size-5 cursor-pointer" />
+                    </button>
+                    <img
+                        src={selectedEvidence}
+                        className="w-full rounded-lg object-contain max-h-[80vh]"
+                    />
+                </div>
+            </div>
+
+        )}
         </>
     )
 }

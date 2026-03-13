@@ -12,6 +12,7 @@ use App\Models\InvoiceItem;
 use App\Models\Item;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -149,6 +150,17 @@ class DeliveryOrderController extends Controller
         DB::transaction(function () use ($validated) {
 
             $doNumber = $this->generateDoNumber($validated['type']);
+            $user = Auth::user();
+
+            if ($validated['type'] === 'in') {
+
+                $validated['receiver_name'] = $user->name;
+                $validated['receiver_signature'] = $user->signature ?? null;
+                
+            } else {
+                $validated['sender_name'] = $user->name;
+                $validated['sender_signature'] = $user->signature ?? null;
+            }
 
             $deliveryOrder = DeliveryOrder::create([
 
@@ -171,13 +183,6 @@ class DeliveryOrderController extends Controller
 
                 'note' => $validated['note'] ?? null,
             ]);
-
-            //auto create invoice
-            $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
-            if ($deliveryOrder->status === 'done' && !$isInvoiceCreated) {
-                $this->createInvoice($deliveryOrder);
-            }
-
 
             foreach ($validated['items'] as $item) {
 
@@ -215,6 +220,12 @@ class DeliveryOrderController extends Controller
 
             }
 
+            //auto create invoice
+            $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
+            if ($deliveryOrder->status === 'done' && !$isInvoiceCreated) {
+                $this->createInvoice($deliveryOrder);
+            }
+
         });
 
         return back()->with('success', 'Surat jalan berhasil dibuat');
@@ -249,7 +260,25 @@ class DeliveryOrderController extends Controller
             'items.*.price' => 'nullable|numeric|min:0',
 
         ]);
-        // dd($validated);
+
+        //menyimpan nama dan signature
+        $user = Auth::user();
+
+        if ($validated['type'] === 'in') {
+
+            $validated['receiver_name'] = $user->name;
+            $validated['receiver_signature'] = $user->signature ?? null;
+            
+        } else {
+            $validated['sender_name'] = $user->name;
+            $validated['sender_signature'] = $user->signature ?? null;
+        }
+        // dd(
+        //     $validated['receiver_name'],
+        //     $validated['receiver_signature'],
+        //     $validated['sender_name'],
+        //     $validated['sender_signature'],
+        // );
 
         DB::transaction(function () use ($request, $validated, $deliveryOrder) {
 
@@ -323,7 +352,6 @@ class DeliveryOrderController extends Controller
                     $this->saveSignature($request->receiver_signature);
             }
 
-
             /**
              * 4️⃣ Update Delivery Order
              */
@@ -345,13 +373,6 @@ class DeliveryOrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            //auto create invoice
-            $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
-            if ($validated['status'] === 'done' && !$isInvoiceCreated) {
-                $this->createInvoice($deliveryOrder);
-            }
-
-
             /**
              * 5️⃣ Hapus item lama
              */
@@ -364,7 +385,8 @@ class DeliveryOrderController extends Controller
             foreach ($validated['items'] as $item) {
 
                 $badStock = $item['bad_stock'] ?? 0;
-                $cleanQty = $item['quantity'] - $badStock;
+                $qty = $item['quantity'] ?? 0;
+                $cleanQty = $qty - $badStock;
 
                 DeliveryOrderItem::create([
                     'delivery_order_id' => $deliveryOrder->id,
@@ -380,24 +402,34 @@ class DeliveryOrderController extends Controller
                  */
                 if ($validated['status'] === 'done') {
 
-                    $product = Item::find($item['item_id']);
+                    $item = Item::find($item['item_id']);
 
                     if ($validated['type'] === 'in') {
 
-                        $product->increment('stock', $cleanQty);
+                        $item->increment('stock', $qty);
 
                         if ($badStock > 0) {
-                            $product->increment('bad_stock', $badStock);
+                            $item->increment('bad_stock', $badStock);
                         }
 
                     } else {
 
-                        $product->decrement('stock', $cleanQty);
+                        $item->decrement('stock', $qty);
+
+                        if ($badStock > 0 && $item->bad_stock) {
+                            $item->decrement('bad_stock', $badStock);
+                        }
 
                     }
 
                 }
 
+            }
+
+            //auto create invoice
+            $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
+            if ($validated['status'] === 'done' && !$isInvoiceCreated) {
+                $this->createInvoice($deliveryOrder);
             }
 
         });

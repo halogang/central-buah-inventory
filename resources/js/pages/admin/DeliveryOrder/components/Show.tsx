@@ -17,7 +17,7 @@ export default function Show({ data, onClose }: Props) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 
-            <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl overflow-y-hidden max-h-[90vh] flex flex-col">
+            <div className="bg-background w-full max-w-4xl rounded-xl shadow-xl overflow-y-hidden max-h-[90vh] flex flex-col">
 
                 {/* HEADER */}
 
@@ -68,7 +68,7 @@ export default function Show({ data, onClose }: Props) {
                                 STATUS
                             </p>
 
-                            <span className="inline-block px-3 py-1 text-sm rounded-full bg-green-100 text-green-700">
+                            <span className="inline-block px-3 py-1 text-sm rounded-full bg-primary/10 text-primary">
                                 {data.status}
                             </span>
 

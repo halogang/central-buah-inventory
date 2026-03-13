@@ -13,7 +13,7 @@ class OpnameStock extends Model
         'opname_number',
         'date',
         'warehouse_id',
-        'checked_by',
+        'user_id',
         'note'
     ];
 
@@ -29,5 +29,10 @@ class OpnameStock extends Model
     public function items()
     {
         return $this->hasMany(OpnameStockItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

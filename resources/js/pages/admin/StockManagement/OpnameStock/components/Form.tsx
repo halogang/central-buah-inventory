@@ -11,6 +11,9 @@ interface Props {
     warehouses: any[]
     items: any[]
     opname?: any
+    users?: any[]
+    roleName: any
+    authUser: any
 }
 
 type OpnameItem = {
@@ -20,14 +23,16 @@ type OpnameItem = {
     difference: number
 }
 
-export default function Form({onClose, warehouses, items, opname} : Props) {
+export default function Form({onClose, warehouses, items, opname, users, roleName, authUser} : Props) {
 
     const [updateItems, setUpdateItems] = useState(false)
 
     const [form, setForm] = useState({
         date: opname?.date.substring(0,10) || '',
         warehouse_id: opname?.warehouse_id || '',
-        checked_by: opname?.checked_by || '',
+        user_id: roleName === 'spv_gudang'
+        ? authUser.id
+        : opname?.user_id || '',
         note: opname?.note || ''
     })
 
@@ -84,7 +89,7 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
 
         payload.append('date', form.date)
         payload.append('warehouse_id', String(form.warehouse_id ?? ''))
-        payload.append('checked_by', form.checked_by)
+        payload.append('user_id', form.user_id ?? '')
         payload.append('note', form.note ?? '')
         payload.append('updateItems', updateItemsValue ? '1' : '0')
 
@@ -138,7 +143,7 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
             return
         }
 
-        if (!form.checked_by) {
+        if (!form.user_id) {
             notify.error("Field Dicek Oleh harus diisi")
             return
         }
@@ -173,6 +178,11 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
 
         }
     }
+
+    const filteredWarehouses =
+        roleName === 'spv_gudang'
+            ? warehouses
+            : warehouses.filter(w => w.user_id == form.user_id)
 
     return (
 
@@ -213,38 +223,63 @@ export default function Form({onClose, warehouses, items, opname} : Props) {
                             required
                             />
 
+                        {
+                            roleName !== 'spv_gudang' && (
+
+                                <div>
+                                    <label className="text-sm">Dicek Oleh</label>
+
+                                    <select
+                                        className="w-full border rounded-md p-2"
+                                        value={form.user_id}
+                                        onChange={(e) =>
+                                            setForm({
+                                                ...form,
+                                                user_id: e.target.value,
+                                                warehouse_id: '' // reset gudang
+                                            })
+                                        }
+                                    >
+
+                                        <option value="">Pilih Penanggungjawab</option>
+
+                                        {users?.map(u => (
+                                            <option key={u.id} value={u.id}>
+                                                {u.name}
+                                            </option>
+                                        ))}
+
+                                    </select>
+
+                                </div>
+
+                            )
+                        }
+
                         <div>
                             <label className="text-sm">Gudang</label>
 
                             <select
+                                disabled={roleName !== 'spv_gudang' && !form.user_id}
                                 className="w-full border rounded-md p-2"
                                 value={form.warehouse_id}
                                 onChange={(e) => setForm({
                                     ...form,
                                     warehouse_id: e.target.value
-                                })}>
+                                })}
+                            >
 
                                 <option value="">Pilih Gudang</option>
 
-                                {
-                                    warehouses.map(w => (<option key={w.id} value={w.id}>
+                                {filteredWarehouses.map(w => (
+                                    <option key={w.id} value={w.id}>
                                         {w.name}
-                                    </option>))
-                                }
+                                    </option>
+                                ))}
 
                             </select>
 
                         </div>
-
-                        <FormInput
-                            label="Dicek Oleh"
-                            value={form.checked_by}
-                            onChange={(e) => setForm({
-                                ...form,
-                                checked_by: e.target.value
-                            })}
-                            required
-                            />
 
                     </div>
 

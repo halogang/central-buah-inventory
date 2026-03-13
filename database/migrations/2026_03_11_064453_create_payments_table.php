@@ -16,16 +16,11 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
-
+            $table->string('payment_method_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 15, 2);
-
-            $table->string('method');
-            $table->string('evidence')->nullable();
-
             $table->text('note')->nullable();
-
+            $table->string('evidence')->nullable();
             $table->date('date');
-
             $table->timestamps();
         });
     }

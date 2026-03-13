@@ -12,16 +12,16 @@ import {
     Trash2
 } from "lucide-react"
 import { useState, useMemo } from "react"
-import { destroy } from "@/routes/surat-jalan"
-
 import { SearchInput } from "@/components/search-input"
 import { Button } from "@/components/ui/button"
 import AppLayout from "@/layouts/app-layout"
+import { notify } from "@/lib/notify"
+import { destroy } from "@/routes/surat-jalan"
+
 import type { BreadcrumbItem } from "@/types"
 
 import Form from "./components/Form"
 import Show from "./components/Show"
-import { notify } from "@/lib/notify"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

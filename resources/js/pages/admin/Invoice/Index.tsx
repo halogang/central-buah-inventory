@@ -1,8 +1,3 @@
-import {SearchInput} from "@/components/search-input";
-import {Button} from "@/components/ui/button";
-import AppLayout from "@/layouts/app-layout";
-import type {BreadcrumbItem}
-from '@/types';
 import {Head} from "@inertiajs/react";
 import {
     ArrowDownLeft,
@@ -15,9 +10,14 @@ import {
     Printer
 } from "lucide-react";
 import {useState} from "react";
-import Show from "./components/Show";
-import Payment from "./components/Payment";
+import {SearchInput} from "@/components/search-input";
+import {Button} from "@/components/ui/button";
 import {formatCurrency} from "@/helpers/format";
+import AppLayout from "@/layouts/app-layout";
+import type {BreadcrumbItem}
+from '@/types';
+import Payment from "./components/Payment";
+import Show from "./components/Show";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,12 +31,27 @@ interface Item {
     name: string
 }
 
+interface PaymentMethod {
+    id: number
+    name: string
+    icon: string
+}
+
 interface InvoiceItem {
     id: number
     item?: Item
     quantity: number
     price: number
     total: number
+}
+
+interface InvoicePayment {
+    id: number
+    amount: number
+    paymentMethod?: PaymentMethod
+    note: string
+    evidence?: string
+    date: string
 }
 
 interface Invoice {
@@ -49,6 +64,7 @@ interface Invoice {
     status: string 
     itemsCount: number 
     invoiceItems?: InvoiceItem[] 
+    payments?: InvoicePayment[]
     deliveryOrder: string 
     supplier: string 
     customer: string 
@@ -67,9 +83,10 @@ interface Summary {
 interface Props {
     invoices: Invoice[]
     summary: Summary
+    paymentMethods: PaymentMethod[]
 }
 
-export default function Index({invoices, summary} : Props) {
+export default function Index({invoices, summary, paymentMethods} : Props) {
     
     const [activeTab, setActiveTab] = useState < "in" | "out" > ("in");
     const [search, setSearch] = useState("")
@@ -84,7 +101,8 @@ export default function Index({invoices, summary} : Props) {
         setOpenShow(true)
     }
 
-    const openPayModal = () => {
+    const openPayModal = (data: any) => {
+        setSelected(data)
         setOpenPayment(true)
     }
 
@@ -276,10 +294,12 @@ export default function Index({invoices, summary} : Props) {
                                             Cetak
                                         </Button>
 
-                                        <Button variant="default" className="w-full" onClick={() => openPayModal()}>
-                                            <CreditCard className="size-4"/>
-                                            Bayar
-                                        </Button>
+                                        {invoice.remaining > 0 && (
+                                            <Button variant="default" className="w-full" onClick={() => openPayModal(invoice)}>
+                                                <CreditCard className="size-4"/>
+                                                Bayar
+                                            </Button>
+                                        )}
 
                                     </div>
 
@@ -293,9 +313,21 @@ export default function Index({invoices, summary} : Props) {
                 </div>
             </div>
 
-            {openShow && (<Show data={selected} onClose={() => setOpenShow(false)}/>)}
+            {openShow && (
+                <Show 
+                    paymentMethods={paymentMethods} 
+                    data={selected} 
+                    onClose={() => setOpenShow(false)}
+                />
+            )}
 
-            {openPayment && (<Payment onClose={() => setOpenPayment(false)}/>)}
+            {openPayment && (
+                <Payment 
+                    invoice={selected} 
+                    paymentMethods={paymentMethods}
+                    onClose={() => setOpenPayment(false)}
+                />
+            )}
 
         </AppLayout>
     )

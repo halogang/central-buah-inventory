@@ -30,6 +30,17 @@ interface Category {
     name: string;
 }
 
+interface User {
+    id: number;
+    name: string;
+}
+
+interface Warehouse {
+    id: number;
+    name: string;
+    user?: User;
+}
+
 interface Unit {
     id: number;
     unit_code: string;
@@ -41,6 +52,7 @@ interface Item {
     image_url: string;
     name: string;
     category?: Category;
+    warehouse?: Warehouse;
     unit?: Unit;
     purchase_price: number;
     selling_price: number;
@@ -184,6 +196,7 @@ export default function Index() {
                         <thead className="bg-muted/50">
                             <tr>
                                 <th className="text-left p-3">Barang</th>
+                                <th className="text-left p-3">Gudang</th>
                                 <th className="text-center p-3">Stok</th>
                                 <th className="text-center p-3">Bad</th>
                                 <th className="text-center p-3">Bersih</th>
@@ -217,6 +230,18 @@ export default function Index() {
 
                                                 <span className="text-muted-foreground text-xs">
                                                     {i.category?.name}
+                                                </span>
+                                            </div>
+                                        </td>
+
+                                        <td className="p-3 text-left">
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">
+                                                    {i.warehouse?.name}
+                                                </span>
+
+                                                <span className="text-muted-foreground text-xs">
+                                                    {i.warehouse?.user?.name}
                                                 </span>
                                             </div>
                                         </td>

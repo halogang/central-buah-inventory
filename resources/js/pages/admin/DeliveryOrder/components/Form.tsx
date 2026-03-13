@@ -19,8 +19,7 @@ export default function Form({
     type,
     onClose
 }: any) {
-
-    const [doNumber, setDoNumber] = useState("");
+    
     const [selectingItem, setSelectingItem] = useState(false)
     const [searchItem, setSearchItem] = useState("")
 
@@ -31,7 +30,6 @@ export default function Form({
         fetch(`/surat-jalan/preview-number/${type}`)
             .then(res => res.json())
             .then(res => {
-                setDoNumber(res.number)
                 setForm((prev:any) => ({
                     ...prev,
                     do_number: res.number

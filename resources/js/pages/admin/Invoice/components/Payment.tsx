@@ -1,145 +1,202 @@
-import { FormImageUpload, FormInput } from "@/components/admin"
+import { router } from "@inertiajs/react"
+import { X } from "lucide-react"
+import { useState } from "react"
+import { FormImageUpload } from "@/components/admin"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { CreditCard, X } from "lucide-react"
+import { formatCurrency, formatNumber } from "@/helpers/format"
+import { notify } from "@/lib/notify"
+import { store } from "@/routes/transactions/payments"
 
+export default function Payment({ invoice, paymentMethods, onClose, onSuccess }: any) {
 
-interface Props {
-    onClose: () => void
-}
+    const [form, setForm] = useState({
+        invoice_id: invoice.id,
+        amount: "",
+        payment_method_id: "",
+        note: "",
+        evidence: null as File | null,
+        evidence_url: null as File | null,
+    })
 
-export default function Show({onClose}: Props) {
+    const submitForm = (e: React.FormEvent) => {
+        e.preventDefault()
 
-    const paymentMethod = [
-        {
-            'icon': '💵',
-            'name': 'Tunai'
-        },
-        {
-            'icon': '🏦',
-            'name': 'Transfer Bank BCA'
-        },
-        {
-            'icon': '🏦',
-            'name': 'Transfer Bank Mandiri'
-        },
-        {
-            'icon': '📱',
-            'name': 'QRIS'
-        },
-    ]
+        router.post(store(), form, {
+            forceFormData: true,
+            onSuccess: (page) => {
+
+                notify.success("Pembayaran berhasil")
+
+                const updatedInvoice = page.props.invoice
+
+                if (updatedInvoice) {
+                    onSuccess(updatedInvoice)
+                }
+
+                onClose()
+            },
+            onError: (errors) => {
+                notify.error(Object.values(errors).join("\n"))
+            }
+        })
+    }
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 
-            <div
-                className="bg-white w-full max-w-6xl rounded-xl shadow-xl overflow-y-hidden max-h-[90vh] flex flex-col">
+            <div className="bg-white w-full max-w-6xl rounded-xl shadow-xl overflow-y-hidden max-h-[90vh] flex flex-col">
 
                 {/* HEADER */}
-
                 <div className="flex items-center justify-between p-4 border-b shrink-0">
                     <h2 className="font-semibold text-lg">
-                        INV/20260220/001
+                        {invoice.invoiceNumber}
                     </h2>
                     <button onClick={onClose}>
-                        <X className="w-5 h-5 cursor-pointer"/>
+                        <X className="w-5 h-5 cursor-pointer" />
                     </button>
                 </div>
 
-                <div className="p-4 flex flex-col gap-2 overflow-y-auto">
-                    <div className="">
-                        <div className="rounded-lg bg-primary/10 p-3">
-                            <p className="text-[10px] text-muted-foreground">SISA TAGIHAN</p>
-                            <span className="text-xl text-primary font-bold">Rp. 1.000.000</span>
-                        </div>
+                <form
+                    onSubmit={submitForm}
+                    className="p-4 flex flex-col gap-4 overflow-y-auto"
+                >
+
+                    {/* SISA TAGIHAN */}
+                    <div className="rounded-lg bg-primary/10 p-3">
+                        <p className="text-[10px] text-muted-foreground">
+                            SISA TAGIHAN
+                        </p>
+                        <span className="text-xl text-primary font-bold">
+                            {formatCurrency(invoice.remaining)}
+                        </span>
                     </div>
 
-                    <div className="">
-                        <label htmlFor="pay" className="text-xs font-semibold text-muted-foreground">Jumlah Bayar</label>
+                    {/* AMOUNT */}
+                    <div>
+                        <label className="text-xs font-semibold text-muted-foreground">
+                            Jumlah Bayar
+                        </label>
+
                         <div className="relative">
                             <Input
-                                id="pay"
                                 type="number"
-                                name="pay"
-                                placeholder="1.000.000"
-                                autoComplete="pay"
-                                autoFocus
+                                value={form.amount}
+                                onChange={(e) =>
+                                    setForm({ ...form, amount: e.target.value })
+                                }
+                                placeholder={formatNumber(invoice.remaining)}
                                 className="pl-10 h-11"
+                                required
                             />
-                            <button
-                                className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium text-sm'>
+
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                                 Rp.
-                            </button>
+                            </span>
                         </div>
                     </div>
 
-                    <div className="">
-                        <label htmlFor="pay" className="text-xs font-semibold text-muted-foreground">Metode Pembayaran</label>
-                        <div className="grid grid-cols-2 gap-2">
-                        {paymentMethod.map((method, index) => (
-                            <button
-                            key={index}
-                            className="flex items-center gap-2 border rounded-lg p-3 hover:bg-primary/10 transition"
-                            >
-                            <span className="text-lg">{method.icon}</span>
-                            <span className="text-sm font-medium">{method.name}</span>
-                            </button>
-                        ))}
+                    {/* PAYMENT METHOD */}
+                    <div>
+                        <label className="text-xs font-semibold text-muted-foreground">
+                            Metode Pembayaran
+                        </label>
+
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+
+                            {paymentMethods.map((method: any) => (
+
+                                <button
+                                    key={method.id}
+                                    type="button"
+                                    onClick={() =>
+                                        setForm({
+                                            ...form,
+                                            payment_method_id: method.id
+                                        })
+                                    }
+                                    className={`
+                                        flex items-center gap-2 border rounded-lg p-3 transition cursor-pointer
+                                        ${form.payment_method_id === method.id
+                                            ? "bg-primary/10 border-primary"
+                                            : "hover:bg-primary/10"}
+                                    `}
+                                >
+                                    <span className="text-lg">
+                                        {method.icon}
+                                    </span>
+
+                                    <span className="text-sm font-medium">
+                                        {method.name}
+                                    </span>
+
+                                </button>
+
+                            ))}
+
                         </div>
                     </div>
 
-                    <div className="">
-                        <label htmlFor="note" className="text-xs font-semibold text-muted-foreground">Keterangan (opsional)</label>
+                    {/* NOTE */}
+                    <div>
+                        <label className="text-xs font-semibold text-muted-foreground">
+                            Keterangan (opsional)
+                        </label>
+
                         <Input
-                            id="note"
                             type="text"
-                            name="note"
+                            value={form.note}
+                            onChange={(e) =>
+                                setForm({ ...form, note: e.target.value })
+                            }
                             placeholder="Catatan pembayaran"
-                            autoComplete="note"
-                            autoFocus
                             className="h-11"
                         />
                     </div>
 
-                    <div className="">
-                        <label htmlFor="evidence" className="text-xs font-semibold text-muted-foreground">Bukti Pembayaran</label>
+                    {/* EVIDENCE */}
+                    <div>
+                        <label className="text-xs font-semibold text-muted-foreground">
+                            Bukti Pembayaran
+                        </label>
+
                         <FormImageUpload
                             label=""
-                            title="Tap untuk foto/upload"
+                            title="Tap untuk upload"
                             icon="camera"
-                            subtitle=""
-                            preview={''}
-                            onChange={() => 'test' }
+                            preview={form.evidence ? URL.createObjectURL(form.evidence) : undefined}
+                            onChange={(file) =>
+                                setForm({ ...form, evidence: file })
+                            }
                             hint="maksimal 2MB"
                         />
                     </div>
 
-                    <div className="flex gap-2 p-4">
-
-                        {/* {delivery.status === "draft" && ( */}
-
-                            <Button
-                                variant="secondary"
-                                className="w-full cursor-pointer"
-                                // onClick={() => openEdit(delivery)}
-                            >
-                                Kembali
-                            </Button>
-
-                        {/* )} */}
+                    {/* BUTTON */}
+                    <div className="flex gap-2 pt-4">
 
                         <Button
-                            variant="default"
+                            type="button"
+                            variant="secondary"
                             className="w-full cursor-pointer"
-                            // onClick={() => openPayModal()}
+                            onClick={onClose}
+                        >
+                            Kembali
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            className="w-full cursor-pointer"
                         >
                             Simpan Pembayaran
                         </Button>
 
                     </div>
-                </div>
+
+                </form>
+
             </div>
+
         </div>
     )
 }

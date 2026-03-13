@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('opname_number')->unique();
             $table->date('date');
             $table->foreignId('warehouse_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('checked_by');
+            $table->string('user_id')->nullable()->constrained()->nullOnDelete();
             $table->text('note');
             $table->timestamps();
         });

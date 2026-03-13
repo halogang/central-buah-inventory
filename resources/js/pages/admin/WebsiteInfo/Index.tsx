@@ -2,13 +2,13 @@ import { router } from "@inertiajs/react"
 import type { FormEvent } from "react"
 import { useState } from "react"
 import { FormInput, FormTextarea } from "@/components/admin"
+import Heading from "@/components/heading"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import AppLayout from "@/layouts/app-layout"
 import { notify } from "@/lib/notify"
 import type { BreadcrumbItem } from '@/types'
-import Heading from "@/components/heading"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

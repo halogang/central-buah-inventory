@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\OpnameStock;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -18,18 +20,41 @@ class OpnameStockController extends Controller
      */
     public function index()
     {
-        $opnames = OpnameStock::with('warehouse', 'items')
+        $user = Auth::user();
+        $roleName = $user->roles->first()->name;
+
+        if ($roleName == 'spv_gudang') {
+            
+            $warehouses = Warehouse::where('user_id', $user->id)->get();
+            $opnames = OpnameStock::with('warehouse', 'items', 'user')
+            ->where('user_id', $user->id)
             ->withCount('items')
             ->latest()
             ->get();
-        
-        $warehouses = Warehouse::all();
+        } else {
+                
+            $warehouses = Warehouse::all();
+            $opnames = OpnameStock::with('warehouse', 'items', 'user')
+            ->withCount('items')
+            ->latest()
+            ->get();   
+        }
+            
+        $users = User::with('roles')
+        ->whereHas('roles', function ($q) {
+            $q->where('name', 'spv_gudang');
+        })
+        ->get();
+
         $items = Item::all();
 
         return Inertia::render('admin/StockManagement/OpnameStock/Index', [
             'opnames' => $opnames,
             'warehouses' => $warehouses,
-            'items' => $items
+            'items' => $items,
+            'roleName' => $roleName,
+            'users' => $users,
+            'authUser' => $user
         ]);
     }
 
@@ -51,19 +76,28 @@ class OpnameStockController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'warehouse_id' => 'nullable|exists:warehouses,id',
-            'checked_by' => 'required|string',
+            'user_id' => 'nullable|exists:users,id',
             'note' => 'nullable|string',
             'items' => 'required|array',
             'updateItems' => 'required|boolean'
         ]);
 
         DB::transaction(function () use ($validated) {
+            $user = Auth::user();
+            $roleName = $user->roles->first()->name;
+
+            $userId = $roleName === 'spv_gudang'
+                ? $user->id
+                : $validated['user_id'];
+
             $date = Carbon::parse($validated['date'])->format('Ymd');
             $warehouse = $validated['warehouse_id'] ?? '00';
             // hitung jumlah opname hari ini di gudang yang sama
             $count = OpnameStock::whereDate('date', $validated['date'])
                 ->where('warehouse_id', $validated['warehouse_id'])
                 ->count() + 1;
+
+            
 
             $running = str_pad($count, 4, '0', STR_PAD_LEFT);
 
@@ -74,7 +108,7 @@ class OpnameStockController extends Controller
                 'opname_number' => $opnameNumber,
                 'date' => $validated['date'],
                 'warehouse_id' => $validated['warehouse_id'],
-                'checked_by' => $validated['checked_by'],
+                'user_id' => $userId,
                 'note' => $validated['note'],
             ]);
 
@@ -113,6 +147,7 @@ class OpnameStockController extends Controller
         
         $opnameStock->load([
             'warehouse',
+            'user',
             'items.item.category'
             ]);
 

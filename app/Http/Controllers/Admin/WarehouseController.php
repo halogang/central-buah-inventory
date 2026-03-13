@@ -15,7 +15,12 @@ class WarehouseController extends Controller
     public function index()
     {
         $warehouses = Warehouse::with('user')->orderBy('updated_at', 'desc')->get();
-        $users = User::all();
+        $users = User::with('roles')
+        ->whereHas('roles', function ($q) {
+            $q->where('name', 'spv_gudang');
+        })
+        ->get();
+        
         return Inertia::render('admin/Warehouses/Index', [
             'users' => $users,
             'warehouses' => $warehouses,

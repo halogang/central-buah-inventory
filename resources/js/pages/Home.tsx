@@ -5,8 +5,8 @@ import FeaturesSection from "@/components/FeaturesSection";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ItemsSection from "@/components/ItemsSection";
-import Navbar from "@/components/Navbar";
 import LocationSection from "@/components/LocationSection";
+import Navbar from "@/components/Navbar";
 
 interface Category {
     id: number;

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\HomeController;
 use \App\Http\Controllers\Admin\DeliveryOrderController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\WebsiteInfoController;
 
 Route::inertia('/', 'Home', [
@@ -72,6 +73,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('invoice', \App\Http\Controllers\Admin\InvoiceController::class)
         ->middleware('permission:Invoice');
+
+    Route::prefix('transactions')->group(function () {
+
+        Route::post('/payments', [PaymentController::class, 'store'])
+            ->name('transactions.payments.store');
+
+    });
 
     Route::resource('keuangan', \App\Http\Controllers\Admin\FinanceController::class)
         ->middleware('permission:Keuangan');

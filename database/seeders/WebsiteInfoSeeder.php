@@ -15,9 +15,9 @@ class WebsiteInfoSeeder extends Seeder
         WebsiteInfo::create([
             'nama_usaha' => 'Central Buah Sutomo',
 
-            'alamat' => 'Jl. Sutomo No. 123, Medan, Sumatera Utara',
+            'alamat' => 'Jl. Dr. Soetomo, Cikento, Gunungsimping, Kec. Cilacap Tengah, Kabupaten Cilacap, Jawa Tengah 53211',
 
-            'kontak' => '0812-3456-7890',
+            'kontak' => '081327346635',
 
             'email' => 'centralbuahsutomo@gmail.com',
 
@@ -29,7 +29,7 @@ class WebsiteInfoSeeder extends Seeder
 
             'favicon' => null,
 
-            'link_maps' => 'https://maps.google.com/?q=Central+Buah+Sutomo',
+            'link_maps' => 'https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d374.36859189116336!2d109.07988371199855!3d-7.356117940528571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sid!4v1773282524767!5m2!1sen!2sid',
 
             'facebook' => 'https://facebook.com/centralbuahsutomo',
 

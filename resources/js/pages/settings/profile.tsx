@@ -12,6 +12,8 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { BreadcrumbItem } from '@/types';
+import { FormSignature } from "@/components/admin"
+import { useState } from "react"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,6 +22,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface User {
+    id: number
+    name: string
+    email: string
+    signature?: string | null
+}
+
 export default function Profile({
     mustVerifyEmail,
     status,
@@ -27,20 +36,27 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
-    const { auth } = usePage().props;
+    const { auth } = usePage<{
+        auth: {
+            user: User
+        }
+    }>().props
+    const [signature, setSignature] = useState<string | null>(
+        auth.user.signature ?? null
+    )
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title="Pengaturan Profil" />
 
-            <h1 className="sr-only">Profile settings</h1>
+            <h1 className="sr-only">Pengaturan Profil</h1>
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <Heading
                         variant="small"
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title="Informasi Profil"
+                        description="Perbarui nama, email, dan tanda tangan"
                     />
 
                     <Form
@@ -53,7 +69,7 @@ export default function Profile({
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">Nama</Label>
 
                                     <Input
                                         id="name"
@@ -72,7 +88,7 @@ export default function Profile({
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">Alamat email</Label>
 
                                     <Input
                                         id="email"
@@ -88,6 +104,27 @@ export default function Profile({
                                     <InputError
                                         className="mt-2"
                                         message={errors.email}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <FormSignature
+                                        label="Tanda tangan"
+                                        value={signature}
+                                        onChange={(value: string | null) => {
+                                            setSignature(value)
+                                        }}
+                                    />
+
+                                    <input
+                                        type="hidden"
+                                        name="signature"
+                                        value={signature ?? ""}
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.signature}
                                     />
                                 </div>
 
