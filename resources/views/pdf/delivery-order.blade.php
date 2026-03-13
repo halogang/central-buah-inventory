@@ -195,7 +195,8 @@
                     <br><br>
 
                     @if($deliveryOrder->sender_signature)
-                    <img src="{{ public_path($deliveryOrder->sender_signature) }}" height="60">
+                    {{-- <img src="{{ public_path($deliveryOrder->sender_signature) }}" height="60"> --}}
+                    <img src="{{ $deliveryOrder->sender_signature }}" height="60">
                     @endif
 
                     <div class="sign-line"></div>
@@ -207,7 +208,8 @@
                     <br><br>
 
                     @if($deliveryOrder->receiver_signature)
-                    <img src="{{ public_path($deliveryOrder->receiver_signature) }}" height="60">
+                    {{-- <img src="{{ public_path($deliveryOrder->receiver_signature) }}" height="60"> --}}
+                    <img src="{{ $deliveryOrder->receiver_signature }}" height="60">
                     @endif
 
                     <div class="sign-line"></div>
