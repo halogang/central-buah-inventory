@@ -195,21 +195,19 @@
                     <br><br>
 
                     @if($deliveryOrder->sender_signature)
-                    {{-- <img src="{{ public_path($deliveryOrder->sender_signature) }}" height="60"> --}}
-                    <img src="{{ $deliveryOrder->sender_signature }}" height="60">
+                    <img src="{{ public_path($deliveryOrder->sender_signature) }}" alt="{{ public_path($deliveryOrder->sender_signature) }}" height="60">
                     @endif
 
                     <div class="sign-line"></div>
                     {{ $deliveryOrder->sender_name }}
                 </td>
 
-                <td width="50%">
+                <td width="50%">s
                     Penerima
                     <br><br>
 
                     @if($deliveryOrder->receiver_signature)
-                    {{-- <img src="{{ public_path($deliveryOrder->receiver_signature) }}" height="60"> --}}
-                    <img src="{{ $deliveryOrder->receiver_signature }}" height="60">
+                    <img src="{{ public_path($deliveryOrder->receiver_signature) }}" alt="{{ public_path($deliveryOrder->receiver_signature) }}" height="60">
                     @endif
 
                     <div class="sign-line"></div>
