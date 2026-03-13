@@ -1,6 +1,8 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { useState } from "react"
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import { FormSignature } from "@/components/admin"
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -12,8 +14,6 @@ import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { BreadcrumbItem } from '@/types';
-import { FormSignature } from "@/components/admin"
-import { useState } from "react"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -1,6 +1,6 @@
 import { router } from "@inertiajs/react"
 import { X } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notify"
 import type { UserData, RoleData } from "../types"
@@ -11,17 +11,6 @@ interface Props {
     user: UserData | null
     roles: RoleData[]
 }
-interface FormState {
-    [key: string]: string | number | boolean | null | undefined
-
-    name: string
-    username: string
-    email: string
-    password: string
-    phone: string
-    role_id: string
-    status_aktif: boolean
-}
 
 export default function UserFormModal({
     open,
@@ -30,7 +19,7 @@ export default function UserFormModal({
     roles
 }: Props) {
 
-    const [form, setForm] = useState<FormState>({
+    const emptyForm = {
         name: "",
         username: "",
         email: "",
@@ -38,35 +27,25 @@ export default function UserFormModal({
         phone: "",
         role_id: "",
         status_aktif: true
-    })
+    }
 
-    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [form, setForm] = useState(() => {
 
-    useEffect(() => {
+        if (!user) return emptyForm
 
-        if (user) {
-            setForm({
-                name: user.name,
-                username: user.username,
-                email: user.email,
-                password: "",
-                phone: user.phone || "",
-                role_id: user.roles?.[0]?.id?.toString() || "",
-                status_aktif: user.status_aktif ?? true
-            })
-        } else {
-            setForm({
-                name: "",
-                username: "",
-                email: "",
-                password: "",
-                phone: "",
-                role_id: "",
-                status_aktif: true
-            })
+        return {
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            password: "",
+            phone: user.phone || "",
+            role_id: user.roles?.[0]?.id?.toString() || "",
+            status_aktif: user.status_aktif ?? true
         }
 
-    }, [user])
+    })
+
+    const [errors] = useState<Record<string, string>>({})
 
     if (!open) return null
 

@@ -1,10 +1,13 @@
-import { Head, usePage } from "@inertiajs/react"
+import { Head, router, usePage } from "@inertiajs/react"
 import { Plus, Shield } from "lucide-react"
 import { useState } from "react"
 import { SearchInput } from "@/components/search-input"
 import { Button } from "@/components/ui/button"
 import AppLayout from "@/layouts/app-layout"
 
+import { notify } from "@/lib/notify"
+import { destroy as destroyRole } from "@/routes/master/roles"
+import { destroy as destroyUser } from "@/routes/master/users"
 import PasswordModal from "./components/PasswordModal"
 import PermissionSimulation from "./components/PermissionSimulation"
 import RoleFormModal from "./components/RoleFormModal"
@@ -38,6 +41,50 @@ export default function Index() {
     const [selectedRole, setSelectedRole] = useState<RoleData | null>(null)
 
     const isOwner = auth.user.roles.some((r: any) => r.name === "owner")
+
+    const confirmDeleteUser = (user: UserData) => {
+        notify.confirmDelete({
+            message: `Hapus ${user.name}?`,
+            onConfirm: () => performDeleteUser(user),
+        })
+    }
+
+    const performDeleteUser = (user: UserData) => {
+        const loading = notify.loading("Menghapus pengguna...")
+
+        router.delete(destroyUser(user.id), {
+            onSuccess: () => {
+                notify.dismiss(loading)
+                notify.success(`${user.name} berhasil dihapus`)
+            },
+            onError: () => {
+                notify.dismiss(loading)
+                notify.error(`Gagal menghapus ${user.name}`)
+            },
+        })
+    }
+
+    const confirmDeleteRole = (role: RoleData) => {
+        notify.confirmDelete({
+            message: `Hapus ${role.name}?`,
+            onConfirm: () => performDeleteRole(role),
+        })
+    }
+
+    const performDeleteRole = (role: RoleData) => {
+        const loading = notify.loading("Menghapus pengguna...")
+
+        router.delete(destroyRole(role.id), {
+            onSuccess: () => {
+                notify.dismiss(loading)
+                notify.success(`${role.name} berhasil dihapus`)
+            },
+            onError: () => {
+                notify.dismiss(loading)
+                notify.error(`Gagal menghapus ${role.name}`)
+            },
+        })
+    }
 
     return (
         <AppLayout>
@@ -94,9 +141,11 @@ export default function Index() {
                     {isOwner && (
                         <Button
                             onClick={() => {
-                                activeTab === "users"
-                                    ? setShowUserModal(true)
-                                    : setShowRoleModal(true)
+                                if (activeTab === "users") {
+                                    setShowUserModal(true)
+                                } else {
+                                    setShowRoleModal(true)
+                                }
                             }}
                         >
                             <Plus />
@@ -118,6 +167,7 @@ export default function Index() {
                             setSelectedUser(u)
                             setShowPasswordModal(true)
                         }}
+                        onDelete={confirmDeleteUser}
                     />
                 )}
 
@@ -131,6 +181,7 @@ export default function Index() {
                             setSelectedRole(r)
                             setShowRoleModal(true)
                         }}
+                        onDelete={confirmDeleteRole}
                     />
                 )}
 

@@ -25,8 +25,6 @@ type OpnameItem = {
 
 export default function Form({onClose, warehouses, items, opname, users, roleName, authUser} : Props) {
 
-    const [updateItems, setUpdateItems] = useState(false)
-
     const [form, setForm] = useState({
         date: opname?.date.substring(0,10) || '',
         warehouse_id: opname?.warehouse_id || '',

@@ -11,7 +11,7 @@ import {
     Edit3,
     Trash2
 } from "lucide-react"
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { SearchInput } from "@/components/search-input"
 import { Button } from "@/components/ui/button"
 import AppLayout from "@/layouts/app-layout"
@@ -110,13 +110,11 @@ export default function Index({ deliveryOrders, suppliers, items, customers }: P
     }
 
     // filter data
-    const filteredData = useMemo(() => {
-        return deliveryOrders
-            .filter((d) => d.type === activeTab)
-            .filter((d) =>
-                d.do_number.toLowerCase().includes(search.toLowerCase())
-            )
-    }, [deliveryOrders, activeTab, search])
+    const filteredData = deliveryOrders
+    .filter((d) => d.type === activeTab)
+    .filter((d) =>
+        d.do_number.toLowerCase().includes(search.toLowerCase())
+    )
 
     // stats
     const total = filteredData.length

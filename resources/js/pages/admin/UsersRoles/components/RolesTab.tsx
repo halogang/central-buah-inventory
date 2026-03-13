@@ -7,6 +7,7 @@ interface Props {
     search: string
     isOwner: boolean
     openEdit: (role: RoleData) => void
+    onDelete: (role: RoleData) => void
 }
 
 export default function RolesTab({
@@ -14,7 +15,8 @@ export default function RolesTab({
     permissions,
     search,
     isOwner,
-    openEdit
+    openEdit,
+    onDelete
 }: Props) {
 
     const filtered = roles.filter((r) =>
@@ -31,6 +33,7 @@ export default function RolesTab({
                     permissions={permissions}
                     isOwner={isOwner}
                     onEdit={() => openEdit(role)}
+                    onDelete={() => onDelete(role)}
                 />
             ))}
 

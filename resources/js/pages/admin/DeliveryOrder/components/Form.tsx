@@ -23,6 +23,27 @@ export default function Form({
     const [selectingItem, setSelectingItem] = useState(false)
     const [searchItem, setSearchItem] = useState("")
 
+    const emptyForm = {
+        do_number: "",
+        supplier_id: "",
+        customer_id: "",
+        date: "",
+        status: "draft",
+        sender_name: "",
+        receiver_name: "",
+        sender_signature: "",
+        receiver_signature: "",
+        note: "",
+        evidence: null,
+        items: []
+    }
+
+    const [form, setForm] = useState(
+        data
+            ? { ...data, items: data.items ?? [] }
+            : emptyForm
+    )
+
     useEffect(() => {
 
         if (data) return
@@ -36,7 +57,7 @@ export default function Form({
                 }))
             })
 
-    }, [type])
+    }, [type, data])
 
     const filteredItems = items.filter((i:any) =>
         i.name.toLowerCase().includes(searchItem.toLowerCase())
@@ -62,42 +83,6 @@ export default function Form({
 
         setSelectingItem(false)
         setSearchItem("")
-    }
-
-    const emptyForm = {
-        do_number: "",
-        supplier_id: "",
-        customer_id: "",
-        date: "",
-        status: "draft",
-        sender_name: "",
-        receiver_name: "",
-        sender_signature: "",
-        receiver_signature: "",
-        note: "",
-        evidence: null,
-        items: []
-    }
-
-    const [form, setForm] = useState(
-        data
-            ? { ...data, items: data.items ?? [] }
-            : emptyForm
-    )
-
-    const addItem = () => {
-        setForm({
-            ...form,
-            items: [
-                ...form.items,
-                {
-                    item_id: "",
-                    quantity: "",
-                    bad_stock: "",
-                    price: ""
-                }
-            ]
-        })
     }
 
     const removeItem = (index: number) => {

@@ -19,27 +19,28 @@ export default function RoleFormModal({
     permissions
 }: Props) {
 
-    const [form, setForm] = useState({
-        name: "",
-        description: "",
-        permission_ids: [] as number[]
-    })
+    const [form, setForm] = useState(() => ({
+        name: role?.name ?? "",
+        description: role?.description ?? "",
+        permission_ids: role?.permissions?.map(p => p.id) ?? []
+    }))
 
     useEffect(() => {
 
-        if (role) {
-            setForm({
-                name: role.name,
-                description: role.description || "",
-                permission_ids: role.permissions.map(p => p.id)
-            })
-        } else {
+        if (!role) {
             setForm({
                 name: "",
                 description: "",
                 permission_ids: []
             })
+            return
         }
+
+        setForm({
+            name: role.name,
+            description: role.description ?? "",
+            permission_ids: role.permissions?.map(p => p.id) ?? []
+        })
 
     }, [role])
 

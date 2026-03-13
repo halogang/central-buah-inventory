@@ -7,6 +7,7 @@ interface Props {
     isOwner: boolean
     openEdit: (user: UserData) => void
     openPassword: (user: UserData) => void
+    onDelete: (user: UserData) => void
 }
 
 export default function UsersTab({
@@ -14,28 +15,9 @@ export default function UsersTab({
     search,
     isOwner,
     openEdit,
-    openPassword
+    openPassword,
+    onDelete
 }: Props) {
-    const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
-    const formatRoleName = (name: string) => {
-        const words = name.replace(/_/g, ' ').split(' ');
-        return words
-            .map((w) => {
-                if (w.toLowerCase() === 'spv') {
-                    return 'SPV';
-                }
-                return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            })
-            .join(' ');
-    };
 
     const filtered = users.filter((u) =>
         u.name.toLowerCase().includes(search.toLowerCase())
@@ -51,6 +33,7 @@ export default function UsersTab({
                 isOwner={isOwner}
                 onEdit={() => openEdit(user)}
                 onPassword={() => openPassword(user)}
+                onDelete={() => onDelete(user)}
                 />
             ))}
         </div>

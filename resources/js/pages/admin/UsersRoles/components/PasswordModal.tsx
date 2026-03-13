@@ -19,7 +19,7 @@ export default function PasswordModal({
 
     const [password, setPassword] = useState("")
     const [confirm, setConfirm] = useState("")
-    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [errors] = useState<Record<string, string>>({})
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 

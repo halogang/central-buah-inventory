@@ -1,4 +1,4 @@
-import { X, Printer, Camera, Check, Cross } from "lucide-react"
+import { X, Printer, Camera, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface Props {

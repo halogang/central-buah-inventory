@@ -7,9 +7,10 @@ interface Props {
     isOwner: boolean
     onEdit: () => void
     onPassword: () => void
+    onDelete: () => void
 }
 
-export default function UserCard({ user, onEdit, onPassword }: Props) {
+export default function UserCard({ user, onEdit, onPassword, onDelete }: Props) {
 
     const getInitials = (name: string) => {
         return name
@@ -44,6 +45,8 @@ export default function UserCard({ user, onEdit, onPassword }: Props) {
         const index = name.charCodeAt(0) % colors.length;
         return colors[index];
     };
+
+    const isOwnerUser = user.roles.some(role => role.name === 'owner')
 
     return (
 
@@ -100,9 +103,11 @@ export default function UserCard({ user, onEdit, onPassword }: Props) {
                 <button onClick={onPassword}>
                     <KeyRound className="size-4 text-muted-foreground hover:text-yellow-600" />
                 </button>
-                <button>
+                {!isOwnerUser && (
+                    <button onClick={onDelete}>
                     <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
                 </button>
+                )}
             </div>
         </div>
     )

@@ -6,12 +6,14 @@ interface Props {
     permissions: Permission[]
     isOwner: boolean
     onEdit: () => void
+    onDelete: () => void
 }
 
 export default function RoleCard({
     role,
     permissions,
-    onEdit
+    onEdit,
+    onDelete
 }: Props) {
 
     const formatRoleName = (name: string) => {
@@ -75,7 +77,7 @@ export default function RoleCard({
                 <button onClick={onEdit}>
                     <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
                 </button>
-                <button>
+                <button onClick={onDelete}>
                     <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
                 </button>
             </div>

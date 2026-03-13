@@ -1,4 +1,4 @@
-import { Camera, CheckCircle, CircleCheck, CreditCard, Eye, Image, Printer, X } from "lucide-react"
+import { CircleCheck, CreditCard, Image, Printer, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/helpers/format"

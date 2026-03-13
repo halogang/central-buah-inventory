@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useRef} from "react"
 import SignatureCanvas from "react-signature-canvas"
 import { Button } from "@/components/ui/button"
 

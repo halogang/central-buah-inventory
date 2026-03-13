@@ -13,13 +13,6 @@ import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy, show } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
 
-// helper to add thousands separators
-function formatNumber(value: number | string) {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    if (isNaN(num)) return String(value);
-    return new Intl.NumberFormat('id-ID').format(num);
-}
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Master Gudang',
