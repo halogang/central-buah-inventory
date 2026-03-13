@@ -204,7 +204,7 @@ export default function Show({data, paymentMethods, onClose}: any) {
                         <Button
                             variant="secondary"
                             className="w-full cursor-pointer"
-                            // onClick={() => openEdit(delivery)}
+                            onClick={() => window.open(`/invoice/${invoice.id}/print`, "_blank")}
                         >
                             <Printer className="size-4" />
                             Cetak PDF

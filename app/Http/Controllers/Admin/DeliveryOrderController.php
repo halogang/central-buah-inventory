@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\WebsiteInfo;
 use App\Models\DeliveryOrder;
 use App\Models\DeliveryOrderItem;
 use App\Models\Invoice;
@@ -15,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DeliveryOrderController extends Controller
 {
@@ -93,7 +95,6 @@ class DeliveryOrderController extends Controller
             'customers' => Customer::select('id','name','phone')->get(),
         ]);
     }
-
 
     public function store(Request $request)
     {
@@ -636,5 +637,27 @@ class DeliveryOrderController extends Controller
         });
 
         return back()->with('success', 'Surat jalan berhasil dihapus');
+    }
+
+
+    //export pdf
+    public function print(DeliveryOrder $surat_jalan)
+    {
+
+        $deliveryOrder = DeliveryOrder::with([
+            'supplier',
+            'customer',
+            'items.item.unit'
+        ])->findOrFail($surat_jalan->id);
+        $websiteInfo = WebsiteInfo::first();
+
+        $pdf = Pdf::loadView('pdf.delivery-order', [
+            'deliveryOrder' => $deliveryOrder,
+            'websiteInfo' => $websiteInfo
+        ])->setPaper('A4', 'portrait');
+
+        $fileName = str_replace('/', '-', $deliveryOrder->do_number);
+
+        return $pdf->stream($fileName.'.pdf');
     }
 }

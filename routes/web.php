@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\HomeController;
 use \App\Http\Controllers\Admin\DeliveryOrderController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\WebsiteInfoController;
 
@@ -69,10 +70,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('surat-jalan', DeliveryOrderController::class)
         ->middleware('permission:Surat Jalan');
 
+    Route::get('/surat-jalan/{surat_jalan}/print', 
+        [DeliveryOrderController::class, 'print']
+    )->name('surat-jalan.print');
+
     Route::get('/surat-jalan/preview-number/{type}', [DeliveryOrderController::class, 'previewNumber']);
 
-    Route::resource('invoice', \App\Http\Controllers\Admin\InvoiceController::class)
+    Route::resource('invoice', InvoiceController::class)
         ->middleware('permission:Invoice');
+
+    Route::get('/invoice/{invoice}/print', 
+        [InvoiceController::class, 'print']
+    )->name('invoice.print');
 
     Route::prefix('transactions')->group(function () {
 

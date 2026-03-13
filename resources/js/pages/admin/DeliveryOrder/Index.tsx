@@ -313,6 +313,7 @@ export default function Index({ deliveryOrders, suppliers, items, customers }: P
                                 <Button
                                     variant="secondary"
                                     className="w-full"
+                                    onClick={() => window.open(`/surat-jalan/${delivery.id}/print`, "_blank")}
                                 >
                                     <Printer className="size-4" />
                                     Cetak

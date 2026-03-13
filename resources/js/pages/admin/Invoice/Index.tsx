@@ -289,7 +289,11 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                                             Detail
                                         </Button>
 
-                                        <Button variant="secondary" className="w-full">
+                                        <Button 
+                                            variant="secondary" 
+                                            className="w-full"
+                                            onClick={() => window.open(`/invoice/${invoice.id}/print`, "_blank")}
+                                        >
                                             <Printer className="size-4"/>
                                             Cetak
                                         </Button>

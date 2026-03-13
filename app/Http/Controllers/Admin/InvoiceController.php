@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\PaymentMethod;
+use App\Models\WebsiteInfo;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -69,6 +71,28 @@ class InvoiceController extends Controller
             'summary' => $summary,
             'paymentMethods' => $paymentMethods
         ]);
+    }
+
+    public function print(Invoice $invoice)
+    {
+
+        $invoice = Invoice::with([
+            'deliveryOrder',
+            'customer',
+            'supplier',
+            'items',
+            'payments'
+        ])->findOrFail($invoice->id);
+        $websiteInfo = WebsiteInfo::first();
+
+        $pdf = Pdf::loadView('pdf.invoice', [
+            'invoice' => $invoice,
+            'websiteInfo' => $websiteInfo
+        ])->setPaper('A4', 'portrait');
+
+        $fileName = str_replace('/', '-', $invoice->invoice_number);
+
+        return $pdf->stream($fileName.'.pdf');
     }
 
     /**

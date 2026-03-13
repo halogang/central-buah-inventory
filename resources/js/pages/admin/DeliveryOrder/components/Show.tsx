@@ -254,6 +254,7 @@ export default function Show({ data, onClose }: Props) {
                         <Button
                             variant="outline"
                             className="flex-1"
+                            onClick={() => window.open(`/surat-jalan/${data.id}/print`, "_blank")}
                         >
                             <Printer className="w-4 h-4 mr-2"/>
                             Cetak PDF
