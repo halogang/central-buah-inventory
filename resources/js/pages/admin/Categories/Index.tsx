@@ -24,6 +24,7 @@ interface Category {
     icon: string;
     image: string;
     image_url: string;
+    thumbnail_url: string;
     created_at: string;
 }
 
@@ -134,7 +135,7 @@ export default function Index() {
                                     {cat.type === "barang" ? (
                                         cat.image ? (
                                             <img
-                                                src={cat.image_url}
+                                                src={cat.thumbnail_url}
                                                 alt={cat.name}
                                                 className="w-12 h-12 object-cover rounded-lg"
                                             />

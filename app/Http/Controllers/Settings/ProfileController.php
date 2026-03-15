@@ -11,13 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\File;
+use App\Services\SignatureService;
 
 class ProfileController extends Controller
 {
-
-    private $signatureUploadPath = '../../public_html/images/signatures';
-    private $signatureSavePath = '/images/signatures';
     /**
      * Show the user's profile settings page.
      */
@@ -32,56 +29,42 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
+    public function update(
+        ProfileUpdateRequest $request,
+        SignatureService $signatureService
+    ): RedirectResponse {
+
         $data = $request->validated();
-        // dd($data, str_contains($data['signature'], 'base64'));
+        $user = $request->user();
 
-        // jika ada signature base64
-        if (!empty($data['signature']) && str_contains($data['signature'], 'base64')) {
+        /*
+        =========================
+        HANDLE SIGNATURE
+        =========================
+        */
 
-            if ($request->user()->signature) {
-                $old = public_path($request->user()->signature);
-                if (File::exists($old)) {
-                    File::delete($old);
-                }
-            }
-
-            $data['signature'] = $this->saveSignature($data['signature']);
+        if (!empty($data['signature'])) {
+            $data['signature'] = $signatureService->saveBase64(
+                $data['signature'],
+                $user->signature
+            );
         }
 
-        $request->user()->fill($data);
+        $user->fill($data);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        /*
+        =========================
+        EMAIL CHANGE CHECK
+        =========================
+        */
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
         return to_route('profile.edit');
-    }
-
-    private function saveSignature($base64)
-    {
-        if (!$base64) return null;
-
-        $image = str_replace('data:image/png;base64,', '', $base64);
-        $image = str_replace(' ', '+', $image);
-
-        $fileName = 'signature_' . uniqid() . '.png';
-
-        $destination = public_path($this->signatureUploadPath);
-
-        if (!File::exists($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
-        File::put(
-            $destination.'/'.$fileName,
-            base64_decode($image)
-        );
-
-        return $this->signatureSavePath.'/'.$fileName;
     }
 
     /**

@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(OpnameStock::class);
     }
+
+    public function stockMovement()
+    {
+        return $this->hasOne(StockMovement::class);
+    }
 }

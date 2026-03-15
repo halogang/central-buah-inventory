@@ -32,7 +32,7 @@ class Item extends Model
         'bad_stock' => 'integer',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'thumbnail_url'];
 
     public function unit()
     {
@@ -59,10 +59,26 @@ class Item extends Model
         return $this->hasMany(OpnameStockItem::class);
     }
 
+    public function stockMovement()
+    {
+        return $this->hasOne(StockMovement::class);
+    }
+
     public function getImageUrlAttribute()
     {
         return $this->image
             ? asset($this->image)
             : null;
+    }
+
+    public function getThumbnailUrlAttribute()
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return url(
+            dirname($this->image).'/thumb/thumb_'.basename($this->image)
+        );
     }
 }

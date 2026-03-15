@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class CategoryController extends Controller
 {
@@ -41,24 +44,50 @@ class CategoryController extends Controller
 
             $image = $request->file('image');
 
-            $filename = time().'_'.$image->getClientOriginalName();
+            $fileName = Str::uuid().'.webp';
+            $thumbName = 'thumb_'.$fileName;
 
             $destination = public_path($this->uploadPath);
+            $thumbDestination = public_path($this->uploadPath.'/thumb');
 
             // buat folder jika belum ada
             if (!File::exists($destination)) {
                 File::makeDirectory($destination, 0755, true);
             }
 
-            $image->move($destination, $filename);
+            if (!File::exists($thumbDestination)) {
+                File::makeDirectory($thumbDestination, 0755, true);
+            }
 
-            $validated['image'] = $this->savePath.'/'.$filename;
+            $manager = new ImageManager(new Driver());
+
+            $img = $manager->read($image->getRealPath());
+
+            /*
+            =========================
+            MAIN IMAGE
+            =========================
+            */
+
+            $img->scale(width: 1200); // max width 1200px
+            $img->toWebp(80)->save($destination.'/'.$fileName); // compress 80%
+
+            /*
+            =========================
+            THUMBNAIL
+            =========================
+            */
+
+            $thumb = $manager->read($image->getRealPath());
+            $thumb->cover(300, 300); // thumbnail 300x300
+            $thumb->toWebp(75)->save($thumbDestination.'/'.$thumbName);
+
+            $validated['image'] = $this->savePath.'/'.$fileName;
         }
 
         if ($validated['type'] === 'pengeluaran') {
             $validated['icon'] = '💵';
         }
-
 
         Category::create($validated);
         return redirect()->route('master.categories.index');
@@ -80,6 +109,7 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -89,27 +119,68 @@ class CategoryController extends Controller
         ]);
 
         $destination = public_path($this->uploadPath);
+        $thumbDestination = public_path($this->uploadPath.'/thumb');
 
         // =============================
-        // Jika upload gambar baru
+        // Upload gambar baru
         // =============================
         if ($request->hasFile('image')) {
 
-            // hapus gambar lama jika ada
-            if ($category->image && File::exists(public_path($category->image))) {
-                File::delete(public_path($category->image));
+            // hapus gambar lama
+            if ($category->image) {
+
+                $oldImage = public_path($category->image);
+                $oldThumb = public_path(
+                    dirname($category->image).'/thumb/thumb_'.basename($category->image)
+                );
+
+                if (File::exists($oldImage)) {
+                    File::delete($oldImage);
+                }
+
+                if (File::exists($oldThumb)) {
+                    File::delete($oldThumb);
+                }
             }
 
             $image = $request->file('image');
 
-            $filename = time().'_'.$image->getClientOriginalName();
+            $filename = Str::uuid().'.webp';
+            $thumbName = 'thumb_'.$filename;
 
-            // buat folder jika belum ada
             if (!File::exists($destination)) {
                 File::makeDirectory($destination, 0755, true);
             }
 
-            $image->move($destination, $filename);
+            if (!File::exists($thumbDestination)) {
+                File::makeDirectory($thumbDestination, 0755, true);
+            }
+
+            $manager = new ImageManager(new Driver());
+
+            /*
+            =============================
+            MAIN IMAGE
+            =============================
+            */
+
+            $img = $manager->read($image->getRealPath());
+
+            $img->scale(width: 1200);
+
+            $img->toWebp(80)->save($destination.'/'.$filename);
+
+            /*
+            =============================
+            THUMBNAIL
+            =============================
+            */
+
+            $thumb = $manager->read($image->getRealPath());
+
+            $thumb->cover(300, 300);
+
+            $thumb->toWebp(75)->save($thumbDestination.'/'.$thumbName);
 
             $validated['image'] = $this->savePath.'/'.$filename;
         }
@@ -119,9 +190,20 @@ class CategoryController extends Controller
         // =============================
         if ($validated['type'] === 'pengeluaran') {
 
-            // hapus gambar lama jika ada
-            if ($category->image && File::exists(public_path($category->image))) {
-                File::delete(public_path($category->image));
+            if ($category->image) {
+
+                $oldImage = public_path($category->image);
+                $oldThumb = public_path(
+                    dirname($category->image).'/thumb/thumb_'.basename($category->image)
+                );
+
+                if (File::exists($oldImage)) {
+                    File::delete($oldImage);
+                }
+
+                if (File::exists($oldThumb)) {
+                    File::delete($oldThumb);
+                }
             }
 
             $validated['image'] = null;

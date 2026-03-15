@@ -32,6 +32,7 @@ interface Category {
     icon?: string
     image?: string
     image_url?: string
+    thumbnail_url?: string
     description?: string
 }
 
@@ -166,7 +167,7 @@ export default function Index() {
                                     <div className="flex items-center justify-center rounded-2xl overflow-hidden">
                                         {i.image_url ? (
                                             <img
-                                                src={i.image_url}
+                                                src={i.thumbnail_url}
                                                 alt={i.name}
                                                 className="w-14 h-14 object-cover rounded-xl"
                                             />

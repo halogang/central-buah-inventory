@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\OpnameStock;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
@@ -125,12 +126,28 @@ class OpnameStockController extends Controller
 
                 if ($validated['updateItems']) {
 
-                    $itemModel = Item::findOrFail($row['item_id']);
-
+                    $itemModel = Item::findOrFail($row['item_id']);                    
                     $itemModel->update([
                         'stock' => $row['physical_stock']
                     ]);
+
+                    StockMovement::create([
+                        'item_id' => $row['item_id'],
+                        'warehouse_id' => $itemModel->warehouse_id,
+                        
+                        'type' => $difference >= 0 ? 'in' : 'out',
+                        
+                        'quantity' => abs($difference),
+                        'stock_before' => $row['system_stock'],
+                        'stock_after' => $row['physical_stock'],
+                        'reference_type' => 'opname_stock',
+                        'reference_id' => $opname->id,
+
+                        'user_id' => Auth::id(),
+                        'note' => 'Opname Stock '. $opnameNumber
+                    ]);
                 }
+
             }
         });
 
@@ -186,6 +203,10 @@ class OpnameStockController extends Controller
 
             $opnameStock->items()->delete();
 
+            StockMovement::where('reference_type','opname_stock')
+                ->where('reference_id',$opnameStock->id)
+                ->delete();
+
             foreach ($request->items as $item) {
 
                 $difference = $item['physical_stock'] - $item['system_stock'];
@@ -196,6 +217,30 @@ class OpnameStockController extends Controller
                     'physical_stock' => $item['physical_stock'],
                     'difference' => $difference,
                 ]);
+
+                if ($request->updateItems) {
+
+                    $itemModel = Item::findOrFail($item['item_id']);                    
+                    $itemModel->update([
+                        'stock' => $item['physical_stock']
+                    ]);
+
+                    StockMovement::create([
+                        'item_id' => $item['item_id'],
+                        'warehouse_id' => $itemModel->warehouse_id,
+                        
+                        'type' => 'adjustment',
+                        
+                        'quantity' => abs($difference),
+                        'stock_before' => $item['system_stock'],
+                        'stock_after' => $item['physical_stock'],
+                        'reference_type' => 'opname_stock',
+                        'reference_id' => $opnameStock->id,
+
+                        'user_id' => Auth::id(),
+                        'note' => 'Opname Stock '. $opnameStock->opname_number
+                    ]);
+                }
             }
         });
 

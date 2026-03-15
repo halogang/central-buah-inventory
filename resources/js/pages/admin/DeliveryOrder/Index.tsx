@@ -37,6 +37,10 @@ interface DeliveryOrder {
     date: string
     supplier: string
     customer: string
+    cart_name: string
+    cart_qty: number
+    cart_weight: number
+    total_weight: number
     status: "draft" | "sent" | "done"
     items_count: number
     total_quantity: number
@@ -46,6 +50,11 @@ interface DeliveryOrder {
     evidence_url?: string
     sender_signature_url?: string
     receiver_signature_url?: string
+}
+
+interface Cart {
+    id: number
+    name: string
 }
 
 interface Supplier {
@@ -69,9 +78,10 @@ interface Props {
     suppliers: Supplier[]
     items: Item[]
     customers: Customer[]
+    carts: Cart[]
 }
 
-export default function Index({ deliveryOrders, suppliers, items, customers }: Props) {
+export default function Index({ deliveryOrders, suppliers, items, customers, carts }: Props) {
 
     const [activeTab, setActiveTab] = useState<"in" | "out">("in")
     const [search, setSearch] = useState("")
@@ -257,11 +267,9 @@ export default function Index({ deliveryOrders, suppliers, items, customers }: P
                                     </span>
                                 </div>
 
-                                {delivery.status === 'draft' && (
-                                    <button onClick={() => confirmDelete(delivery)}>
-                                        <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
-                                    </button>
-                                )}
+                                <button onClick={() => confirmDelete(delivery)}>
+                                    <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
+                                </button>
 
                             </div>
 
@@ -294,21 +302,15 @@ export default function Index({ deliveryOrders, suppliers, items, customers }: P
                                     <Eye className="size-4" />
                                     Detail
                                 </Button>
-
-                                {/* {delivery.status === "draft" && ( */}
-
-                                    {delivery.status !== "done" && (
-                                        <Button
-                                            variant="secondary"
-                                            className="w-full"
-                                            onClick={() => openEdit(delivery)}
-                                        >
-                                            <Edit3 className="size-4" />
-                                            Edit
-                                        </Button>
-                                    )}
-
-                                {/* )} */}
+                                
+                                <Button
+                                    variant="secondary"
+                                    className="w-full"
+                                    onClick={() => openEdit(delivery)}
+                                >
+                                    <Edit3 className="size-4" />
+                                    Edit
+                                </Button>
 
                                 <Button
                                     variant="secondary"
@@ -344,6 +346,7 @@ export default function Index({ deliveryOrders, suppliers, items, customers }: P
                     suppliers={suppliers}
                     items={items}
                     customers={customers}
+                    carts={carts}
                     type={activeTab}
                     onClose={() => setOpenForm(false)}
                 />

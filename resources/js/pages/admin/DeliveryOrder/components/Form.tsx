@@ -17,6 +17,7 @@ export default function Form({
     customers,
     items,
     type,
+    carts,
     onClose
 }: any) {
     
@@ -33,6 +34,9 @@ export default function Form({
         receiver_name: "",
         sender_signature: "",
         receiver_signature: "",
+        cart_id: "",
+        cart_qty: "",
+        cart_weight: "",
         note: "",
         evidence: null,
         items: []
@@ -126,6 +130,12 @@ export default function Form({
         return sum + getItemTotal(item)
     }, 0)
 
+    const totalWeight =
+        (form?.items || []).reduce((sum: number, item: any) => {
+            return sum + Number(item.quantity || 0)
+        }, 0) + 
+        (Number(form.cart_qty || 0) * Number(form.cart_weight || 0))
+
     const submitForm = (e: React.FormEvent) => {
 
         e.preventDefault()
@@ -216,15 +226,18 @@ export default function Form({
 
                         <DeliveryItemsSection
                             form={form}
+                            setForm={setForm}
                             selectingItem={selectingItem}
                             searchItem={searchItem}
                             filteredItems={filteredItems}
+                            carts={carts}
                             setSelectingItem={setSelectingItem}
                             setSearchItem={setSearchItem}
                             selectItem={selectItem}
                             updateItem={updateItem}
                             removeItem={removeItem}
                             totalAmount={totalAmount}
+                            totalWeight={totalWeight}
                             getNetQty={getNetQty}
                             getItemTotal={getItemTotal}
                         />

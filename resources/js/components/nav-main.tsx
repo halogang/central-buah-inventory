@@ -26,7 +26,7 @@ export function NavMain({ items = [], badge }: { items: NavItem[], badge:string 
                                 {item.icon && <item.icon />}
                                 <span>{item.title}</span>
                                 {badge && (
-                                    <span className="ml-auto inline-flex items-center justify-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                    <span className="ml-auto inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium text-yellow-500 bg-yellow-500/10">
                                         {badge}
                                     </span>
                                 )}

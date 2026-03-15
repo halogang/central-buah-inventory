@@ -43,7 +43,15 @@ return new class extends Migration
             $table->string('sender_signature')->nullable();
             $table->string('receiver_signature')->nullable();
 
+            $table->foreignId('cart_id')
+                ->nullable()
+                -> constrained()
+                ->nullOnDelete();
+            $table->integer('cart_weight')->nullable();
+            $table->integer('cart_qty')->nullable();
+
             $table->decimal('total_amount', 15, 2)->default(0);
+            $table->integer('total_weight')->default(0);
 
             $table->text('note')->nullable();
 

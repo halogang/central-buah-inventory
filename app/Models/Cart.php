@@ -14,4 +14,9 @@ class Cart extends Model
         'cart_code',
         'note',
     ];
+
+    public function delivery_order()
+    {
+        return $this->hasMany(DeliveryOrder::class);
+    }
 }

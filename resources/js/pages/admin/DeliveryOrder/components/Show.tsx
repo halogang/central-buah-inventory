@@ -14,6 +14,16 @@ export default function Show({ data, onClose }: Props) {
         return qty - bad
     }
 
+    const getTotalItemWeight = () => {
+        return (data.items ?? []).reduce((sum:number, item:any) => {
+            return sum + Number(item.quantity || 0)
+        }, 0)
+    }
+
+    const cartWeight = Number(data.cart_qty || 0) * Number(data.cart_weight || 0)
+
+    const totalWeight = getTotalItemWeight() + cartWeight
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 
@@ -141,6 +151,48 @@ export default function Show({ data, onClose }: Props) {
 
                             </table>
 
+                        </div>
+
+                    </div>
+
+                    {/* CART INFO */}
+
+                    <div className="grid grid-cols-4 gap-4">
+
+                        <div className="bg-muted rounded-lg p-4">
+                            <p className="text-xs text-muted-foreground">
+                                CART
+                            </p>
+                            <p className="font-medium">
+                                {data.cart_name || "-"}
+                            </p>
+                        </div>
+
+                        <div className="bg-muted rounded-lg p-4">
+                            <p className="text-xs text-muted-foreground">
+                                QTY CART
+                            </p>
+                            <p className="font-medium">
+                                {data.cart_qty || 0}
+                            </p>
+                        </div>
+
+                        <div className="bg-muted rounded-lg p-4">
+                            <p className="text-xs text-muted-foreground">
+                                BERAT CART
+                            </p>
+                            <p className="font-medium">
+                                {data.cart_weight || 0}
+                            </p>
+                        </div>
+
+                        <div className="bg-primary/10 rounded-lg p-4">
+                            <p className="text-xs text-muted-foreground">
+                                TOTAL BERAT
+                            </p>
+                            <p className="font-semibold text-primary">
+                                {totalWeight}
+                            </p>
                         </div>
 
                     </div>

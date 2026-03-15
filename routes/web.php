@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\HomeController;
@@ -15,9 +16,8 @@ Route::inertia('/', 'Home', [
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')
-        ->middleware('permission:Dashboard')
-        ->name('dashboard');
+    
+    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:Dashboard')->name('dashboard');
 
     Route::get('/test-permission', function () {
         return 'ok';
@@ -65,6 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('masuk', \App\Http\Controllers\Admin\StockInController::class);
             Route::resource('keluar', \App\Http\Controllers\Admin\StockOutController::class);
             Route::resource('stok-opname', \App\Http\Controllers\Admin\OpnameStockController::class);
+            Route::resource('movement', \App\Http\Controllers\Admin\StockMovementController::class);
         });
 
     Route::resource('surat-jalan', DeliveryOrderController::class)
@@ -90,7 +91,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     });
 
-    Route::resource('keuangan', \App\Http\Controllers\Admin\FinanceController::class)
+    Route::resource('keuangan', \App\Http\Controllers\Admin\PettyCashTransactionController::class)
         ->middleware('permission:Keuangan');
 
     Route::resource('laporan', \App\Http\Controllers\Admin\ReportController::class)
@@ -98,6 +99,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('pos', \App\Http\Controllers\Admin\POSController::class)
         ->middleware('permission:POS Kasir');
+
+    Route::resource('laporan', \App\Http\Controllers\Admin\ReportController::class)
+        ->middleware('permission:Laporan');
+
+    Route::resource('stock-movement', \App\Http\Controllers\Admin\StockMovementController::class);
+        // ->middleware('permission:Laporan');
+        
 });
 
 require __DIR__.'/settings.php';

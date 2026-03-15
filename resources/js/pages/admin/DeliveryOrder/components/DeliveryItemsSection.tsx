@@ -1,9 +1,10 @@
 import { Package, Plus, Trash2, Image } from "lucide-react"
-import { FormInput } from "@/components/admin"
-import { formatCurrency } from "@/helpers/format"
+import { FormInput, FormSelect } from "@/components/admin"
+import { formatCurrency, formatNumber } from "@/helpers/format"
 
 export default function DeliveryItemsSection({
     form,
+    setForm,
     selectingItem,
     searchItem,
     filteredItems,
@@ -13,8 +14,10 @@ export default function DeliveryItemsSection({
     updateItem,
     removeItem,
     totalAmount,
+    totalWeight,
     getNetQty,
-    getItemTotal
+    getItemTotal,
+    carts
 }: any) {
 
     return (
@@ -26,6 +29,41 @@ export default function DeliveryItemsSection({
                     <Package className="size-5 text-primary"/>
                     <span className="font-bold text-sm">Daftar Barang</span>
                 </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 items-end border rounded-lg p-3">
+                <FormSelect
+                    label="Keranjang"
+                    value={form.cart_id}
+                    onChange={(e) =>
+                        setForm({ ...form, cart_id: e.target.value })
+                    }
+                    options={
+                        [{
+                            label: 'Pilih Keranjang',
+                            value: '',
+                            disabled: true
+                        },
+                        ...carts.map((s: any) => ({
+                            label: s.name,
+                            value: s.id
+                        }))]
+                    }
+                    required
+                />
+                <FormInput
+                    label="Jumlah"
+                    type="number"
+                    value={form.cart_qty}
+                    onChange={(e) => setForm({ ...form, cart_qty: e.target.value })}
+                />
+
+                <FormInput
+                    label="Berat/Keranjang"
+                    type="number"
+                    value={form.cart_weight}
+                    onChange={(e) => setForm({ ...form, cart_weight: e.target.value })}
+                />
             </div>
 
             {form.items.map((item: any, index: number) => (
@@ -137,57 +175,69 @@ export default function DeliveryItemsSection({
 
             {selectingItem && (
 
-                <div className="border rounded-lg p-3 flex flex-col gap-2">
+                <div className="border rounded-lg">
 
-                    <input
-                        type="text"
-                        placeholder="Cari barang..."
-                        value={searchItem}
-                        onChange={(e)=>setSearchItem(e.target.value)}
-                        className="border rounded px-2 py-1 text-sm"
-                    />
+                    <div className="p-3 flex flex-col gap-2">
+                        <input
+                            type="text"
+                            placeholder="Cari barang..."
+                            value={searchItem}
+                            onChange={(e)=>setSearchItem(e.target.value)}
+                            className="border rounded px-2 py-1 text-sm"
+                        />
 
-                    <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
+                        <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
 
-                        {filteredItems.map((item:any)=>(
-                            <button
-                                key={item.id}
-                                type="button"
-                                onClick={()=>selectItem(item)}
-                                className="flex gap-2 items-center p-2 rounded hover:bg-muted"
-                            >
+                            {filteredItems.map((item:any)=>(
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={()=>selectItem(item)}
+                                    className="flex gap-2 items-center p-2 rounded hover:bg-muted"
+                                >
 
-                                {item.image ?
+                                    {item.image ?
 
-                                    <img
-                                        src={item.image_url}
-                                        className="w-8 h-8 object-cover rounded"
-                                    />
+                                        <img
+                                            src={item.image_url}
+                                            className="w-8 h-8 object-cover rounded"
+                                        />
 
-                                :
+                                    :
 
-                                    <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
-                                        <Image className="size-4"/>
+                                        <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
+                                            <Image className="size-4"/>
+                                        </div>
+
+                                    }
+
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-sm font-medium">{item.name}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {item.unit?.unit_code}
+                                        </span>
                                     </div>
 
-                                }
+                                </button>
+                            ))}
 
-                                <div className="flex flex-col text-left">
-                                    <span className="text-sm font-medium">{item.name}</span>
-                                    <span className="text-xs text-muted-foreground">
-                                        {item.unit?.unit_code}
-                                    </span>
-                                </div>
-
-                            </button>
-                        ))}
-
+                        </div>
                     </div>
-
+                    
+                    <button onClick={() => setSelectingItem(false)}
+                        className="border-t p-2 text-center cursor-pointer hover:bg-accent w-full font-medium text-sm text-muted-foreground">
+                        Tutup
+                    </button>
                 </div>
 
             )}
 
+            <div className="p-4 rounded-lg bg-primary/10 flex items-center justify-between">
+                <span className="text-sm">Total Berat</span>
+                <span className="text-md font-extrabold text-primary">
+                    {formatNumber(totalWeight)}
+                </span>
+            </div>
             {form.items.length !== 0 && (
 
                 <div className="p-4 rounded-lg bg-primary/10 flex items-center justify-between">

@@ -15,7 +15,7 @@ class Category extends Model
         'icon'
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'thumbnail_url'];
 
     public function items()
     {
@@ -27,5 +27,16 @@ class Category extends Model
         return $this->image
             ? asset($this->image)
             : null;
+    }
+
+    public function getThumbnailUrlAttribute()
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return url(
+            dirname($this->image).'/thumb/thumb_'.basename($this->image)
+        );
     }
 }

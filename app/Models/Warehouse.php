@@ -24,6 +24,11 @@ class Warehouse extends Model
         return $this->hasMany(OpnameStock::class);
     }
 
+    public function stockMovement()
+    {
+        return $this->hasOne(StockMovement::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -21,7 +21,11 @@ class DeliveryOrder extends Model
         'status',
         'sender_signature',
         'receiver_signature',
+        'cart_id',
+        'cart_weight',
+        'cart_qty',
         'total_amount',
+        'total_weight',
         'note'
     ];
 
@@ -42,6 +46,11 @@ class DeliveryOrder extends Model
     public function items()
     {
         return $this->hasMany(DeliveryOrderItem::class);
+    }
+
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class);
     }
 
     public function scopeIn($query)
