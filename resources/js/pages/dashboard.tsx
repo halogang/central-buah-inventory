@@ -9,6 +9,7 @@ import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { StatCard } from "@/types/dashboard";
 import { formatCurrency, formatNumber } from '@/helpers/format';
+import { usePage } from "@inertiajs/react";
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -24,16 +25,22 @@ const breadcrumbs: BreadcrumbItem[] = [
    PAGE
 ========================= */
 
-export default function Dashboard({
-    userName,
-    totalProduct,
-    totalStock,
-    totalPendapatan,
-    totalStockMenipis,
-    transactions,
-    lowStockProducts,
-    unpaidInvoices
-}: any) {
+export default function Dashboard() {
+
+    const {
+        userName,
+        totalProduct,
+        totalStock,
+        totalPendapatan,
+        totalStockMenipis,
+        transactions,
+        lowStockProducts,
+        unpaidInvoices
+    } = usePage().props as any;
+
+    const page = usePage();
+
+    console.log("Page props:"+page.props);
 
     console.log({
     totalProduct,
