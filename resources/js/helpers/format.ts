@@ -1,25 +1,17 @@
-export function formatNumber(value: number): string {
-  try {
-    return new Intl.NumberFormat("id-ID", {
-      maximumFractionDigits: 0,
-    }).format(value);
-  } catch {
-    return String(value);
-  }
+export function formatNumber(value: any): string {
+  const num = Number(value) || 0
+
+  return new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(num)
 }
 
-export function formatCurrency(value: number): string {
-  try {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
-  } catch {
-    return String(value);
-  }
-}
+export function formatCurrency(value: any): string {
+  const num = Number(value) || 0
 
-export function parseNumber(value: string): number {
-  return Number(value.replace(/\./g, ""));
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(num)
 }

@@ -103,10 +103,10 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'userName' => Auth::user()->name,
 
-            'totalProduct' => $totalProduct,
-            'totalStock' => $totalStock,
-            'totalPendapatan' => $totalPendapatan,
-            'totalStockMenipis' => $totalStockMenipis,
+            'totalProduct' => (int) $totalProduct,
+            'totalStock' => (int) $totalStock,
+            'totalPendapatan' => (float) $totalPendapatan,
+            'totalStockMenipis' => (int) $totalStockMenipis,
 
             'transactions' => $transactions ?? [],
             'lowStockProducts' => $lowStockProducts ?? [],
