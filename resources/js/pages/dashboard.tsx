@@ -35,6 +35,13 @@ export default function Dashboard({
     unpaidInvoices
 }: any) {
 
+    console.log({
+    totalProduct,
+    totalStock,
+    totalPendapatan,
+    totalStockMenipis
+    })
+
     const statsData: StatCard[] = [
         { label: "Total Produk", value: formatNumber(totalProduct), trend: "+3", icon: "package", color: "success" },
         { label: "Total Stok", value: formatNumber(totalStock), trend: "+120", icon: "boxes", color: "info" },

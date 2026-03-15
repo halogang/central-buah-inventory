@@ -1,1 +1,0 @@
-function t(r){try{return new Intl.NumberFormat("id-ID",{maximumFractionDigits:0}).format(r)}catch{return String(r)}}function n(r){try{return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(r)}catch{return String(r)}}export{n as a,t as f};
