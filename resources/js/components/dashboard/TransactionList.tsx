@@ -9,8 +9,8 @@ const statusStyles: Record<string, string> = {
   draft: "bg-muted text-muted-foreground border-0",
 };
 
-const formatCurrency = (n: number) =>
-  `Rp ${n.toLocaleString("id-ID")}`;
+const formatCurrency = (n?: number) =>
+  `Rp ${(n ?? 0).toLocaleString("id-ID")}`;
 
 const TransactionItem = ({ tx }: { tx: Transaction }) => (
   <div className="flex items-center gap-4 p-4 bg-chart-4/3 dark:bg-chart-3/3 rounded-xl border border-muted-foreground/25">
@@ -43,7 +43,7 @@ const TransactionList = ({ transactions }: { transactions: Transaction[] }) => (
       <Link href={"/surat-jalan"} className="text-sm font-medium text-primary hover:underline">Lihat Semua</Link>
     </div>
     <div className="grid grid-cols-1 gap-2">
-      {transactions.map((tx) => (
+      {(transactions ?? []).map((tx) => (
         <TransactionItem key={tx.id} tx={tx} />
       ))}
     </div>

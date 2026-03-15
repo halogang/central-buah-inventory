@@ -26,13 +26,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Dashboard({
     userName,
-    totalProduct,
-    totalStock,
-    totalPendapatan,
-    totalStockMenipis,
-    transactions,
-    lowStockProducts,
-    unpaidInvoices
+    totalProduct = 0,
+    totalStock = 0,
+    totalPendapatan = 0,
+    totalStockMenipis = 0,
+    transactions = [],
+    lowStockProducts = [],
+    unpaidInvoices = []
 }: any) {
 
     const statsData: StatCard[] = [

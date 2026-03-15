@@ -26,7 +26,7 @@ const LowStockCard = ({ products }: { products: Product[] }) => (
       <Link href={"/stok/realtime"} className="text-sm font-medium text-primary hover:underline">Lihat Semua</Link>
     </div>
     <div className="space-y-3">
-      {products.map((p) => (
+      {(products ?? []).map((p) => (
         <LowStockItem key={p.id} product={p} />
       ))}
     </div>

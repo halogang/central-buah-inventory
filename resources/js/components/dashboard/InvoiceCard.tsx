@@ -1,8 +1,8 @@
 import { Link } from "@inertiajs/react";
 import type { Invoice } from "@/types/dashboard";
 
-const formatCurrency = (n: number) =>
-  `Rp ${n.toLocaleString("id-ID")}`;
+const formatCurrency = (n?: number) =>
+  `Rp ${(n ?? 0).toLocaleString("id-ID")}`;
 
 const InvoiceItem = ({ invoice }: { invoice: Invoice }) => (
   <div className="bg-chart-4/5 border border-chart-4/25 dark:bg-chart-3/5 dark:border-chart-3/25 rounded-lg p-3 flex items-center justify-between">
@@ -21,7 +21,7 @@ const InvoiceCard = ({ invoices }: { invoices: Invoice[] }) => (
       <Link href={"/invoice"} className="text-sm font-medium text-primary hover:underline">Lihat Semua</Link>
     </div>
     <div className="space-y-3">
-      {invoices.map((inv) => (
+      {(invoices ?? []).map((inv) => (
         <InvoiceItem key={inv.id} invoice={inv} />
       ))}
     </div>

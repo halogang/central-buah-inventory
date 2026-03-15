@@ -108,9 +108,9 @@ class DashboardController extends Controller
             'totalPendapatan' => $totalPendapatan,
             'totalStockMenipis' => $totalStockMenipis,
 
-            'transactions' => $transactions,
-            'lowStockProducts' => $lowStockProducts,
-            'unpaidInvoices' => $unpaidInvoices,
+            'transactions' => $transactions ?? [],
+            'lowStockProducts' => $lowStockProducts ?? [],
+            'unpaidInvoices' => $unpaidInvoices ?? [],
         ]);
     }
 }
