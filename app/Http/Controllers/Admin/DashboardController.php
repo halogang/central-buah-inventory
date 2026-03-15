@@ -95,6 +95,16 @@ class DashboardController extends Controller
                 ];
             });
 
+        dd(
+            $totalProduct,
+            $totalStock,
+            $totalPendapatan,
+            $totalStockMenipis,
+            $transactions,
+            $lowStockProducts,
+            $unpaidInvoices,
+        );
+
 
         /* ======================
         RETURN TO FRONTEND
