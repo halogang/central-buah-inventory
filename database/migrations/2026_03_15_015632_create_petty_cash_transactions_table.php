@@ -20,10 +20,11 @@ return new class extends Migration
 
             $table->decimal('amount', 15, 2);
 
-            $table->foreignId('expense_category_id')
-                ->nullable()
-                ->constrained()
-                ->nullOnDelete();
+            // $table->foreignId('expense_category_id')
+            //     ->nullable()
+            //     ->constrained()
+            //     ->nullOnDelete();
+            $table->string('expense_category')->nullable();
 
             $table->text('description')->nullable();
 

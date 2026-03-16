@@ -10,13 +10,14 @@ class PettyCashTransaction extends Model
         'date',
         'type',
         'amount',
-        'expense_category_id',
+        // 'expense_category_id',
+        'expense_category',
         'description',
         'created_by'
     ];
 
-    public function category()
-    {
-        return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
-    }
+    // public function category()
+    // {
+    //     return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
+    // }
 }

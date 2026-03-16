@@ -15,7 +15,22 @@ class PettyCashTransactionController extends Controller
      */
     public function index()
     {
-        return Inertia::render('admin/PettyCash/Index');
+        $transactions = PettyCashTransaction::latest()->get();
+
+        $totalIncome = $transactions
+            ->where('type', 'income')
+            ->sum('amount');
+
+        $totalExpense = $transactions
+            ->where('type', 'expense')
+            ->sum('amount');
+
+        $balance = $totalIncome - $totalExpense;
+
+        return Inertia::render('admin/PettyCash/Index', [
+            'transactions' => $transactions,
+            'balance' => $balance
+        ]);
     }
 
     /**
@@ -36,13 +51,13 @@ class PettyCashTransactionController extends Controller
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:1',
             'description' => 'nullable|string',
-            'expense_category_id' => 'required_if:type,expense|exists:expense_categories,id'
+            'expense_category' => 'nullable|string'
         ]);
 
         // validasi tambahan jika expense
-        if ($request->type === 'expense' && !$request->expense_category_id) {
+        if ($request->type === 'expense' && !$request->expense_category) {
             return back()->withErrors([
-                'expense_category_id' => 'Kategori pengeluaran wajib diisi'
+                'expense_category' => 'Kategori pengeluaran wajib diisi'
             ]);
         }
 
@@ -50,8 +65,8 @@ class PettyCashTransactionController extends Controller
             'date' => $request->date,
             'type' => $request->type,
             'amount' => $request->amount,
-            'expense_category_id' => $request->type === 'expense'
-                ? $request->expense_category_id
+            'expense_category' => $request->type === 'expense'
+                ? $request->expense_category
                 : null,
             'description' => $request->description,
             'created_by' => Auth::id()
@@ -61,34 +76,27 @@ class PettyCashTransactionController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(PettyCashTransaction $pettyCashTransaction)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(PettyCashTransaction $pettyCashTransaction)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, PettyCashTransaction $pettyCashTransaction)
     {
-        //
-    }
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'type' => 'required|in:income,expense',
+            'amount' => 'required|numeric|min:1',
+            'description' => 'nullable|string',
+            'expense_category' => 'nullable|string'
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(PettyCashTransaction $pettyCashTransaction)
-    {
-        //
+        // validasi tambahan jika expense
+        if ($request->type === 'expense' && !$request->expense_category) {
+            return back()->withErrors([
+                'expense_category' => 'Kategori pengeluaran wajib diisi'
+            ]);
+        }
+
+        $pettyCashTransaction->update($validated);
+
+        return back()->with('success', 'Transasksi berhasil diperbarui');
     }
 }
