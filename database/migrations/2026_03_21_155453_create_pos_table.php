@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('tax')->nullable();
             $table->integer('total');
 
-            $table->enum('payment_method', ['cash, transfer, qris'])->default('cash');
+           $table->string('payment_method')->default('cash');
             
             $table->integer('paid_amount')->nullable();
             $table->integer('change_amount')->nullable();
