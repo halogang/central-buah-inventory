@@ -8,6 +8,8 @@ import { notify } from '@/lib/notify';
 import { destroy } from '@/routes/master/categories';
 import type { BreadcrumbItem } from '@/types';
 import Form from './components/Form';
+import { usePagination } from '@/hooks/use-pagination';
+import Pagination from '@/components/Pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -72,6 +74,13 @@ export default function Index() {
         .filter((c) => c.type === activeTab)
         .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Categories" />
@@ -116,10 +125,10 @@ export default function Index() {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {filtered.map((cat) => (
+                    {paginatedData.map((cat) => (
                         <div
                             key={cat.id}
-                            className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border cursor-pointer flex items-center justify-between gap-4"
+                            className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border flex items-center justify-between gap-4"
                             onClick={() => setEditCat(cat)}
                         >
                             <div className="flex items-center gap-4">
@@ -170,6 +179,12 @@ export default function Index() {
                         </div>
                     ))}
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
                 {showForm && (
                     <Form

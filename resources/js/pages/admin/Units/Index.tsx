@@ -8,6 +8,8 @@ import { notify } from "@/lib/notify";
 import { destroy } from "@/routes/master/units";
 import type { BreadcrumbItem } from '@/types';
 import Form from "./components/Form";
+import { usePagination } from "@/hooks/use-pagination";
+import Pagination from "@/components/Pagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -65,6 +67,13 @@ export default function Index() {
         i.unit_code.toLowerCase().includes(search.toLowerCase())
     );
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 10);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Items" />
@@ -91,7 +100,7 @@ export default function Index() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map((unit) => (
+                            {paginatedData.map((unit) => (
                                 <tr
                                     key={unit.id}
                                     className="border-t hover:bg-muted/30 transition"
@@ -121,6 +130,12 @@ export default function Index() {
                         </tbody>
                     </table>
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
                 {showForm && (
                     <Form 

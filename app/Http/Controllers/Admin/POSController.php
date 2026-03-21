@@ -13,6 +13,8 @@ class POSController extends Controller
      */
     public function index()
     {
+        $items = 0;
+
         return Inertia::render('admin/POS/Index');
     }
 
@@ -29,7 +31,7 @@ class POSController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**

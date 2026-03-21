@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy, show } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
+import { usePagination } from '@/hooks/use-pagination';
+import Pagination from '@/components/Pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -90,6 +92,13 @@ export default function Warehouses() {
         w.name.toString().toLowerCase().includes(search.toLowerCase())
     );
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6);
+
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
         const payload = {
@@ -144,7 +153,7 @@ export default function Warehouses() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.map((w) => (
+                    {paginatedData.map((w) => (
                         <div
                             key={w.id}
                             className="flex flex-col gap-4 rounded-xl border border-sidebar-border/70 bg-background px-4 pt-4 pb-6 shadow-sm dark:border-sidebar-border"
@@ -202,6 +211,12 @@ export default function Warehouses() {
                         </div>
                     ))}
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
                 {(showCreate || editItem) && (
                     <div

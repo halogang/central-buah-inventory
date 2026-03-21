@@ -34,9 +34,6 @@ export default function Form({
         receiver_name: "",
         sender_signature: "",
         receiver_signature: "",
-        cart_id: "",
-        cart_qty: "",
-        cart_weight: "",
         note: "",
         evidence: null,
         items: []
@@ -77,7 +74,10 @@ export default function Form({
             unit: item.unit,
             quantity: "",
             bad_stock: "",
-            price: ""
+            price: type === 'in' ? item.purchase_price : item.selling_price,
+            cart_id: "",
+            cart_weight: "",
+            cart_qty: ""
         }
 
         setForm({
@@ -130,11 +130,13 @@ export default function Form({
         return sum + getItemTotal(item)
     }, 0)
 
-    const totalWeight =
-        (form?.items || []).reduce((sum: number, item: any) => {
-            return sum + Number(item.quantity || 0)
-        }, 0) + 
-        (Number(form.cart_qty || 0) * Number(form.cart_weight || 0))
+    const totalWeight = (form?.items || []).reduce((sum: number, item: any) => {
+        const qty = Number(item.quantity || 0)
+        const cartQty = Number(item.cart_qty || 0)
+        const cartWeight = Number(item.cart_weight || 0)
+
+        return sum + qty + (cartQty * cartWeight)
+    }, 0)
 
     const submitForm = (e: React.FormEvent) => {
 

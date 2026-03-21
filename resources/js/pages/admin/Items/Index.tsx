@@ -5,6 +5,8 @@ import { SearchInput } from '@/components/search-input';
 import AppLayout from '@/layouts/app-layout';
 import { show } from '@/routes/master/items';
 import type { BreadcrumbItem } from '@/types';
+import { usePagination } from "@/hooks/use-pagination";
+import Pagination from "@/components/Pagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -68,6 +70,13 @@ export default function Index() {
         i.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6); // 6 card per page
+
     const allBadStockCount = items.reduce((total, item) => total + Number(item.bad_stock || 0), 0);
     const allCleanStockCount = items.reduce((total, item) => total + Number(item.stock || 0), 0) - allBadStockCount;
 
@@ -109,7 +118,7 @@ export default function Index() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.map((i) =>  {
+                    {paginatedData.map((i) =>  {
 
                         const stats = items.reduce((acc, item) => {
                             if (item.category?.id !== i.id) return acc;
@@ -223,6 +232,11 @@ export default function Index() {
                         )
                     })}
                 </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
             </div>
         </AppLayout>
     );

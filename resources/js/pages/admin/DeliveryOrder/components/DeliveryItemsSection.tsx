@@ -31,41 +31,6 @@ export default function DeliveryItemsSection({
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 items-end border rounded-lg p-3">
-                <FormSelect
-                    label="Keranjang"
-                    value={form.cart_id}
-                    onChange={(e) =>
-                        setForm({ ...form, cart_id: e.target.value })
-                    }
-                    options={
-                        [{
-                            label: 'Pilih Keranjang',
-                            value: '',
-                            disabled: true
-                        },
-                        ...carts.map((s: any) => ({
-                            label: s.name,
-                            value: s.id
-                        }))]
-                    }
-                    required
-                />
-                <FormInput
-                    label="Jumlah"
-                    type="number"
-                    value={form.cart_qty}
-                    onChange={(e) => setForm({ ...form, cart_qty: e.target.value })}
-                />
-
-                <FormInput
-                    label="Berat/Keranjang"
-                    type="number"
-                    value={form.cart_weight}
-                    onChange={(e) => setForm({ ...form, cart_weight: e.target.value })}
-                />
-            </div>
-
             {form.items.map((item: any, index: number) => (
 
                 <div
@@ -113,7 +78,7 @@ export default function DeliveryItemsSection({
 
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 items-end">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
 
                         <FormInput
                             label="Jumlah"
@@ -134,11 +99,48 @@ export default function DeliveryItemsSection({
                         />
 
                         <FormInput
-                            label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/kg'}`}
+                            label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/kontol'}`}
                             type="number"
                             value={item.price}
                             onChange={(e) =>
                                 updateItem(index, "price", e.target.value)
+                            }
+                        />
+
+                        <FormSelect
+                            label="Keranjang"
+                            value={item.cart_id}
+                            onChange={(e) =>
+                                updateItem(index, "cart_id", e.target.value)
+                            }
+                            options={
+                                [{
+                                    label: 'Pilih Keranjang',
+                                    value: '',
+                                    disabled: true
+                                },
+                                ...carts.map((s: any) => ({
+                                    label: s.name,
+                                    value: s.id
+                                }))]
+                            }
+                            required
+                        />
+                        <FormInput
+                            label="Jumlah"
+                            type="number"
+                            value={item.cart_qty}
+                           onChange={(e) =>
+                                updateItem(index, "cart_qty", e.target.value)
+                            }
+                        />
+
+                        <FormInput
+                            label="Berat/Keranjang"
+                            type="number"
+                            value={item.cart_weight}
+                            onChange={(e) =>
+                                updateItem(index, "cart_weight", e.target.value)
                             }
                         />
 

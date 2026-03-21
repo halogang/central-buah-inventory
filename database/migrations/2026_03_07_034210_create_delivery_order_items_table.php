@@ -24,6 +24,13 @@ return new class extends Migration
 
             $table->decimal('price', 15, 2)->default(0);
 
+            $table->foreignId('cart_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
+            $table->integer('cart_weight')->nullable();
+            $table->integer('cart_qty')->nullable();
+
             $table->timestamps();
         });
     }

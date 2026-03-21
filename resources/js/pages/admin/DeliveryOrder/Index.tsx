@@ -23,6 +23,9 @@ import type { BreadcrumbItem } from "@/types"
 import Form from "./components/Form"
 import Show from "./components/Show"
 
+import { usePagination } from "@/hooks/use-pagination"
+import Pagination from "@/components/Pagination"
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: "Surat Jalan",
@@ -37,9 +40,6 @@ interface DeliveryOrder {
     date: string
     supplier: string
     customer: string
-    cart_name: string
-    cart_qty: number
-    cart_weight: number
     total_weight: number
     status: "draft" | "sent" | "done"
     items_count: number
@@ -125,6 +125,14 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
     .filter((d) =>
         d.do_number.toLowerCase().includes(search.toLowerCase())
     )
+
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filteredData, 6)
+
 
     // stats
     const total = filteredData.length
@@ -238,7 +246,7 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
                 {/* DATA */}
                 <div className="grid gap-3">
 
-                    {filteredData.map((delivery) => (
+                    {paginatedData.map((delivery) => (
 
                         <div
                             key={delivery.id}
@@ -327,7 +335,13 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
 
                     ))}
 
-                    {filteredData.length === 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={goTo}
+                    />
+
+                    {paginatedData.length === 0 && (
 
                         <div className="text-center text-muted-foreground py-10">
                             Tidak ada data

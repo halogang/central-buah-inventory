@@ -100,10 +100,10 @@
                 </td>
 
                 <td>
-                    <div class="company-name">Central Buah Sutomo</div>
+                    <div class="company-name">{{ $websiteInfo->nama_usaha ?? 'Central Buah Sutomo' }}</div>
                     <div class="company-info">
-                        Jl. Buah Segar No. 123, Jakarta<br>
-                        Telp. 0812-3456-7890
+                        {{ $websiteInfo->alamat ?? '-' }}<br>
+                        Telp. {{ $websiteInfo->kontak ?? '-' }}
                     </div>
                 </td>
 
@@ -150,6 +150,7 @@
                 <tr>
                     <th width="40">No</th>
                     <th>Barang</th>
+                    <th width="120">Keranjang</th>
                     <th width="80">Qty</th>
                     <th width="60">Bad</th>
                     <th width="80">Net</th>
@@ -164,6 +165,17 @@
                     <td align="center">{{ $i+1 }}</td>
 
                     <td>{{ $item->item->name ?? '-' }}</td>
+
+                    <td>
+                        <div>
+                            {{ $item->cart->name ?? '-' }}
+                            <br>
+                            <small>
+                                jumlah: {{ $item->cart_qty ?? 0 }}<br>
+                                berat: {{ $item->cart_weight ?? 0 }}
+                            </small>
+                        </div>
+                    </td>
 
                     <td align="center">
                         {{ $item->quantity }}
@@ -186,6 +198,24 @@
             </tbody>
         </table>
 
+        @php
+            $totalItemWeight = $deliveryOrder->items->sum('quantity');
+
+            $totalCartWeight = $deliveryOrder->items->sum(function($item) {
+                return ($item->cart_qty ?? 0) * ($item->cart_weight ?? 0);
+            });
+
+            $totalWeight = $totalItemWeight + $totalCartWeight;
+        @endphp
+
+        <table style="width:100%; margin-top:10px;">
+            <tr>
+                <td align="right">
+                    <strong>Total Berat: {{ $totalWeight }}</strong>
+                </td>
+            </tr>
+        </table>
+
         <!-- SIGNATURE -->
         <table class="signature">
             <tr>
@@ -202,7 +232,7 @@
                     {{ $deliveryOrder->sender_name }}
                 </td>
 
-                <td width="50%">s
+                <td width="50%">
                     Penerima
                     <br><br>
 

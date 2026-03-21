@@ -8,10 +8,8 @@ use App\Models\Customer;
 use App\Models\WebsiteInfo;
 use App\Models\Cart;
 use App\Models\DeliveryOrder;
-use App\Models\DeliveryOrderItem;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
-use App\Models\StockMovement;
 use App\Models\Item;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -20,14 +18,39 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\SignatureService;
+use App\Services\DeliveryOrderService;
 
 class DeliveryOrderController extends Controller
 {
     private $evidenceUploadPath = '../../public_html/images/delivery-orders';
-    private $evidenceSavePath = '/images/delivery-orders';  
+    private $evidenceSavePath = '/images/delivery-orders';
 
-    private $signatureUploadPath = '../../public_html/images/signatures';
-    private $signatureSavePath = '/images/signatures';
+    private function validateRequest($request)
+    {
+        return $request->validate([
+            'type' => 'required|in:in,out',
+            'supplier_id' => 'nullable|exists:suppliers,id',
+            'customer_id' => 'nullable|exists:customers,id',
+            'status' => 'required|in:draft,sent,done',
+
+            'sender_name' => 'nullable|string|max:255',
+            'receiver_name' => 'nullable|string|max:255',
+
+            'note' => 'nullable|string',
+
+            'sender_signature' => 'nullable|string',
+            'receiver_signature' => 'nullable|string',
+
+            'items.*.item_id' => 'required|exists:items,id',
+            'items.*.quantity' => 'required|numeric|min:0',
+            'items.*.bad_stock' => 'nullable|numeric|min:0',
+            'items.*.price' => 'nullable|numeric|min:0',
+
+            'items.*.cart_id' => 'nullable|exists:carts,id',
+            'items.*.cart_qty' => 'nullable|numeric',
+            'items.*.cart_weight' => 'nullable|numeric',
+        ]);
+    }
 
     public function index()
     {
@@ -35,7 +58,7 @@ class DeliveryOrderController extends Controller
             'supplier',
             'customer',
             'items.item',
-            'cart'
+            'items.cart',
         ])
         ->latest()
         ->get()
@@ -77,6 +100,10 @@ class DeliveryOrderController extends Controller
                     return [
                         'item_id' => $item->item_id,
                         'name' => $item->item?->name,
+                        'cart' => $item->cart,
+                        'cart_id' => $item->cart_id,
+                        'cart_weight' => $item->cart_weight,
+                        'cart_qty' => $item->cart_qty,
                         'image' => $item->item?->image,
                         'image_url' => $item->item?->image,
                         'unit' => $item->item?->unit?->unit_code,
@@ -101,41 +128,17 @@ class DeliveryOrderController extends Controller
         return Inertia::render('admin/DeliveryOrder/Index', [
             'deliveryOrders' => $deliveryOrders,
             'suppliers' => Supplier::select('id','name')->get(),
-            'items' => Item::select('id','name','image')->get(),
+            'items' => Item::with('unit')->get(),
             'customers' => Customer::select('id','name','phone')->get(),
             'carts' => Cart::select('id','name')->get(),
         ]);
     }
 
-    public function store(Request $request, SignatureService $signatureService)
+    public function store(Request $request, SignatureService $signatureService, DeliveryOrderService $service)
     {
-        $validated = $request->validate([
-            'type' => 'required|in:in,out',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'customer_id' => 'nullable|exists:customers,id',
-            'cart_id' => 'nullable|exists:carts,id',
-            'status' => 'required|in:draft,sent,done',
+        $validated = $this->validateRequest($request);
 
-            'cart_qty' => 'nullable|numeric',
-            'cart_weight' => 'nullable|numeric',
-
-            'sender_name' => 'nullable|string|max:255',
-            'receiver_name' => 'nullable|string|max:255',
-
-            'note' => 'nullable|string',
-
-            'sender_signature' => 'nullable|string',
-            'receiver_signature' => 'nullable|string',
-
-            'items' => 'nullable|array',
-
-            'items.*.item_id' => 'nullable|exists:items,id',
-            'items.*.quantity' => 'nullable|numeric|min:0',
-            'items.*.bad_stock' => 'nullable|numeric|min:0',
-            'items.*.price' => 'nullable|numeric|min:0',
-        ]);
-
-        DB::transaction(function () use ($validated, $signatureService) {
+        DB::transaction(function () use ($validated, $signatureService, $service) {
 
             $doNumber = $this->generateDoNumber($validated['type']);
             $user = Auth::user();
@@ -164,94 +167,16 @@ class DeliveryOrderController extends Controller
                 }
             }
 
-
             $deliveryOrder = DeliveryOrder::create([
+                ...$validated,
                 'do_number' => $doNumber,
                 'date' => now(),
-
-                'supplier_id' => $validated['supplier_id'] ?? null,
-                'customer_id' => $validated['customer_id'] ?? null,
-                'cart_id' => $validated['cart_id'] ?? null,
-
-                'type' => $validated['type'],
-                'status' => $validated['status'],
-                
-                'cart_qty' => $validated['cart_qty'],
-                'cart_weight' => $validated['cart_weight'],
-
-                'sender_name' => $validated['sender_name'] ?? null,
-                'receiver_name' => $validated['receiver_name'] ?? null,
-
-                'sender_signature' => $validated['sender_signature'] ?? null,
-                'receiver_signature' => $validated['receiver_signature'] ?? null,
-
-                'note' => $validated['note'] ?? null,
             ]);
 
-            $totalAmount = 0;
-            $totalWeight = $validated['cart_qty'] * $validated['cart_weight'];
+            [$totalAmount, $totalWeight] = $service->handleItems($deliveryOrder, $validated['items']);
 
-            foreach ($validated['items'] as $item) {
-
-                $badStock = $item['bad_stock'] ?? 0;
-                $cleanQty = $item['quantity'] - $badStock;
-                $price = $item['price'] ?? 0;
-
-                DeliveryOrderItem::create([
-                    'delivery_order_id' => $deliveryOrder->id,
-                    'item_id' => $item['item_id'],
-                    'quantity' => $item['quantity'],
-                    'bad_stock' => $badStock,
-                    'price' => $price,
-                ]);
-
-                // hitung total
-                $totalAmount += $item['quantity'] * $price;
-                $totalWeight += $item['quantity'];
-
-                if ($deliveryOrder->status === 'done') {
-
-                    $product = Item::find($item['item_id']);
-
-                    $before = $product->stock;
-
-                    if ($deliveryOrder->type === 'in') {
-
-                        $product->increment('stock', $cleanQty);
-
-                        if ($badStock > 0) {
-                            $product->increment('bad_stock', $badStock);
-                        }
-                        $type = 'in';
-
-                    } else {
-
-                        $product->decrement('stock', $cleanQty);
-                        $type = 'out';
-
-                    }
-                    $after = $product->fresh()->stock;
-
-                    StockMovement::create([
-                        'item_id' => $product->id,
-                        'warehouse_id' => $product->warehouse_id,
-
-                        'type' => $type,
-
-                        'quantity' => $cleanQty,
-                        'bad_stock' => $badStock,
-
-                        'stock_before' => $before,
-                        'stock_after' => $after,
-
-                        'reference_type' => 'delivery_order',
-                        'reference_id' => $deliveryOrder->id,
-
-                        'user_id' => Auth::id(),
-
-                        'note' => 'Delivery Order '.$deliveryOrder->do_number
-                    ]);
-                }
+            if ($validated['status'] === 'done') {
+                $service->updateStock($deliveryOrder, $validated['items']);
             }
 
             // update total amount
@@ -263,7 +188,7 @@ class DeliveryOrderController extends Controller
             // auto create invoice
             $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
 
-            if ($deliveryOrder->status === 'done' && !$isInvoiceCreated) {
+            if ($validated['status'] === 'done' && !$isInvoiceCreated) {
                 $this->createInvoice($deliveryOrder);
             }
 
@@ -272,98 +197,42 @@ class DeliveryOrderController extends Controller
         return back()->with('success', 'Surat jalan berhasil dibuat');
     }
 
-    public function update(Request $request, DeliveryOrder $surat_jalan, SignatureService $signatureService)
-    {
-        // dd($surat_jalan, $request->all());
-        $deliveryOrder = $surat_jalan;
+    public function update(
+        Request $request,
+        DeliveryOrder $deliveryOrder,
+        SignatureService $signatureService,
+        DeliveryOrderService $service
+    ) {
+        $validated = $this->validateRequest($request);
 
-        //delete invoice jika delivery order ubah status
-        $invoice = Invoice::where('delivery_order_id', $deliveryOrder->id);
-        $isInvoiceCreated = $invoice->exists();
-        if ($deliveryOrder->status === 'done' && $isInvoiceCreated) {
-           $invoice->delete();
-        }
-        
-
-        $validated = $request->validate([
-
-            'type' => 'required|in:in,out',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'customer_id' => 'nullable|exists:customers,id',
-            'cart_id' => 'nullable|exists:carts,id',
-            'status' => 'required|in:draft,sent,done',
-
-            'cart_qty' => 'nullable|numeric',
-            'cart_weight' => 'nullable|numeric',
-
-            'sender_name' => 'nullable|string|max:255',
-            'receiver_name' => 'nullable|string|max:255',
-
-            'notes' => 'nullable|string',
-
-            'sender_signature' => 'nullable|string',
-            'receiver_signature' => 'nullable|string',
-
-            'items' => 'required|array|min:1',
-
-            'items.*.item_id' => 'required|exists:items,id',
-            'items.*.quantity' => 'required|numeric|min:0',
-            'items.*.bad_stock' => 'nullable|numeric|min:0',
-            'items.*.price' => 'nullable|numeric|min:0',
-
-        ]);
-
-        //menyimpan nama dan signature
         $user = Auth::user();
 
+        // 🔥 Set default sender/receiver
         if ($validated['type'] === 'in') {
-
             $validated['receiver_name'] = $user->name;
             $validated['receiver_signature'] = $user->signature ?? null;
-            
         } else {
             $validated['sender_name'] = $user->name;
             $validated['sender_signature'] = $user->signature ?? null;
         }
 
-        DB::transaction(function () use ($request, $validated, $deliveryOrder, $signatureService) {
+        DB::transaction(function () use (
+            $request,
+            &$validated,
+            $deliveryOrder,
+            $signatureService,
+            $service
+        ) {
 
             /**
-             * 1️⃣ Rollback stock lama jika DO sebelumnya DONE
+             * 1️⃣ Rollback stock jika sebelumnya DONE
              */
             if ($deliveryOrder->status === 'done') {
-
-                StockMovement::where('reference_type','delivery_order')
-                    ->where('reference_id',$deliveryOrder->id)
-                    ->delete();
-
-                foreach ($deliveryOrder->items as $oldItem) {
-
-                    $cleanQty = $oldItem->quantity - $oldItem->bad_stock;
-
-                    $product = Item::find($oldItem->item_id);
-
-                    if ($deliveryOrder->type === 'in') {
-
-                        $product->decrement('stock', $cleanQty);
-
-                        if ($oldItem->bad_stock > 0) {
-                            $product->decrement('bad_stock', $oldItem->bad_stock);
-                        }
-
-                    } else {
-
-                        $product->increment('stock', $cleanQty);
-
-                    }
-
-                }
-
+                $service->rollbackStock($deliveryOrder);
             }
 
-
             /**
-             * 2️⃣ Upload evidence baru jika ada
+             * 2️⃣ Handle evidence upload
              */
             if ($request->hasFile('evidence')) {
 
@@ -372,7 +241,6 @@ class DeliveryOrderController extends Controller
                 }
 
                 $file = $request->file('evidence');
-
                 $filename = time().'_'.$file->getClientOriginalName();
 
                 $destination = public_path($this->evidenceUploadPath);
@@ -386,46 +254,33 @@ class DeliveryOrderController extends Controller
                 $validated['evidence'] = $this->evidenceSavePath.'/'.$filename;
             }
 
-
             /**
-             * 3️⃣ Simpan signature baru jika ada
+             * 3️⃣ Handle signature (pakai service kamu 🔥)
              */
-            if ($request->sender_signature && str_contains($request->sender_signature, 'base64')) {
+            $validated['sender_signature'] = $signatureService->saveBase64(
+                $validated['sender_signature'] ?? null,
+                $deliveryOrder->sender_signature
+            );
 
-                $validated['sender_signature'] =
-                    $validated['sender_signature'] = $signatureService->saveBase64(
-                        $validated['sender_signature'],
-                    );
-            }
-
-            if ($request->receiver_signature && str_contains($request->receiver_signature, 'base64')) {
-
-                $validated['receiver_signature'] =
-                    $validated['receiver_signature'] = $signatureService->saveBase64(
-                        $validated['receiver_signature'],
-                    );
-            }
+            $validated['receiver_signature'] = $signatureService->saveBase64(
+                $validated['receiver_signature'] ?? null,
+                $deliveryOrder->receiver_signature
+            );
 
             /**
              * 4️⃣ Update Delivery Order
              */
             $deliveryOrder->update([
-
                 'supplier_id' => $validated['supplier_id'] ?? null,
                 'customer_id' => $validated['customer_id'] ?? null,
-                'cart_id' => $validated['cart_id'] ?? null,
-
                 'type' => $validated['type'],
                 'status' => $validated['status'],
-
-                'cart_qty' => $validated['cart_qty'],
-                'cart_weight' => $validated['cart_weight'],
 
                 'sender_name' => $validated['sender_name'] ?? null,
                 'receiver_name' => $validated['receiver_name'] ?? null,
 
-                'sender_signature' => $validated['sender_signature'] ?? $deliveryOrder->sender_signature,
-                'receiver_signature' => $validated['receiver_signature'] ?? $deliveryOrder->receiver_signature,
+                'sender_signature' => $validated['sender_signature'],
+                'receiver_signature' => $validated['receiver_signature'],
 
                 'evidence' => $validated['evidence'] ?? $deliveryOrder->evidence,
 
@@ -433,104 +288,43 @@ class DeliveryOrderController extends Controller
             ]);
 
             /**
-             * 5️⃣ Hapus item lama
+             * 5️⃣ Reset items
              */
             $deliveryOrder->items()->delete();
 
+            /**
+             * 6️⃣ Insert items + hitung total
+             */
+            [$totalAmount, $totalWeight] =
+                $service->handleItems($deliveryOrder, $validated['items']);
 
             /**
-             * 6️⃣ Insert item baru
+             * 7️⃣ Update stock jika DONE
              */
-            $totalAmount = 0;
-            $totalWeight = 0;
-
-            foreach ($validated['items'] as $item) {
-
-                $badStock = $item['bad_stock'] ?? 0;
-                $qty = $item['quantity'] ?? 0;
-                $cleanQty = $qty - $badStock;
-
-                DeliveryOrderItem::create([
-                    'delivery_order_id' => $deliveryOrder->id,
-                    'item_id' => $item['item_id'],
-                    'quantity' => $item['quantity'],
-                    'bad_stock' => $badStock,
-                    'price' => $item['price'] ?? 0,
-                ]);
-
-                // hitung total
-                $totalAmount += $qty * ($item['price'] ?? 0);
-                $totalWeight += $qty;
-
-
-                /**
-                 * 7️⃣ Update stock jika status DONE
-                 */
-                if ($validated['status'] === 'done') {
-
-                    $item = Item::find($item['item_id']);
-                    $before = $item->stock;
-
-                    if ($validated['type'] === 'in') {
-
-                        $item->increment('stock', $qty);
-
-                        if ($badStock > 0) {
-                            $item->increment('bad_stock', $badStock);
-                        }
-                        
-                        $type = 'in';
-                        
-                    } else {
-                        
-                        $item->decrement('stock', $qty);
-                        
-                        if ($badStock > 0 && $item->bad_stock) {
-                            $item->decrement('bad_stock', $badStock);
-                        }
-                        
-                        $type = 'out';
-
-                    }
-
-                    $after = $item->refresh()->stock;
-
-                    StockMovement::create([
-                        'item_id' => $item->id,
-                        'warehouse_id' => $item->warehouse_id,
-
-                        'type' => $type,
-
-                        'quantity' => $cleanQty,
-                        'bad_stock' => $badStock,
-
-                        'stock_before' => $before,
-                        'stock_after' => $after,
-
-                        'reference_type' => 'delivery_order',
-                        'reference_id' => $deliveryOrder->id,
-
-                        'user_id' => Auth::id(),
-
-                        'note' => 'Delivery Order '.$deliveryOrder->do_number
-                    ]);
-
-                }
-
+            if ($validated['status'] === 'done') {
+                $service->updateStock($deliveryOrder, $validated['items']);
             }
 
-            $totalWeight += ($validated['cart_qty'] ?? 0) * ($validated['cart_weight'] ?? 0);
-
-            // update total amount
+            /**
+             * 8️⃣ Update total
+             */
             $deliveryOrder->update([
                 'total_amount' => $totalAmount,
                 'total_weight' => $totalWeight
             ]);
 
-            //auto create invoice
-            $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
-            if ($validated['status'] === 'done' && !$isInvoiceCreated) {
-                $this->createInvoice($deliveryOrder);
+            /**
+             * 9️⃣ Handle invoice
+             */
+            $invoice = Invoice::where('delivery_order_id', $deliveryOrder->id);
+
+            if ($validated['status'] === 'done') {
+                if (!$invoice->exists()) {
+                    $this->createInvoice($deliveryOrder);
+                }
+            } else {
+                // kalau turun dari DONE → hapus invoice
+                $invoice->delete();
             }
 
         });
@@ -604,29 +398,6 @@ class DeliveryOrderController extends Controller
             'remaining' => $total
         ]);
 
-    }
-
-    private function saveSignature($base64)
-    {
-        if (!$base64) return null;
-
-        $image = str_replace('data:image/png;base64,', '', $base64);
-        $image = str_replace(' ', '+', $image);
-
-        $fileName = 'signature_' . uniqid() . '.png';
-
-        $destination = public_path($this->signatureUploadPath);
-
-        if (!File::exists($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
-        File::put(
-            $destination.'/'.$fileName,
-            base64_decode($image)
-        );
-
-        return $this->signatureSavePath.'/'.$fileName;
     }
 
     public function previewNumber($type)
@@ -747,7 +518,8 @@ class DeliveryOrderController extends Controller
         $deliveryOrder = DeliveryOrder::with([
             'supplier',
             'customer',
-            'items.item.unit'
+            'items.item.unit',
+            'items.cart',
         ])->findOrFail($surat_jalan->id);
         $websiteInfo = WebsiteInfo::first();
 

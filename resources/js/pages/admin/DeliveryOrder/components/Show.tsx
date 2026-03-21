@@ -20,9 +20,15 @@ export default function Show({ data, onClose }: Props) {
         }, 0)
     }
 
-    const cartWeight = Number(data.cart_qty || 0) * Number(data.cart_weight || 0)
+    const getCartWeight = () => {
+        return (data.items ?? []).reduce((sum: number, item: any) => {
+            const cartQty = Number(item.cart_qty || 0)
+            const cartWeight = Number(item.cart_weight || 0)
 
-    const totalWeight = getTotalItemWeight() + cartWeight
+            return sum + (cartQty * cartWeight)
+        }, 0)
+    }
+    const totalWeight = getTotalItemWeight() + getCartWeight()
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
@@ -104,6 +110,7 @@ export default function Show({ data, onClose }: Props) {
                                     <tr className="text-left">
 
                                         <th className="p-3">BARANG</th>
+                                        <th className="p-3">KERANJANG</th>
                                         <th className="p-3 text-center">QTY</th>
                                         <th className="p-3 text-center">BAD</th>
                                         <th className="p-3 text-center">NET</th>
@@ -127,6 +134,16 @@ export default function Show({ data, onClose }: Props) {
 
                                                 <td className="p-3">
                                                     {item.name}
+                                                </td>
+
+                                                <td className="p-3">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span>{item.cart?.name ?? 'kosong'}</span>
+                                                        <div className="flex flex-col items-start text-xs text-muted-foreground">
+                                                            <span>jumlah: {item.cart_qty ?? 'kosong'}</span>
+                                                            <span>berat/keranjang: {item.cart_weight ?? 'kosong'}</span>
+                                                        </div>
+                                                    </div>
                                                 </td>
 
                                                 <td className="p-3 text-center">
@@ -157,34 +174,7 @@ export default function Show({ data, onClose }: Props) {
 
                     {/* CART INFO */}
 
-                    <div className="grid grid-cols-4 gap-4">
-
-                        <div className="bg-muted rounded-lg p-4">
-                            <p className="text-xs text-muted-foreground">
-                                CART
-                            </p>
-                            <p className="font-medium">
-                                {data.cart_name || "-"}
-                            </p>
-                        </div>
-
-                        <div className="bg-muted rounded-lg p-4">
-                            <p className="text-xs text-muted-foreground">
-                                QTY CART
-                            </p>
-                            <p className="font-medium">
-                                {data.cart_qty || 0}
-                            </p>
-                        </div>
-
-                        <div className="bg-muted rounded-lg p-4">
-                            <p className="text-xs text-muted-foreground">
-                                BERAT CART
-                            </p>
-                            <p className="font-medium">
-                                {data.cart_weight || 0}
-                            </p>
-                        </div>
+                    <div className="grid grid-cols-1 gap-4">
 
                         <div className="bg-primary/10 rounded-lg p-4">
                             <p className="text-xs text-muted-foreground">

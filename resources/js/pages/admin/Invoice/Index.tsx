@@ -14,10 +14,11 @@ import {SearchInput} from "@/components/search-input";
 import {Button} from "@/components/ui/button";
 import {formatCurrency} from "@/helpers/format";
 import AppLayout from "@/layouts/app-layout";
-import type {BreadcrumbItem}
-from '@/types';
+import type {BreadcrumbItem} from '@/types';
 import Payment from "./components/Payment";
 import Show from "./components/Show";
+import { usePagination } from "@/hooks/use-pagination"
+import Pagination from "@/components/Pagination"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -113,6 +114,13 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
             invoice.customer.toLowerCase().includes(search.toLowerCase())
     )
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filteredInvoices, 6)
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Invoices"/>
@@ -207,7 +215,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                 <div className="grid grid-cols-1 gap-2">
 
                     {
-                        filteredInvoices.map((invoice) => {
+                        paginatedData.map((invoice) => {
 
                             const progress = (invoice.paid / invoice.total) * 100
 
@@ -315,6 +323,12 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                     }
 
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
             </div>
 
             {openShow && (

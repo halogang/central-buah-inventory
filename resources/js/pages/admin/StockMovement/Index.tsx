@@ -4,6 +4,8 @@ import { useState } from "react";
 import { SearchInput } from "@/components/search-input";
 import AppLayout from "@/layouts/app-layout";
 import type { BreadcrumbItem } from "@/types";
+import { usePagination } from "@/hooks/use-pagination";
+import Pagination from "@/components/Pagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -53,6 +55,13 @@ export default function Index() {
     const filtered = stockMovements.filter((m) =>
         m.item?.name?.toLowerCase().includes(search.toLowerCase())
     );
+
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6)
 
     const totalIn = stockMovements
         .filter((m) => m.type === "in")
@@ -117,7 +126,7 @@ export default function Index() {
                         </thead>
 
                         <tbody>
-                            {filtered.map((m) => {
+                            {paginatedData.map((m) => {
 
                                 const { label, style, icon } = getMovementType(m.type);
 
@@ -166,6 +175,17 @@ export default function Index() {
                                     </tr>
                                 );
                             })}
+
+                            {paginatedData.length === 0 && (
+                                <tr>
+                                    <td
+                                        colSpan={9}
+                                        className="text-center p-6 text-muted-foreground"
+                                    >
+                                        Tidak ada pergerakan barang
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
 
                     </table>

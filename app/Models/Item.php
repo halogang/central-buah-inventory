@@ -64,6 +64,11 @@ class Item extends Model
         return $this->hasOne(StockMovement::class);
     }
 
+    public function posItem()
+    {
+        return $this->hasMany(PosItem::class);
+    }
+
     public function getImageUrlAttribute()
     {
         return $this->image

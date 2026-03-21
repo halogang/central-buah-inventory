@@ -5,6 +5,8 @@ import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/layouts/app-layout";
 import type { BreadcrumbItem } from "@/types";
+import { usePagination } from "@/hooks/use-pagination";
+import Pagination from "@/components/Pagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -91,6 +93,13 @@ export default function Index() {
 
         return matchesSearch && matchesStatus;
     });
+
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 10)
 
     const itemTotal = items.length;
 
@@ -206,7 +215,7 @@ export default function Index() {
                         </thead>
 
                         <tbody>
-                            {filtered.map((i) => {
+                            {paginatedData.map((i) => {
 
                                 const cleanStock = i.stock - i.bad_stock;
                                 const cleanStockValue =
@@ -278,7 +287,7 @@ export default function Index() {
                 {/* MOBILE CARD LIST */}
                 <div className="grid gap-3 md:hidden">
 
-                    {filtered.map((i) => {
+                    {paginatedData.map((i) => {
 
                         const cleanStock = i.stock - i.bad_stock;
                         const cleanStockValue =
@@ -326,6 +335,12 @@ export default function Index() {
                         );
                     })}
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
             </div>
         </AppLayout>
     );

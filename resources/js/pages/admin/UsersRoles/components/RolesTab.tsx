@@ -1,5 +1,7 @@
 import type { Permission, RoleData } from "../types"
 import RoleCard from "./RoleCard"
+import { usePagination } from "@/hooks/use-pagination"
+import Pagination from "@/components/Pagination"
 
 interface Props {
     roles: RoleData[]
@@ -23,20 +25,35 @@ export default function RolesTab({
         r.name.toLowerCase().includes(search.toLowerCase())
     )
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6)
+
     return (
-        <div className="flex flex-col gap-4">
+        <>
+            <div className="flex flex-col gap-4">
 
-            {filtered.map((role) => (
-                <RoleCard
-                    key={role.id}
-                    role={role}
-                    permissions={permissions}
-                    isOwner={isOwner}
-                    onEdit={() => openEdit(role)}
-                    onDelete={() => onDelete(role)}
-                />
-            ))}
+                {paginatedData.map((role) => (
+                    <RoleCard
+                        key={role.id}
+                        role={role}
+                        permissions={permissions}
+                        isOwner={isOwner}
+                        onEdit={() => openEdit(role)}
+                        onDelete={() => onDelete(role)}
+                    />
+                ))}
 
-        </div>
+            </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goTo}
+            />
+        </>
     )
 }

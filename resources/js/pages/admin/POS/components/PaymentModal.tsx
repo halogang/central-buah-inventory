@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, CheckCircle, Printer, ShoppingCart, Apple } from "lucide-react";
 import { CartItem, PaymentMethod, formatRupiah } from "@/data/products";
+import { store } from "@/routes/pos";
 
 interface PaymentModalProps {
   cart: CartItem[];

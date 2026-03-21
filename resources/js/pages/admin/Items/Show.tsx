@@ -8,6 +8,8 @@ import { notify } from "@/lib/notify";
 import { destroy, index } from "@/routes/master/items";
 import type { BreadcrumbItem } from "@/types";
 import Form from "./components/Form";
+import { usePagination } from "@/hooks/use-pagination";
+import Pagination from "@/components/Pagination";
 
 interface Category {
     id: number;
@@ -108,6 +110,13 @@ export default function Show({
         i.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filteredItems, 10);
+
     const totalBadStock = items.reduce(
         (total, item) => total + Number(item.bad_stock || 0),
         0
@@ -204,7 +213,7 @@ export default function Show({
                         </thead>
 
                         <tbody>
-                            {filteredItems.map((item) => (
+                            {paginatedData.map((item) => (
                                 <tr
                                     key={item.id}
                                     className="border-t hover:bg-muted/30 transition"
@@ -285,10 +294,10 @@ export default function Show({
                                 </tr>
                             ))}
 
-                            {filteredItems.length === 0 && (
+                            {paginatedData.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={7}
+                                        colSpan={9}
                                         className="text-center p-6 text-muted-foreground"
                                     >
                                         Tidak ada barang dalam kategori ini
@@ -298,6 +307,11 @@ export default function Show({
                         </tbody>
                     </table>
                 </div>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
                 {showForm && (
                     <Form

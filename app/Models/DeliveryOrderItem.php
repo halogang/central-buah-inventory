@@ -14,7 +14,10 @@ class DeliveryOrderItem extends Model
         'item_id',
         'quantity',
         'bad_stock',
-        'price'
+        'price',
+        'cart_id',
+        'cart_weight',
+        'cart_qty',
     ];
 
     public function deliveryOrder()
@@ -25,5 +28,10 @@ class DeliveryOrderItem extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class);
     }
 }

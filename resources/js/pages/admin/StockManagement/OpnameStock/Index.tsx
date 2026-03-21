@@ -7,6 +7,8 @@ import AppLayout from '@/layouts/app-layout'
 import { notify } from '@/lib/notify'
 import { destroy, show } from '@/routes/stok/stok-opname'
 import Form from './components/Form'
+import { usePagination } from '@/hooks/use-pagination'
+import Pagination from '@/components/Pagination'
 
 interface Opname {
     id:number
@@ -71,6 +73,13 @@ export default function StockOpnames(){
         )
     })
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6)
+
     const openForm = (op?:Opname)=>{
         setEditItem(op || null)
         setShowForm(true)
@@ -130,7 +139,7 @@ export default function StockOpnames(){
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                {filtered.map(op=>(
+                {paginatedData.map(op=>(
                     <div
                         key={op.id}
                         className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm"
@@ -187,6 +196,12 @@ export default function StockOpnames(){
                 ))}
 
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goTo}
+            />
 
         </div>
 

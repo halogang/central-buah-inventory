@@ -15,8 +15,8 @@ class Cart extends Model
         'note',
     ];
 
-    public function delivery_order()
+    public function deliveryOrderItem()
     {
-        return $this->hasMany(DeliveryOrder::class);
+        return $this->hasMany(DeliveryOrderItem::class);
     }
 }

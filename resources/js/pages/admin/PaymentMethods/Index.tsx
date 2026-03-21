@@ -12,6 +12,9 @@ import { notify } from '@/lib/notify';
 import { store, update, destroy } from '@/routes/master/payment-methods';
 import type { BreadcrumbItem } from '@/types';
 
+import { usePagination } from '@/hooks/use-pagination';
+import Pagination from '@/components/Pagination';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Metode Pembayaran',
@@ -73,6 +76,13 @@ export default function Index() {
     const filtered = methods.filter((m) =>
         m.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6);
 
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,7 +175,7 @@ export default function Index() {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {filtered.map((m) => (
+                    {paginatedData.map((m) => (
                         <div
                             key={m.id}
                             className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border cursor-pointer flex items-center justify-between gap-4"
@@ -201,6 +211,12 @@ export default function Index() {
                         </div>
                     ))}
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
                 {(showCreate || editItem) && (
                     <div

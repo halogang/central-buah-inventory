@@ -48,11 +48,6 @@ class DeliveryOrder extends Model
         return $this->hasMany(DeliveryOrderItem::class);
     }
 
-    public function cart()
-    {
-        return $this->belongsTo(Cart::class);
-    }
-
     public function scopeIn($query)
     {
         return $query->where('type', 'in');

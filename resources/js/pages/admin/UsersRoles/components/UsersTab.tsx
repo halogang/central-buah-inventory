@@ -1,5 +1,7 @@
 import type { UserData } from "../types"
 import UserCard from "./UserCard"
+import { usePagination } from "@/hooks/use-pagination"
+import Pagination from "@/components/Pagination"
 
 interface Props {
     users: UserData[]
@@ -23,19 +25,33 @@ export default function UsersTab({
         u.name.toLowerCase().includes(search.toLowerCase())
     )
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6)
+
     return (
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((user) => (
-                <UserCard 
-                key={user.id}
-                user={user}
-                isOwner={isOwner}
-                onEdit={() => openEdit(user)}
-                onPassword={() => openPassword(user)}
-                onDelete={() => onDelete(user)}
-                />
-            ))}
-        </div>
+        <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {paginatedData.map((user) => (
+                    <UserCard 
+                    key={user.id}
+                    user={user}
+                    isOwner={isOwner}
+                    onEdit={() => openEdit(user)}
+                    onPassword={() => openPassword(user)}
+                    onDelete={() => onDelete(user)}
+                    />
+                ))}
+            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goTo}
+            />
+        </>
     )
 }

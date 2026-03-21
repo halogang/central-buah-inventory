@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy } from '@/routes/master/suppliers';
 import type { BreadcrumbItem } from '@/types';
+import { usePagination } from '@/hooks/use-pagination';
+import Pagination from '@/components/Pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -75,6 +77,13 @@ export default function Index() {
         s.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 6);
+
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
         if (editItem) {
@@ -124,7 +133,7 @@ export default function Index() {
                 </div>
 
                 <div className="flex flex-col gap-4">
-                    {filtered.map((s) => (
+                    {paginatedData.map((s) => (
                         <div
                             key={s.id}
                             className="rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border flex items-center justify-between gap-4"
@@ -162,6 +171,12 @@ export default function Index() {
                         </div>
                     ))}
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
                 {(showCreate || editItem) && (
                     <div
