@@ -1,6 +1,8 @@
 import { Image, Search } from "lucide-react";
 import { Product } from "@/data/products";
 import { formatCurrency } from "@/helpers/format";
+import { usePagination } from "@/hooks/use-pagination";
+import Pagination from "@/components/Pagination";
 
 interface ProductGridProps {
   products: Product[];
@@ -14,10 +16,17 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    goTo,
+  } = usePagination(filtered, 12);
+
   return (
     <div className="flex-1 flex flex-col min-w-0">
       {/* Header */}
-      <div className="pr-6 py-4">
+      <div className="pr-6">
         <h1 className="text-xl font-bold text-foreground">POS Kasir</h1>
       </div>
 
@@ -37,8 +46,8 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
 
       {/* Grid */}
       <div className="flex-1 overflow-y-auto pr-6 pb-6">
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {filtered.map((product) => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {paginatedData.map((product) => (
             <button
               key={product.id}
               onClick={() => onProductClick(product)}
@@ -47,7 +56,7 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
               <Image className="w-12 h-12 object-contain mb-3 group-hover:scale-110 transition-transform duration-150 text-muted-foreground"/>
               <div className="font-semibold text-md text-foreground leading-tight">{product.name}</div>
               <div className="text-sm text-muted-foreground mt-0.5">
-                {product.stock} {product.unit}
+                {product.stock ?? '0'} {product.unit}
               </div>
               <div className="font-bold text-md pos-price-text tabular-nums text-orange-400">
                 {formatCurrency(product.price)}
@@ -55,6 +64,12 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
             </button>
           ))}
         </div>
+
+        <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goTo}
+        />
       </div>
     </div>
   );

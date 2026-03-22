@@ -6,6 +6,7 @@ import { CartItem, PaymentMethod, Product } from "@/data/products";
 import AppLayout from "@/layouts/app-layout";
 import { Head, usePage } from "@inertiajs/react";
 import type { BreadcrumbItem } from '@/types';
+import { notify } from "@/lib/notify";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,12 +15,13 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const Index = () => {
+  const Index = () => {
   const { productData } = usePage().props as any;
   const products: Product[] = productData.map((item: any) => ({
     id: String(item.id),
     name: item.name,
     price: Number(item.price),
+    stock: Number(item.stock),
     unit: item.unit ?? "pcs",
     image: item.image ?? null,
   }));
@@ -32,23 +34,51 @@ const Index = () => {
   const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0 });
 
   const addToCart = useCallback((product: Product) => {
+    let shouldNotify = false;
+
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
+
       if (existing) {
+        if (existing.qty >= product.stock) {
+          shouldNotify = true;
+          return prev;
+        }
+
         return prev.map((item) =>
-          item.product.id === product.id ? { ...item, qty: item.qty + 1 } : item
+          item.product.id === product.id
+            ? { ...item, qty: item.qty + 1 }
+            : item
         );
       }
+
+      if (product.stock <= 0) {
+        shouldNotify = true;
+        return prev;
+      }
+
       return [...prev, { product, qty: 1, customPrice: null }];
     });
+
+    if (shouldNotify) {
+      notify.error('Stok tidak cukup!');
+    }
   }, []);
 
   const changeQty = useCallback((productId: string, delta: number) => {
     setCart((prev) =>
       prev.map((item) => {
         if (item.product.id !== productId) return item;
+
         const newQty = item.qty + delta;
-        return newQty >= 1 ? { ...item, qty: newQty } : item;
+
+        // 🚫 tidak boleh kurang dari 1
+        if (newQty < 1) return item;
+
+        // 🚫 tidak boleh lebih dari stock
+        if (newQty > item.product.stock) return item;
+
+        return { ...item, qty: newQty };
       })
     );
   }, []);

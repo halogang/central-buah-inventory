@@ -26,7 +26,6 @@ return new class extends Migration
             
             $table->integer('paid_amount')->nullable();
             $table->integer('change_amount')->nullable();
-            $table->integer('status');
             $table->timestamps();
         });
     }
