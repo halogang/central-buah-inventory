@@ -1,4 +1,4 @@
-import { Apple, Image, Search } from "lucide-react";
+import { Image, Search } from "lucide-react";
 import { Product } from "@/data/products";
 import { formatCurrency } from "@/helpers/format";
 

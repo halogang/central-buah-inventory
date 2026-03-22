@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Item;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -13,9 +14,19 @@ class POSController extends Controller
      */
     public function index()
     {
-        $items = 0;
+        $productData = Item::with('unit')->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'price' => $item->selling_price,
+                'unit' => $item->unit->unit_code ?? 'pcs',
+                'image' => $item->image,
+            ];
+        });
 
-        return Inertia::render('admin/POS/Index');
+        return Inertia::render('admin/POS/Index', [
+            'productData' => $productData
+        ]);
     }
 
     /**
@@ -31,7 +42,21 @@ class POSController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
+
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'total' => 'required|integer',
+            'payment_method' => 'required|string',
+            'paid_amount' => 'nullable|integer',
+            'change_amount' => 'nullable|integer',
+            'items' => 'required|array',
+        ]);
+
+        dd($validated);
+
+        // sementara return aja dulu
+        return back()->with('success', 'Transaksi berhasil');
     }
 
     /**

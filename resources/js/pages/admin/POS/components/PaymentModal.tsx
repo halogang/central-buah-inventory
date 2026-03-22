@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { X, CheckCircle, Printer, ShoppingCart, Apple } from "lucide-react";
+import { X, CheckCircle, Printer, Apple } from "lucide-react";
 import { CartItem, PaymentMethod, formatRupiah } from "@/data/products";
 import { store } from "@/routes/pos";
+import { router } from "@inertiajs/react";
 
 interface PaymentModalProps {
   cart: CartItem[];
@@ -34,16 +35,54 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
   ];
 
   const handleProcess = () => {
+    let paid = total;
+    let changeAmount = 0;
+
     if (paymentMethod === "tunai") {
       const received = Number(cashReceived);
+
       if (!received || received < total) {
         setError("Nominal kurang");
         return;
       }
-      onSuccess(received, received - total);
-    } else {
-      onSuccess(total, 0);
+
+      paid = received;
+      changeAmount = received - total;
     }
+
+    // 🔥 mapping cart → payload items
+    const items = cart.map((item) => ({
+      item_id: item.product.id,
+      item_name: item.product.name,
+      unit: item.product.unit ?? "pcs",
+      quantity: item.qty,
+      base_price: item.product.price,
+      price: item.customPrice ?? item.product.price,
+      total: (item.customPrice ?? item.product.price) * item.qty,
+    }));
+
+    const payload = {
+      date: new Date().toISOString().slice(0, 10),
+      subtotal: total,
+      discount: 0,
+      tax: 0,
+      total: total,
+      payment_method: paymentMethod,
+      paid_amount: paid,
+      change_amount: changeAmount,
+      status: 1,
+      items,
+    };
+
+    router.post(store(), payload, {
+      onSuccess: () => {
+        onSuccess(paid, changeAmount);
+      },
+      onError: (errors) => {
+        console.error(errors);
+        setError("Gagal memproses pembayaran");
+      },
+    });
   };
 
   return (
@@ -127,7 +166,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
           {/* Process */}
           <button
             onClick={handleProcess}
-            className="w-full h-12 rounded-xl pos-pay-gradient text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
+            className="w-full h-12 rounded-xl pos-pay-gradient text-primary-foreground bg-primary font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
           >
             <span className="text-base">💵</span>
             Proses Pembayaran

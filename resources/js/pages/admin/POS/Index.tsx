@@ -1,11 +1,10 @@
 import { useState, useCallback } from "react";
-import POSSidebar from "./components/POSSidebar";
 import ProductGrid from "./components/ProductGrid";
 import CartPanel from "./components/CartPanel";
 import PaymentModal, { SuccessModal } from "./components/PaymentModal";
-import { products as productData, CartItem, PaymentMethod, Product, formatRupiah } from "@/data/products";
+import { CartItem, PaymentMethod, Product } from "@/data/products";
 import AppLayout from "@/layouts/app-layout";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,6 +15,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const Index = () => {
+  const { productData } = usePage().props as any;
+  const products: Product[] = productData.map((item: any) => ({
+    id: String(item.id),
+    name: item.name,
+    price: Number(item.price),
+    unit: item.unit ?? "pcs",
+    image: item.image ?? null,
+  }));
+
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("tunai");
@@ -114,7 +122,7 @@ const Index = () => {
         <div className="p-4">
             <div className="flex flex-1">
                 <ProductGrid
-                products={productData}
+                products={products}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 onProductClick={addToCart}
