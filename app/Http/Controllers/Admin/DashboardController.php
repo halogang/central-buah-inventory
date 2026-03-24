@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DeliveryOrder;
 use App\Models\Invoice;
 use App\Models\Item;
+use App\Models\Pos;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -21,9 +22,11 @@ class DashboardController extends Controller
 
         $totalStock = Item::sum('stock');
 
-        $totalPendapatan =
-            Invoice::where('type', 'out')->sum('paid')
-            - Invoice::where('type', 'in')->sum('paid');
+        //menghitung total pendapatan
+        $invoiceEarning = Invoice::where('type', 'out')->sum('paid') - Invoice::where('type', 'in')->sum('paid');
+        $posEarning = Pos::sum('paid_amount');
+
+        $totalPendapatan = $invoiceEarning + $posEarning;
 
         $totalStockMenipis = Item::whereColumn('stock', '<=', 'min_stock')->count();
 
