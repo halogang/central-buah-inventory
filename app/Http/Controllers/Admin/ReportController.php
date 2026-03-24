@@ -13,6 +13,8 @@ class ReportController extends Controller
      */
     public function index()
     {
+        
+
         return Inertia::render('admin/Report/Index');
     }
 
