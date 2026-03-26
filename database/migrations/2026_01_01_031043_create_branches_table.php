@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('branches', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Retail / Wholesale
-            $table->string('code')->unique(); // RTL / WHS
             $table->text('address')->nullable();
-            $table->string('phone')->nullable();
-            $table->enum('type', ['retail', 'wholesale'])->nullable();
-            $table->enum('status', ['active', 'nonactive'])->default('active');
+            $table->string('contact')->nullable();
+            // $table->string('logo')->nullable();
+            // $table->string('favicon')->nullable();
+            // $table->string('url')->nullable();
+            // $table->string('primary_color')->nullable();
+            // $table->string('accent')->nullable();
             $table->timestamps();
         });
     }

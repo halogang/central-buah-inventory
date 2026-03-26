@@ -16,6 +16,7 @@ class Item extends Model
         'name',
         'category_id',
         'unit_id',
+        'branch_id',
         'warehouse_id',
         'purchase_price',
         'selling_price',
@@ -42,6 +43,11 @@ class Item extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function warehouse()

@@ -11,12 +11,18 @@ class Warehouse extends Model
         'name',
         'address',
         'user_id',
+        'branch_id',
         'status',
     ];
 
     public function items()
     {
         return $this->hasMany(Item::class);
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
     }
 
     public function stockOpnames()

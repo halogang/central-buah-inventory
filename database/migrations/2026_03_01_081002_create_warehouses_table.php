@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('address')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('status', ['active', 'nonactive'])->default('active');
             $table->timestamps();
         });
