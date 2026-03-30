@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\User;
@@ -15,6 +16,7 @@ class WarehouseController extends Controller
     public function index()
     {
         $warehouses = Warehouse::with('user', 'branch')->orderBy('updated_at', 'desc')->get();
+        $branches = Branch::all();
         $users = User::with('roles')
         ->whereHas('roles', function ($q) {
             $q->where('name', 'spv_gudang');
@@ -24,6 +26,7 @@ class WarehouseController extends Controller
         return Inertia::render('admin/Warehouses/Index', [
             'users' => $users,
             'warehouses' => $warehouses,
+            'branches' => $branches,
         ]);
     }
 
@@ -38,6 +41,7 @@ class WarehouseController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
             'user_id' => 'nullable|exists:users,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'status' => 'nullable|in:active,nonactive',
         ]);
 
@@ -75,6 +79,7 @@ class WarehouseController extends Controller
             'name' => 'required|string|max:255',
             'address' => 'nullable|string',
             'user_id' => 'nullable|exists:users,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'status' => 'nullable|in:active,nonactive',
         ]);
 

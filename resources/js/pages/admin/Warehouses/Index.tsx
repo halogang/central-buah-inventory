@@ -46,13 +46,15 @@ type WarehouseForm = {
     name: string;
     address: string;
     user_id: string;
+    branch_id: string;
     status: 'active' | 'nonactive';
 };
 
 export default function Warehouses() {
-    const { warehouses, users } = usePage<{
+    const { warehouses, users, branches } = usePage<{
         warehouses: Warehouse[]
         users: User[]
+        branches: Branch[]
     }>().props
     const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
@@ -63,6 +65,7 @@ export default function Warehouses() {
         name: '',
         address: '',
         user_id: '',
+        branch_id: '', 
         status: 'active',
     }
     const [form, setForm] = useState(emptyForm);
@@ -74,6 +77,7 @@ export default function Warehouses() {
                 name: item.name,
                 address: item.address || '',
                 user_id: String(item.user_id ?? ''),
+                branch_id: String(item.branch?.id ?? ''),
                 status: item.status === 'active' ? 'active' : 'nonactive',
             })
         } else {
@@ -111,6 +115,7 @@ export default function Warehouses() {
             name: form.name,
             address: form.address,
             user_id: form.user_id || null,
+            branch_id: form.branch_id || null,
             status: form.status,
         }
         if (editItem) {
@@ -271,6 +276,21 @@ export default function Warehouses() {
                                         ...users.map((u: any) => ({
                                             value: String(u.id),
                                             label: u.name,
+                                        })),
+                                    ]}
+                                />
+                                <FormSelect
+                                label="Cabang"
+                                    value={form.branch_id}
+                                    onChange={(e) =>
+                                        setForm({ ...form, branch_id: e.target.value })
+                                    }
+                                    error={errors.branch_id}
+                                    options={[
+                                        { value: '', label: 'Pilih Cabang' },
+                                        ...branches.map((b: any) => ({
+                                            value: String(b.id),
+                                            label: b.name,
                                         })),
                                     ]}
                                 />

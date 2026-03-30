@@ -17,6 +17,7 @@ export default function Form({
         name: '',
         address: '',
         capacity: '',
+        branch: '',
         pic: '',
         status: 'active',
     };
@@ -25,6 +26,7 @@ export default function Form({
         warehouse ? {
             name: warehouse.name,
             address: warehouse.address,
+            branch: warehouse.branch,
             capacity: String(warehouse.capacity),
             pic: warehouse.pic,
             status: warehouse.status,
