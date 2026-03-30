@@ -58,6 +58,7 @@ export function AppSidebar() {
         .map(({ label, href }) => ({ label, href }));   
 
     const invoiceItems = [
+        { permission: 'Surat Jalan', label: 'Jadwal Surat Jalan', href: '/delivery-schedules' },
         { permission: 'Surat Jalan', label: 'Surat Jalan', href: '/surat-jalan' },
         { permission: 'Invoice', label: 'Invoice', href: '/invoice' },
     ];

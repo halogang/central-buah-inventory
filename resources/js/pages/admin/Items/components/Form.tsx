@@ -112,7 +112,7 @@ export default function ItemForm({
 
                    <FormImageUpload
                         label="Gambar"
-                        preview={item.image_url}
+                        preview={preview}
                         onChange={(file) => {
                             setForm({ ...form, image: file });
 
