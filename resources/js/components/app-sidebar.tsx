@@ -32,7 +32,7 @@ export function AppSidebar() {
         { permission: 'Master Data', label: 'Info Website', href: '/master/website-info' },
         { permission: 'Master Data', label: 'Barang', href: '/master/items' },
         { permission: 'Master Data', label: 'Unit', href: '/master/units' },
-        { permission: 'Master Data', label: 'Cabang (coming soon)', href: '#' },
+        { permission: 'Master Data', label: 'Cabang', href: '/master/branches' },
         { permission: 'Master Data', label: 'Keranjang', href: '/master/carts' },
         { permission: 'Gudang', label: 'Gudang', href: '/master/warehouses' },
         { permission: 'Master Data', label: 'Kategori', href: '/master/categories' },
@@ -122,7 +122,7 @@ export function AppSidebar() {
                         />
                     )}
                 </SidebarDropdownProvider>
-                <NavMain items={navItems} badge='Prototype' />
+                <NavMain items={navItems} badge='' />
             </SidebarContent>
         </Sidebar>
     );

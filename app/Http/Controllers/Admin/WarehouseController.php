@@ -14,7 +14,7 @@ class WarehouseController extends Controller
 {
     public function index()
     {
-        $warehouses = Warehouse::with('user')->orderBy('updated_at', 'desc')->get();
+        $warehouses = Warehouse::with('user', 'branch')->orderBy('updated_at', 'desc')->get();
         $users = User::with('roles')
         ->whereHas('roles', function ($q) {
             $q->where('name', 'spv_gudang');

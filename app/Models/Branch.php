@@ -15,5 +15,8 @@ class Branch extends Model
         'contact',
     ];
 
-    
+    public function warehouse()
+    {
+        return $this->hasMany(Warehouse::class);
+    }
 }

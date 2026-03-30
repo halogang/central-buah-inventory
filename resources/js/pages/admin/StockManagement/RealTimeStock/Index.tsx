@@ -75,20 +75,18 @@ export default function Index() {
             .toLowerCase()
             .includes(search.toLowerCase());
 
-        const cleanStock = item.stock - item.bad_stock;
-
         let matchesStatus = true;
 
         if (statusFilter === "safe") {
-            matchesStatus = item.bad_stock === 0 && cleanStock >= item.min_stock;
+            matchesStatus = item.stock > item.min_stock;
+        }
+
+        if (statusFilter === "low") {
+            matchesStatus = item.stock < item.min_stock;
         }
 
         if (statusFilter === "bad") {
             matchesStatus = item.bad_stock > 0;
-        }
-
-        if (statusFilter === "low") {
-            matchesStatus = cleanStock < item.min_stock;
         }
 
         return matchesSearch && matchesStatus;
@@ -396,26 +394,16 @@ function Info({ label, value, className = "" }: any) {
 }
 
 function getStatus(item: Item) {
-
-    const cleanStock = item.stock - item.bad_stock;
-
-    if (item.bad_stock > 0) {
+    if (item.stock > item.min_stock) {
         return {
-            status: "Bad Stock",
-            style: "text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/20",
-        };
-    }
-
-    if (cleanStock < item.min_stock) {
-        return {
-            status: "Menipis",
-            style:
-                "text-yellow-700 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20",
+            status: "Aman",
+            style: "text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/20",
         };
     }
 
     return {
-        status: "Aman",
-        style: "text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/20",
+        status: "Menipis",
+        style:
+            "text-yellow-700 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20",
     };
 }

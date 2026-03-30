@@ -27,12 +27,18 @@ interface User {
     name: string;
 }
 
+interface Branch {
+    id: number;
+    name: string;
+}
+
 interface Warehouse {
     id: number;
     name: string;
     address?: string;
     user_id?: number | null;
     user?: User | null;
+    branch?: Branch | null;
     status: 'active' | 'nonactive';
 }
 
@@ -158,31 +164,37 @@ export default function Warehouses() {
                             key={w.id}
                             className="flex flex-col gap-4 rounded-xl border border-sidebar-border/70 bg-background px-4 pt-4 pb-6 shadow-sm dark:border-sidebar-border"
                         >
-                            <div className="flex items-start gap-3">
-                                <div className={
-                                    w.status === 'active'
-                                        ? 'rounded-xl p-3 bg-primary/10 text-primary'
-                                        : 'rounded-xl p-3 bg-muted text-muted-foreground'
-                                }>
-                                    <Warehouse className="size-6 shrink-0" />
-                                </div>
-                                <div className='flex flex-col gap-1'>
-                                    <div className="flex items-center gap-2">
-                                        <div className="font-semibold text-sm">
-                                            {w.name}
-                                        </div>
-                                        {w.status === 'active' ? (
-                                            ''
-                                        ) : (
-                                            <div className="rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground dark:bg-muted dark:text-muted-foreground">
-                                                Nonaktif
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-3">
+                                    <div className={
+                                        w.status === 'active'
+                                            ? 'rounded-xl p-3 bg-primary/10 text-primary'
+                                            : 'rounded-xl p-3 bg-muted text-muted-foreground'
+                                    }>
+                                        <Warehouse className="size-6 shrink-0" />
+                                    </div>
+                                    <div className='flex flex-col gap-1'>
+                                        <div className="flex items-center gap-2">
+                                            <div className="font-semibold text-sm">
+                                                {w.name}
                                             </div>
-                                        )}
+                                            {w.status === 'active' ? (
+                                                ''
+                                            ) : (
+                                                <div className="rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-muted-foreground dark:bg-muted dark:text-muted-foreground">
+                                                    Nonaktif
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                            <MapPin className="size-3 shrink-0" />
+                                            {w.address}
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                        <MapPin className="size-3 shrink-0" />
-                                        {w.address}
-                                    </div>
+                                </div>
+
+                                <div className="rounded-full bg-primary/10 px-2 py-1 text-xs font-bold text-primary dark:bg-muted dark:text-muted-foreground">
+                                    Cabang {w.branch? w.branch.name : ''}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 justify-between">
@@ -207,7 +219,6 @@ export default function Warehouses() {
                                     <Trash2 className="size-4 text-muted-foreground hover:text-red-600" />
                                 </button>
                             </div>
-
                         </div>
                     ))}
                 </div>

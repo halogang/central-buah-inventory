@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Category;
 use App\Models\StockMovement;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 class ItemController extends Controller
 {
     // default upload path (nanti bisa kamu ubah sendiri)
+    // private $uploadPath = '/images/items';
     private $uploadPath = '../../public_html/images/items';
     private $savePath = '/images/items';
 
@@ -126,7 +128,7 @@ class ItemController extends Controller
         $category = Category::findOrFail($id);
 
         $items = Item::with([
-            'warehouse',
+            'warehouse.branch',
             'category',
             'unit'
         ])->where('category_id', $category->id)->get();
@@ -136,6 +138,7 @@ class ItemController extends Controller
         $categories = Category::where('type', 'barang')->get();
         $warehouses = Warehouse::all(['id','name']);
         $units = Unit::all();
+        $branches = Branch::all();
 
         return Inertia::render('admin/Items/Show', [
             'items' => $items,
@@ -143,6 +146,7 @@ class ItemController extends Controller
             'categories' => $categories,
             'warehouses' => $warehouses,
             'units' => $units,
+            'branches' => $branches,
         ]);
     }
 

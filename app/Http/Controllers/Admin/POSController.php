@@ -19,7 +19,9 @@ class POSController extends Controller
      */
     public function index()
     {
-        $productData = Item::with('unit')->get()->map(function ($item) {
+        $productData = Item::with('unit', 'warehouse.branch')->whereHas('warehouse.branch', function($q){
+            $q->where('name', 'Retail');
+        })->get()->map(function ($item) {
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -27,6 +29,7 @@ class POSController extends Controller
                 'stock' => $item->stock,
                 'unit' => $item->unit->unit_code ?? 'pcs',
                 'image' => $item->image,
+                'thumbnail_url' => $item->thumbnail_url,
             ];
         });
 

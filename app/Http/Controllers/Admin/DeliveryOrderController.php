@@ -125,10 +125,14 @@ class DeliveryOrderController extends Controller
 
         });
 
+        $items = Item::with('unit', 'warehouse.branch')->whereHas('warehouse.branch', function($q){
+            $q->where('name', 'Grosir');
+        })->get();
+
         return Inertia::render('admin/DeliveryOrder/Index', [
             'deliveryOrders' => $deliveryOrders,
             'suppliers' => Supplier::select('id','name')->get(),
-            'items' => Item::with('unit')->get(),
+            'items' => $items,
             'customers' => Customer::select('id','name','phone')->get(),
             'carts' => Cart::select('id','name')->get(),
         ]);

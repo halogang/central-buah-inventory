@@ -1,11 +1,13 @@
 import type { BreadcrumbItem } from '@/types';
 import AppLayout from "@/layouts/app-layout";
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { formatCurrency } from '@/helpers/format';
-import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core'
 import Form from './components/Form';
+import { destroy } from '@/routes/keuangan';
+import { notify } from '@/lib/notify';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,13 +26,13 @@ interface Transaction {
 }
 
 interface PageProps extends InertiaPageProps {
-    transactions: Transaction[]
+    pettyCashTransactions: Transaction[]
     balance: any
 }
 
 export default function Index() {
     
-    const { transactions, balance } = usePage<PageProps>().props
+    const { pettyCashTransactions, balance } = usePage<PageProps>().props
 
 
     const [showModal, setShowModal] = useState(false)
@@ -53,6 +55,27 @@ export default function Index() {
         setSelectedTransaction(transaction)
         setTransactionType(transaction.type === 'income' ? 'income' : 'expense')
         setShowModal(true)
+    }
+
+    const confirmDelete = (transaction: Transaction) => {
+        notify.confirmDelete({
+            message: `Hapus ${transaction.type === 'income' ? 'pemasukan' : 'pengeluaran'}?`,
+            onConfirm: () => performDelete(transaction),
+        })
+    }
+    const performDelete = (transaction: Transaction) => {
+        const loading = notify.loading("Menghapus keranjang...")
+
+        router.delete(destroy(transaction.id), {
+            onSuccess: () => {
+                notify.dismiss(loading)
+                notify.success(`${transaction.type === 'income' ? 'pemasukan' : 'pengeluaran'} berhasil dihapus`)
+            },
+            onError: () => {
+                notify.dismiss(loading)
+                notify.error(`Gagal menghapus ${transaction.type === 'income' ? 'pemasukan' : 'pengeluaran'}`)
+            },
+        })
     }
 
     return (
@@ -97,19 +120,19 @@ export default function Index() {
 
                     <div className="grid grid-cols-1 gap-2 max-h-100 overflow-y-auto">
 
-                        {transactions.map((transaction) => (
+                        {pettyCashTransactions.map((pettyCashTransaction) => (
 
                             <div
-                                key={transaction.id}
+                                key={pettyCashTransaction.id}
                                 className="flex items-start sm:items-center gap-3 p-3 rounded-lg border hover:bg-muted/40 transition"
                             >
 
-                                <div className={`rounded-lg p-2 w-10 h-10 flex items-center justify-center ${transaction.type === 'income'
+                                <div className={`rounded-lg p-2 w-10 h-10 flex items-center justify-center ${pettyCashTransaction.type === 'income'
                                         ? 'bg-primary/10 text-primary'
                                         : 'bg-red-500/10 text-red-500'
                                     }`}>
 
-                                    {transaction.type === 'income'
+                                    {pettyCashTransaction.type === 'income'
                                         ? <ArrowDownRight className='size-6'/>
                                         : <ArrowUpRight className='size-6'/>
                                     }
@@ -120,36 +143,45 @@ export default function Index() {
 
                                     <div className="flex flex-col">
                                         <p className="text-sm font-bold">
-                                            {transaction.description}
+                                            {pettyCashTransaction.description}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            {transaction.date}
-                                            {transaction.expense_category && (
-                                                <> • {transaction.expense_category}</>
+                                            {pettyCashTransaction.date}
+                                            {pettyCashTransaction.expense_category && (
+                                                <> • {pettyCashTransaction.expense_category}</>
                                             )}
                                         </p>
                                     </div>
 
                                     <div className="flex items-center gap-3">
 
-                                        <span className={`text-lg font-bold ${transaction.type === 'income'
+                                        <span className={`text-lg font-bold ${pettyCashTransaction.type === 'income'
                                                 ? 'text-primary'
                                                 : 'text-red-500'
                                             }`}>
 
-                                            {transaction.type === 'income'
-                                                ? '+' + formatCurrency(transaction.amount)
-                                                : formatCurrency(transaction.amount)
+                                            {pettyCashTransaction.type === 'income'
+                                                ? '+' + formatCurrency(pettyCashTransaction.amount)
+                                                : formatCurrency(pettyCashTransaction.amount)
                                             }
 
                                         </span>
 
-                                        <button
-                                            onClick={() => openEdit(transaction)}
-                                            className="p-2 hover:bg-muted rounded-lg"
-                                        >
-                                            <Pencil className="size-4"/>
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                onClick={() => openEdit(pettyCashTransaction)}
+                                                className="p-2 hover:bg-muted rounded-lg"
+                                            >
+                                                <Pencil className="size-4"/>
+                                            </button>
+
+                                            <button
+                                                onClick={() => confirmDelete(pettyCashTransaction)}
+                                                className="p-2 hover:bg-muted rounded-lg"
+                                            >
+                                                <Trash2 className="size-4"/>
+                                            </button>
+                                        </div>
 
                                     </div>
 
@@ -167,7 +199,7 @@ export default function Index() {
 
             {showModal && (
                 <Form
-                    pettyCash={selectedTransaction}
+                    pettyCashTransaction={selectedTransaction}
                     transactionType={transactionType}
                     onClose={() => setShowModal(false)}
                 />

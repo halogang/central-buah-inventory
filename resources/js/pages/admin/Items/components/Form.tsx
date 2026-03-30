@@ -27,6 +27,10 @@ export default function ItemForm({
         bad_stock: 0,
     };
 
+    const [preview, setPreview] = useState<string | undefined>(
+        item?.image ? item.image_url : undefined
+    );
+
     const [form, setForm] = useState(
         item ? {
             image: null as File | null,
@@ -106,10 +110,16 @@ export default function ItemForm({
 
                 <form onSubmit={submitForm} className="space-y-4 px-6">
 
-                    <FormImageUpload
+                   <FormImageUpload
                         label="Gambar"
-                        preview={item?.image ? item.image_url : undefined}
-                        onChange={(file) => setForm({ ...form, image: file })}
+                        preview={item.image_url}
+                        onChange={(file) => {
+                            setForm({ ...form, image: file });
+
+                            if (file) {
+                                setPreview(URL.createObjectURL(file));
+                            }
+                        }}
                         hint="maksimal 2MB"
                     />
 
@@ -149,7 +159,7 @@ export default function ItemForm({
                             onChange={(e)=>setForm({...form,warehouse_id:e.target.value})}
                             options={warehouses.map((w:any)=>({
                                 value:String(w.id),
-                                label:w.name
+                                label:w.name + (w.branch ? ` (Cabang ${w.branch.name})` : '')
                             }))}
                         />
 

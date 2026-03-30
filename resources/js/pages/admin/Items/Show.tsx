@@ -23,9 +23,15 @@ interface Unit {
     description?: string;
 }
 
+interface Branch {
+    id: number;
+    name: string;
+}
+
 interface Warehouse {
     id: number;
     name: string;
+    branch?: Branch;
 }
 
 interface Item {
@@ -236,7 +242,10 @@ export default function Show({
                                     </td>
 
                                     <td className="p-3">
-                                        {item.warehouse?.name || "-"}
+                                        <div className="flex flex-col gap-1">
+                                            <span>{item.warehouse?.name || "-"}</span>
+                                            <span className="text-xs text-muted-foreground">Cabang {item.warehouse?.branch?.name || "-"}</span>
+                                        </div>
                                     </td>
 
                                     <td className="p-3">{item.unit?.unit_code}</td>

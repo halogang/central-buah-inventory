@@ -15,20 +15,20 @@ class PettyCashTransactionController extends Controller
      */
     public function index()
     {
-        $transactions = PettyCashTransaction::latest()->get();
+        $pettyCashTransactions = PettyCashTransaction::latest()->get();
 
-        $totalIncome = $transactions
+        $totalIncome = $pettyCashTransactions
             ->where('type', 'income')
             ->sum('amount');
 
-        $totalExpense = $transactions
+        $totalExpense = $pettyCashTransactions
             ->where('type', 'expense')
             ->sum('amount');
 
         $balance = $totalIncome - $totalExpense;
 
         return Inertia::render('admin/PettyCash/Index', [
-            'transactions' => $transactions,
+            'pettyCashTransactions' => $pettyCashTransactions,
             'balance' => $balance
         ]);
     }
@@ -95,8 +95,22 @@ class PettyCashTransactionController extends Controller
             ]);
         }
 
-        $pettyCashTransaction->update($validated);
+        $pettyCashTransaction->update([
+            'date' => $validated['date'],
+            'type' => $validated['type'],
+            'amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'expense_category' => $validated['type'] === 'expense'
+                ? ($validated['expense_category'] ?: $pettyCashTransaction->expense_category)
+                : null,
+        ]);
 
         return back()->with('success', 'Transasksi berhasil diperbarui');
+    }
+
+    public function destroy(PettyCashTransaction $pettyCashTransaction)
+    {
+        $pettyCashTransaction->delete();
+        return back()->with('success', 'Transaksi berhasil dihapus');
     }
 }

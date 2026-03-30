@@ -1,5 +1,5 @@
 import { ImageIcon, X, Camera } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FormImageUploadProps {
@@ -30,6 +30,12 @@ export default function FormImageUpload({
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (preview) {
+            setPreviewUrl(preview);
+        }
+    }, [preview]);
+
     const handleChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
 
@@ -55,12 +61,11 @@ export default function FormImageUpload({
         }
 
         onChange(null);
-
         setPreviewUrl(null);
 
     }, [onChange, previewUrl]);
 
-    const currentPreview = previewUrl || preview;
+    const currentPreview = previewUrl;
 
     return (
         <div className="space-y-2">

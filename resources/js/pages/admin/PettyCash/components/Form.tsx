@@ -7,13 +7,13 @@ import { notify } from "@/lib/notify";
 import { store, update } from "@/routes/keuangan";
 
 interface Props {
-    pettyCash?: any
+    pettyCashTransaction?: any
     transactionType: 'income' | 'expense'
     onClose: () => void
 }
 
 export default function Form({
-    pettyCash,
+    pettyCashTransaction,
     transactionType,
     onClose,
 }: Props) {
@@ -44,11 +44,11 @@ export default function Form({
     };
 
     const [form, setForm] = useState(
-        pettyCash ? {
-            date: pettyCash.date,
-            amount: pettyCash.amount,
-            description: pettyCash.description,
-            expense_category: pettyCash.expense_category,
+        pettyCashTransaction ? {
+            date: pettyCashTransaction.date,
+            amount: pettyCashTransaction.amount,
+            description: pettyCashTransaction.description,
+            expense_category: pettyCashTransaction.expense_category,
         } : emptyForm
     );
 
@@ -61,8 +61,8 @@ export default function Form({
             amount: Number(form.amount),
         };
 
-        if (pettyCash) {
-            router.put(update(pettyCash.id), payload, {
+        if (pettyCashTransaction) {
+            router.put(update(pettyCashTransaction.id), payload, {
                 onSuccess: () => {
                     notify.success(`${form.description} berhasil diperbarui`)
                     onClose()
@@ -94,7 +94,7 @@ export default function Form({
             >
                 <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
                     <h2 className="text-lg font-semibold">
-                        {pettyCash ? `Edit ${pettyCash.description}` : (transactionType === 'income' ? 'Tambah Modal' : 'Catat Pengeluaran')}
+                        {pettyCashTransaction ? `Edit ${pettyCashTransaction.description}` : (transactionType === 'income' ? 'Tambah Modal' : 'Catat Pengeluaran')}
                     </h2>
                     <X className="h-5 w-5 cursor-pointer" onClick={onClose} />
                 </div>

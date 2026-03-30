@@ -35,6 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('website-info.update');
 
             Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+            Route::resource('branches', \App\Http\Controllers\Admin\BranchController::class);
             Route::resource('suppliers', \App\Http\Controllers\Admin\SupplierController::class);
             Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
             Route::resource('payment-methods', \App\Http\Controllers\Admin\PaymentMethodController::class);
@@ -92,7 +93,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::resource('keuangan', \App\Http\Controllers\Admin\PettyCashTransactionController::class)
-        ->middleware('permission:Keuangan');
+        ->middleware('permission:Keuangan')
+        ->parameters([
+            'keuangan' => 'pettyCashTransaction'
+        ]);
 
     Route::resource('laporan', \App\Http\Controllers\Admin\ReportController::class)
         ->middleware('permission:Laporan');

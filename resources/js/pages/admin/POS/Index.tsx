@@ -24,6 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     stock: Number(item.stock),
     unit: item.unit ?? "pcs",
     image: item.image ?? null,
+    image_url: item.image_url ?? null,
   }));
 
   const [searchQuery, setSearchQuery] = useState("");

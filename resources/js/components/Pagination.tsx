@@ -15,7 +15,7 @@ export default function Pagination({
     if (totalPages <= 1) return null;
 
     return (
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-center gap-6 mt-4">
 
             <Button
                 variant="outline"

@@ -53,7 +53,17 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
               onClick={() => onProductClick(product)}
               className="bg-card rounded-xl border border-border p-4 text-left hover:pos-card-hover hover:shadow-md transition-all duration-150 active:scale-[0.97] group"
             >
-              <Image className="w-12 h-12 object-contain mb-3 group-hover:scale-110 transition-transform duration-150 text-muted-foreground"/>
+              <div className="w-full h-32 mb-3 overflow-hidden rounded-lg bg-muted flex items-center justify-center">
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover  group-hover:scale-105 transition-transform duration-150"
+                  />
+                ) : (
+                  <Image className="w-10 h-10 text-muted-foreground" />
+                )}
+              </div>
               <div className="font-semibold text-md text-foreground leading-tight">{product.name}</div>
               <div className="text-sm text-muted-foreground mt-0.5">
                 {product.stock ?? '0'} {product.unit}
