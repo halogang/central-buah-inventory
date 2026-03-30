@@ -92,12 +92,18 @@ export default function Index() {
         return matchesSearch && matchesStatus;
     });
 
+    const sorted = [...filtered];
+
+    if (statusFilter === "bad") {
+        sorted.sort((a, b) => b.bad_stock - a.bad_stock);
+    }
+
     const {
         currentPage,
         totalPages,
         paginatedData,
         goTo,
-    } = usePagination(filtered, 10)
+    } = usePagination(sorted, 10)
 
     const itemTotal = items.length;
 

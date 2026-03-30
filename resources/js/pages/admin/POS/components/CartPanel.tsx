@@ -76,8 +76,15 @@ const CartPanel = ({
             className="bg-background rounded-xl border border-border p-3 animate-in fade-in-0 zoom-in-95 duration-150"
           >
             <div className="flex items-start gap-3">
-              {/* <img src={item.product.image} alt={item.product.name} className="w-10 h-10 object-contain" /> */}
-              <Apple className="w-10 h-10 object-contain" />
+              {item.product.image ? (
+                  <img
+                    src={item.product.image}
+                    alt={item.product.name}
+                    className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-150"
+                  />
+                ) : (
+                  <Apple className="w-10 h-10 text-muted-foreground" />
+                )}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm text-foreground truncate">{item.product.name}</div>
                 {editingId === item.product.id ? (
