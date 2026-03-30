@@ -99,7 +99,7 @@ export default function DeliveryItemsSection({
                         />
 
                         <FormInput
-                            label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/kontol'}`}
+                            label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/-'}`}
                             type="number"
                             value={item.price}
                             onChange={(e) =>
