@@ -141,6 +141,7 @@ export default function ItemForm({
                                 value:String(c.id),
                                 label:c.name
                             }))}
+                            required
                         />
 
                         <FormSelect
@@ -151,6 +152,7 @@ export default function ItemForm({
                                 value:String(c.id),
                                 label:c.unit_code
                             }))}
+                            required
                         />
 
                         <FormSelect
@@ -161,6 +163,7 @@ export default function ItemForm({
                                 value:String(w.id),
                                 label:w.name + (w.branch ? ` (Cabang ${w.branch.name})` : '')
                             }))}
+                            required
                         />
 
                     </div>
@@ -172,6 +175,7 @@ export default function ItemForm({
                             type="number"
                             value={form.purchase_price}
                             onChange={(e)=>setForm({...form,purchase_price:e.target.value})}
+                            required
                         />
 
                         <FormInput
@@ -179,6 +183,7 @@ export default function ItemForm({
                             type="number"
                             value={form.selling_price}
                             onChange={(e)=>setForm({...form,selling_price:e.target.value})}
+                            required
                         />
 
                         <FormInput
@@ -186,6 +191,7 @@ export default function ItemForm({
                             type="number"
                             value={form.stock}
                             onChange={(e)=>setForm({...form,stock:e.target.value})}
+                            required
                         />
 
                         <FormInput
@@ -193,6 +199,7 @@ export default function ItemForm({
                             type="number"
                             value={form.min_stock}
                             onChange={(e)=>setForm({...form,min_stock:e.target.value})}
+                            required
                         />
 
                         <FormInput
@@ -200,6 +207,7 @@ export default function ItemForm({
                             type="number"
                             value={form.bad_stock}
                             onChange={(e)=>setForm({...form,bad_stock:e.target.value})}
+                            required
                         />
 
                     </div>

@@ -71,7 +71,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
     Route::resource('surat-jalan', DeliveryOrderController::class)
-        ->middleware('permission:Surat Jalan');
+        ->middleware('permission:Surat Jalan')
+        ->parameters([
+            'surat-jalan' => 'deliveryOrder'
+        ]);;
 
     Route::get('/surat-jalan/{surat_jalan}/print', 
         [DeliveryOrderController::class, 'print']
