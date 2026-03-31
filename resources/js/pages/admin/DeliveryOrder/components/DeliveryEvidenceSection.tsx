@@ -1,7 +1,13 @@
 import { Camera } from "lucide-react"
 import { FormImageUpload } from "@/components/admin"
+import { useState } from "react";
 
 export default function DeliveryEvidenceSection({ form, setForm }: any) {
+
+
+    const [preview, setPreview] = useState<string | undefined>(
+        form?.evidence ? form.evidence_url : undefined
+    );
 
     return (
 
@@ -17,8 +23,15 @@ export default function DeliveryEvidenceSection({ form, setForm }: any) {
                 title="Tap untuk foto/upload"
                 icon="camera"
                 subtitle=""
-                preview={form?.evidence}
-                onChange={(file) => setForm({ ...form, evidence: file })}
+                preview={preview}
+                // onChange={(file) => setForm({ ...form, evidence: file })}
+                onChange={(file) => {
+                    setForm({ ...form, evidence: file });
+
+                    if (file) {
+                        setPreview(URL.createObjectURL(file));
+                    }
+                }}
                 hint="maksimal 2MB"
                 required={form.status === 'done' ? true : false}
             />

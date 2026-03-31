@@ -60,9 +60,17 @@ export default function Form({
 
     }, [type, data])
 
-    const filteredItems = items.filter((i:any) =>
-        i.name.toLowerCase().includes(searchItem.toLowerCase())
-    )
+    const filteredItems = items.filter((i:any) => {
+        const matchesSearch = i.name
+            .toLowerCase()
+            .includes(searchItem.toLowerCase());
+        
+        const nonSelected = !form.items.some(
+            (selected:any) => selected.item_id === i.id
+        );
+
+        return matchesSearch && nonSelected;
+    })
 
     const selectItem = (item:any) => {
 
@@ -137,6 +145,8 @@ export default function Form({
 
         return sum + qty + (cartQty * cartWeight)
     }, 0)
+
+    const cartUnit = form.items[0]?.unit?.unit_code || '-'
 
     const submitForm = (e: React.FormEvent) => {
 
@@ -240,6 +250,7 @@ export default function Form({
                             removeItem={removeItem}
                             totalAmount={totalAmount}
                             totalWeight={totalWeight}
+                            cartUnit={cartUnit}
                             getNetQty={getNetQty}
                             getItemTotal={getItemTotal}
                         />

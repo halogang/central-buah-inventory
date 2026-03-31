@@ -172,7 +172,7 @@
                             <br>
                             <small>
                                 jumlah: {{ $item->cart_qty ?? 0 }}<br>
-                                berat: {{ $item->cart_weight ?? 0 }}
+                                berat: {{ $item->cart_weight ?? 0 }} {{ $item->item->unit->unit_code ?? '' }}
                             </small>
                         </div>
                     </td>
@@ -181,9 +181,10 @@
                         {{ $item->quantity }}
                         {{ $item->item->unit->unit_code ?? '' }}
                     </td>
-
+                    
                     <td align="center">
                         {{ $item->bad_stock }}
+                        {{ $item->item->unit->unit_code ?? '' }}
                     </td>
 
                     <td align="center">
@@ -206,12 +207,14 @@
             });
 
             $totalWeight = $totalItemWeight + $totalCartWeight;
+            $cartUnit = $deliveryOrder->items->firstWhere('cart_id', '!=', null)?->item?->unit?->unit_code ?? '-';
+            $totalWeightDisplay = $totalWeight . ' ' . $cartUnit;
         @endphp
 
         <table style="width:100%; margin-top:10px;">
             <tr>
                 <td align="right">
-                    <strong>Total Berat: {{ $totalWeight }}</strong>
+                    <strong>Total Berat: {{ $totalWeightDisplay }}</strong>
                 </td>
             </tr>
         </table>

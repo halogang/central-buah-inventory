@@ -26,7 +26,7 @@ class ItemController extends Controller
 
     public function index()
     {
-        $items = Item::with(['category','warehouse', 'unit'])
+        $items = Item::with(['category','warehouse.branch', 'unit'])
                 ->orderBy('updated_at', 'desc')
                 ->get();
 
@@ -136,7 +136,7 @@ class ItemController extends Controller
         // dd($items);
 
         $categories = Category::where('type', 'barang')->get();
-        $warehouses = Warehouse::all(['id','name']);
+        $warehouses = Warehouse::with('branch')->get();
         $units = Unit::all();
         $branches = Branch::all();
 

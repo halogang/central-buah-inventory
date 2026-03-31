@@ -8,6 +8,9 @@ import { PageProps as InertiaPageProps } from '@inertiajs/core'
 import Form from './components/Form';
 import { destroy } from '@/routes/keuangan';
 import { notify } from '@/lib/notify';
+import { SearchInput } from '@/components/search-input';
+import { usePagination } from '@/hooks/use-pagination';
+import Pagination from '@/components/Pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -34,10 +37,14 @@ export default function Index() {
     
     const { pettyCashTransactions, balance } = usePage<PageProps>().props
 
-
     const [showModal, setShowModal] = useState(false)
     const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income')
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+
+    const [search, setSearch] = useState('')
+
+    const [dateFrom, setDateFrom] = useState("")
+    const [dateTo, setDateTo] = useState("")
 
     const openCreateModal = () => {
         setSelectedTransaction(null)
@@ -53,7 +60,7 @@ export default function Index() {
 
     const openEdit = (transaction: Transaction) => {
         setSelectedTransaction(transaction)
-        setTransactionType(transaction.type === 'income' ? 'income' : 'expense')
+        setTransactionType(transaction.type)
         setShowModal(true)
     }
 
@@ -63,20 +70,59 @@ export default function Index() {
             onConfirm: () => performDelete(transaction),
         })
     }
+
     const performDelete = (transaction: Transaction) => {
-        const loading = notify.loading("Menghapus keranjang...")
+        const loading = notify.loading("Menghapus transaksi...")
 
         router.delete(destroy(transaction.id), {
             onSuccess: () => {
                 notify.dismiss(loading)
-                notify.success(`${transaction.type === 'income' ? 'pemasukan' : 'pengeluaran'} berhasil dihapus`)
+                notify.success("Berhasil dihapus")
             },
             onError: () => {
                 notify.dismiss(loading)
-                notify.error(`Gagal menghapus ${transaction.type === 'income' ? 'pemasukan' : 'pengeluaran'}`)
+                notify.error("Gagal menghapus")
             },
         })
     }
+
+    // 🔥 FILTER
+    const filtered = pettyCashTransactions.filter((t) => {
+        const matchesSearch = t.description
+            .toLowerCase()
+            .includes(search.toLowerCase())
+
+        const transactionDate = new Date(t.date)
+
+        const matchesFrom = dateFrom
+            ? transactionDate >= new Date(dateFrom)
+            : true
+
+        const matchesTo = dateTo
+            ? transactionDate <= new Date(dateTo)
+            : true
+
+        return matchesSearch && matchesFrom && matchesTo
+    })
+
+    // 🔥 SUMMARY DINAMIS
+    const totalIncome = filtered
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+
+    const totalExpense = filtered
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+
+    // const balance = totalIncome - totalExpense
+
+    // 🔥 PAGINATION
+    const {
+        currentPage,
+        totalPages,
+        paginatedData,
+        goTo,
+    } = usePagination(filtered, 4)
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -84,21 +130,48 @@ export default function Index() {
 
             <div className="p-4 sm:p-6 flex flex-col gap-6">
 
-                <div className="rounded-2xl bg-linear-to-r from-green-700/80 via-green-800 to-orange-500 p-6 flex flex-col gap-4">
-                    <div>
-                        <p className="text-primary-foreground/70 text-md font-medium">
-                            Saldo Kas Kecil
-                        </p>
-                        <h1 className="text-4xl font-black text-primary-foreground">
-                            {formatCurrency(balance)}
-                        </h1>
+                {/* SUMMARY */}
+                <div className="rounded-2xl bg-linear-to-r from-green-700 via-green-800 to-orange-500 p-6 flex flex-col gap-4 text-white">
+
+                    <div className="flex justify-between items-start gap-4">
+
+                        <div>
+                            <p className="text-white/70 text-sm">
+                                Saldo Kas Kecil
+                            </p>
+                            <h1 className="text-2xl sm:text-4xl font-black">
+                                {formatCurrency(balance)}
+                            </h1>
+                        </div>
+
                     </div>
+
+                    <div className="flex gap-2">
+                        <div className="flex flex-col w-full bg-white/20 rounded-lg p-2">
+                            <p className="text-white/70 text-xs">
+                                Total Pemasukan
+                            </p>
+                            <span className="text-lg font-bold">
+                                {formatCurrency(totalIncome)}
+                            </span>
+                        </div>
+                        <div className="flex flex-col w-full bg-white/20 rounded-lg p-2">
+                            <p className="text-white/70 text-xs">
+                                Total Pengeluaran
+                            </p>
+                            <span className="text-lg font-bold">
+                                {formatCurrency(totalExpense)}
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2">
+                {/* ACTION */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                         onClick={openCreateModal}
-                        className="w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-primary text-primary-foreground"
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-primary text-white"
                     >
                         <Plus className="size-4" />
                         Tambah Modal
@@ -106,83 +179,124 @@ export default function Index() {
 
                     <button
                         onClick={openCreateExpense}
-                        className="w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-orange-500 text-primary-foreground hover:bg-orange-500/80"
+                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-orange-500 text-white"
                     >
                         <Wallet className="size-4" />
                         Catat Pengeluaran
                     </button>
                 </div>
 
-                <div className="p-6 rounded-xl border flex flex-col gap-4">
+                {/* LIST */}
+                <div className="p-4 sm:p-6 rounded-xl border flex flex-col gap-4">
+
                     <h3 className="font-bold text-lg">
                         Riwayat Transaksi
                     </h3>
 
-                    <div className="grid grid-cols-1 gap-2 max-h-100 overflow-y-auto">
+                    <div className="flex flex-col sm:flex-row gap-2 items-center">
 
-                        {pettyCashTransactions.map((pettyCashTransaction) => (
+                        <SearchInput
+                            placeholder="Cari transaksi..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+
+                        <div className="flex items-center gap-2">
+
+                            <input
+                                type="date"
+                                value={dateFrom}
+                                onChange={(e) => setDateFrom(e.target.value)}
+                                className="border rounded-md px-2 py-1 text-sm"
+                            />
+
+                            <span className="text-sm text-muted-foreground">-</span>
+
+                            <input
+                                type="date"
+                                value={dateTo}
+                                onChange={(e) => setDateTo(e.target.value)}
+                                className="border rounded-md px-2 py-1 text-sm"
+                            />
+
+                            <button
+                                onClick={() => {
+                                    setDateFrom("")
+                                    setDateTo("")
+                                }}
+                                className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/70 cursor-pointer"
+                            >
+                                Semua
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div className="flex flex-col gap-2 max-h-100 overflow-y-auto pr-2">
+
+                        {paginatedData.length === 0 && (
+                            <div className="text-center text-muted-foreground py-6">
+                                Tidak ada transaksi
+                            </div>
+                        )}
+
+                        {paginatedData.map((t) => (
 
                             <div
-                                key={pettyCashTransaction.id}
-                                className="flex items-start sm:items-center gap-3 p-3 rounded-lg border hover:bg-muted/40 transition"
+                                key={t.id}
+                                className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between p-3 rounded-lg border hover:bg-muted/40 transition"
                             >
 
-                                <div className={`rounded-lg p-2 w-10 h-10 flex items-center justify-center ${pettyCashTransaction.type === 'income'
-                                        ? 'bg-primary/10 text-primary'
-                                        : 'bg-red-500/10 text-red-500'
+                                {/* LEFT */}
+                                <div className="flex gap-3">
+
+                                    <div className={`rounded-lg p-2 w-10 h-10 flex items-center justify-center ${
+                                        t.type === 'income'
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'bg-red-500/10 text-red-500'
                                     }`}>
-
-                                    {pettyCashTransaction.type === 'income'
-                                        ? <ArrowDownRight className='size-6'/>
-                                        : <ArrowUpRight className='size-6'/>
-                                    }
-
-                                </div>
-
-                                <div className="flex justify-between w-full items-center">
+                                        {t.type === 'income'
+                                            ? <ArrowDownRight className='size-5'/>
+                                            : <ArrowUpRight className='size-5'/>
+                                        }
+                                    </div>
 
                                     <div className="flex flex-col">
                                         <p className="text-sm font-bold">
-                                            {pettyCashTransaction.description}
+                                            {t.description}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            {pettyCashTransaction.date}
-                                            {pettyCashTransaction.expense_category && (
-                                                <> • {pettyCashTransaction.expense_category}</>
+                                            {t.date}
+                                            {t.expense_category && (
+                                                <> • {t.expense_category}</>
                                             )}
                                         </p>
                                     </div>
 
-                                    <div className="flex items-center gap-3">
+                                </div>
 
-                                        <span className={`text-lg font-bold ${pettyCashTransaction.type === 'income'
-                                                ? 'text-primary'
-                                                : 'text-red-500'
-                                            }`}>
+                                {/* RIGHT */}
+                                <div className="flex justify-between sm:justify-end items-center gap-3">
 
-                                            {pettyCashTransaction.type === 'income'
-                                                ? '+' + formatCurrency(pettyCashTransaction.amount)
-                                                : formatCurrency(pettyCashTransaction.amount)
-                                            }
+                                    <span className={`text-sm sm:text-lg font-bold ${
+                                        t.type === 'income'
+                                            ? 'text-primary'
+                                            : 'text-red-500'
+                                    }`}>
+                                        {t.type === 'income'
+                                            ? '+' + formatCurrency(t.amount)
+                                            : formatCurrency(t.amount)
+                                        }
+                                    </span>
 
-                                        </span>
-
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => openEdit(pettyCashTransaction)}
-                                                className="p-2 hover:bg-muted rounded-lg"
-                                            >
-                                                <Pencil className="size-4"/>
-                                            </button>
-
-                                            <button
-                                                onClick={() => confirmDelete(pettyCashTransaction)}
-                                                className="p-2 hover:bg-muted rounded-lg"
-                                            >
-                                                <Trash2 className="size-4"/>
-                                            </button>
-                                        </div>
-
+                                    <div className="flex gap-1">
+                                        <button onClick={() => openEdit(t)}>
+                                            <Pencil className="size-4"/>
+                                        </button>
+                                        <button onClick={() => confirmDelete(t)}>
+                                            <Trash2 className="size-4 text-red-500"/>
+                                        </button>
                                     </div>
 
                                 </div>
@@ -192,6 +306,12 @@ export default function Index() {
                         ))}
 
                     </div>
+
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={goTo}
+                    />
 
                 </div>
 

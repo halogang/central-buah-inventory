@@ -106,7 +106,7 @@ class DeliveryOrderController extends Controller
                         'cart_qty' => $item->cart_qty,
                         'image' => $item->item?->image,
                         'image_url' => $item->item?->image,
-                        'unit' => $item->item?->unit?->unit_code,
+                        'unit' => $item->item?->unit,
 
                         'quantity' => $item->quantity,
                         'bad_stock' => $item->bad_stock,

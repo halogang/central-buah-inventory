@@ -10,7 +10,7 @@ class PettyCashTransaction extends Model
         'date',
         'type',
         'amount',
-        // 'expense_category_id',
+        'evidence',
         'expense_category',
         'description',
         'created_by'

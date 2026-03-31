@@ -29,7 +29,9 @@ class PettyCashTransactionController extends Controller
 
         return Inertia::render('admin/PettyCash/Index', [
             'pettyCashTransactions' => $pettyCashTransactions,
-            'balance' => $balance
+            'balance' => $balance,
+            'totalIncome' => $totalIncome,
+            'totalExpense' => $totalExpense,
         ]);
     }
 
