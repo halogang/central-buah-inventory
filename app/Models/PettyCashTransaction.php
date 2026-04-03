@@ -13,11 +13,6 @@ class PettyCashTransaction extends Model
         'evidence',
         'expense_category',
         'description',
-        'created_by'
+        'created_by',
     ];
-
-    // public function category()
-    // {
-    //     return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
-    // }
 }

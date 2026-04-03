@@ -155,7 +155,7 @@ export default function Show({ data, onClose }: Props) {
                                                 </td>
 
                                                 <td className="p-3 text-center text-green-600 font-medium">
-                                                    {net} {item.unit}
+                                                    {net} {item.unit?.unit_code ?? '-'}
                                                 </td>
 
                                             </tr>
@@ -240,7 +240,7 @@ export default function Show({ data, onClose }: Props) {
                             {data.receiver_signature && (
                                 <img
                                     src={data.receiver_signature_url}
-                                    alt={data.receiver_signature_url}
+                                    alt='TTD Penerima'
                                     className="h-20 mx-auto object-contain"
                                 />
                             )}
@@ -268,20 +268,26 @@ export default function Show({ data, onClose }: Props) {
 
                     <div className="bg-muted rounded-lg p-6 text-center">
 
-                        <Camera className="mx-auto mb-2"/>
+                        <Camera className="mx-auto mb-4"/>
 
-                        {data.evidence ? (
+                        {Array.isArray(data.evidence) && data.evidence.length > 0 ? (
 
-                            <img
-                                src={data.evidence_url}
-                                alt={data.evidence_url}
-                                className="mx-auto max-h-48 rounded-md"
-                            />
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+                                {data.evidence.map((path: string, index: number) => (
+                                    <img
+                                        key={index}
+                                        src={`${path}`}
+                                        className="w-full h-32 object-cover rounded-md"
+                                    />
+                                ))}
+
+                            </div>
 
                         ) : (
 
                             <p className="text-sm text-muted-foreground">
-                                Foto serah terima tersedia
+                                Tidak ada foto serah terima
                             </p>
 
                         )}

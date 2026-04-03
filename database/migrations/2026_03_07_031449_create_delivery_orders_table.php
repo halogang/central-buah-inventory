@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('sender_name')->nullable();
             $table->string('receiver_name')->nullable();
 
-            $table->string('evidence')->nullable(); // foto barang
+            $table->json('evidence')->nullable(); // foto barang
 
             $table->enum('status', [
                 'draft',

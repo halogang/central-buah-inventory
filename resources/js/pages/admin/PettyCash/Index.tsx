@@ -2,7 +2,7 @@ import type { BreadcrumbItem } from '@/types';
 import AppLayout from "@/layouts/app-layout";
 import { Head, router, usePage } from '@inertiajs/react';
 import { formatCurrency } from '@/helpers/format';
-import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil, Trash2 } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil, Trash2, ImageIcon, X } from 'lucide-react';
 import { useState } from 'react';
 import { PageProps as InertiaPageProps } from '@inertiajs/core'
 import Form from './components/Form';
@@ -22,20 +22,27 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Transaction {
     id: number
     date: string
+    evidence: string
     amount: number
     type: "income" | "expense"
     description: string
     expense_category?: string
 }
 
+interface Category {
+    id: number
+    name: string
+}
+
 interface PageProps extends InertiaPageProps {
     pettyCashTransactions: Transaction[]
+    categories: Category[]
     balance: any
 }
 
 export default function Index() {
     
-    const { pettyCashTransactions, balance } = usePage<PageProps>().props
+    const { pettyCashTransactions, balance, categories } = usePage<PageProps>().props
 
     const [showModal, setShowModal] = useState(false)
     const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income')
@@ -123,6 +130,12 @@ export default function Index() {
         paginatedData,
         goTo,
     } = usePagination(filtered, 4)
+
+    const [previewImage, setPreviewImage] = useState<string | null>(null)
+
+    const openPreview = (image: string) => {
+        setPreviewImage(image)
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -249,7 +262,7 @@ export default function Index() {
                             >
 
                                 {/* LEFT */}
-                                <div className="flex gap-3">
+                                <div className="flex gap-3 items-start">
 
                                     <div className={`rounded-lg p-2 w-10 h-10 flex items-center justify-center ${
                                         t.type === 'income'
@@ -274,6 +287,15 @@ export default function Index() {
                                         </p>
                                     </div>
 
+                                    {t.evidence && (
+                                        <button
+                                            onClick={() => openPreview(t.evidence)}
+                                            className="cursor-pointer px-2 bg-blue-500/10 text-blue-500 border font-medium hover:bg-blue-500/0 hover:border-blue-500 rounded-md"
+                                        >
+                                            <span className='text-xs'>Lihat Bukti Transaksi</span>
+                                        </button>
+                                    )}
+
                                 </div>
 
                                 {/* RIGHT */}
@@ -290,7 +312,7 @@ export default function Index() {
                                         }
                                     </span>
 
-                                    <div className="flex gap-1">
+                                    <div className="flex gap-2 items-center">
                                         <button onClick={() => openEdit(t)}>
                                             <Pencil className="size-4"/>
                                         </button>
@@ -317,10 +339,36 @@ export default function Index() {
 
             </div>
 
+            {previewImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+                    onClick={() => setPreviewImage(null)}
+                >
+                    <div
+                        className="bg-white rounded-lg p-4 max-w-lg w-full flex flex-col gap-1 items-end"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setPreviewImage(null)}
+                            className="cursor-pointer text-gray-500 hover:text-black"
+                        >
+                            <X />
+                        </button>
+
+                        <img
+                            src={previewImage}
+                            alt="Bukti Transaksi"
+                            className="w-full h-auto rounded"
+                        />
+                    </div>
+                </div>
+            )}
+
             {showModal && (
                 <Form
                     pettyCashTransaction={selectedTransaction}
                     transactionType={transactionType}
+                    categories={categories}
                     onClose={() => setShowModal(false)}
                 />
             )}

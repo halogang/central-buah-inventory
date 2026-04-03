@@ -25,6 +25,7 @@ return new class extends Migration
             //     ->constrained()
             //     ->nullOnDelete();
             $table->string('expense_category')->nullable();
+                
             $table->string('evidence')->nullable();
 
             $table->text('description')->nullable();

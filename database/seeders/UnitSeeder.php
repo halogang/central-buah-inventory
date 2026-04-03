@@ -14,9 +14,8 @@ class UnitSeeder extends Seeder
     {
         $units = [
             ['unit_code' => 'kg', 'description' => 'Kilogram'],
-            ['unit_code' => 'sisir', 'description' => 'Sisir'],
-            ['unit_code' => 'biji', 'description' => 'Biji / Buah'],
-            ['unit_code' => 'pack', 'description' => 'Pack / Box'],
+            ['unit_code' => 'pcs', 'description' => 'Piece'],
+            ['unit_code' => 'pcs', 'description' => 'Pack / Box'],
         ];
 
         foreach($units as $unit) {

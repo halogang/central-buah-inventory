@@ -11,6 +11,41 @@ import DeliveryInfoSection from "./DeliveryInfoSection"
 import DeliveryItemsSection from "./DeliveryItemsSection"
 import DeliverySignatureSection from "./DeliverySignatureSection"
 
+type DeliveryItem = {
+    item_id: number
+    name: string
+    image?: string
+    image_url?: string
+    unit?: any
+    quantity: number | string
+    bad_stock?: number | string
+    price?: number | string
+    cart_id?: number | string
+    cart_weight?: number | string
+    cart_qty?: number | string
+}
+
+type DeliveryForm = {
+    do_number: string
+    supplier_id: string | number | null
+    customer_id: string | number | null
+    date: string
+    status: string
+    sender_name: string
+    receiver_name: string
+    sender_signature: string
+    receiver_signature: string
+    note: string | null
+
+    evidence: {
+        existing: string[]
+        new: File[]
+        deleted: string[]
+    }
+
+    items: DeliveryItem[]
+}
+
 export default function Form({
     data,
     suppliers,
@@ -35,13 +70,29 @@ export default function Form({
         sender_signature: "",
         receiver_signature: "",
         note: "",
-        evidence: null,
+        evidence: {
+            existing: [],
+            new: [],
+            deleted: [],
+        },
         items: []
     }
 
-    const [form, setForm] = useState(
+    const [form, setForm] = useState<DeliveryForm>(
         data
-            ? { ...data, items: data.items ?? [] }
+            ? { 
+                ...data, 
+                items: data.items ?? [],
+                evidence: {
+                    existing: Array.isArray(data.evidence)
+                        ? data.evidence
+                        : data.evidence
+                            ? [data.evidence]
+                            : [],
+                    new: [],
+                    deleted: []
+                }
+            }
             : emptyForm
     )
 
@@ -108,7 +159,11 @@ export default function Form({
         })
     }
 
-    const updateItem = (index: number, field: string, value: any) => {
+    const updateItem = <K extends keyof DeliveryItem>(
+        index: number,
+        field: K,
+        value: DeliveryItem[K]
+    ) => {
 
         const updated = [...form.items]
 
@@ -153,13 +208,45 @@ export default function Form({
         e.preventDefault()
         console.log(form) // cek ini
 
-        const payload = {
-            ...form,
-            type
-        }
+        const payload = new FormData();
+
+        (Object.keys(form) as (keyof DeliveryForm)[]).forEach((key) => {
+
+            if (key === 'evidence') {
+
+                //existing
+                form.evidence.existing.forEach((path: string) => {
+                    payload.append('existing_evidence[]', path)
+                })
+
+                //deleted
+                form.evidence.deleted.forEach((path: string) => {
+                    payload.append('deleted_evidence[]', path)
+                })
+
+                //new files
+                form.evidence.new.forEach((file: File) => {
+                    payload.append('evidence[]', file)
+                })
+
+            } else if (key === 'items') {
+
+                form.items.forEach((item: DeliveryItem, index: number) => {
+                    (Object.keys(item) as (keyof DeliveryItem)[]).forEach((key) => {
+                        payload.append(`items[${index}][${key}]`, String(item[key] ?? ''))
+                    })
+                })
+
+            } else {
+
+                payload.append(key, String(form[key] ?? ''))
+            }
+        })
+
+        payload.append('type', type)
 
         if (data) {
-            payload._method='PUT';
+            payload.append('_method', 'PUT');
 
             router.post(update(data.id), payload, {
 

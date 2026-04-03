@@ -3,13 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\PettyCashTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class PettyCashTransactionController extends Controller
 {
+    private $uploadPath = '../../public_html/images/petty_cash';    
+    private $savePath = '/images/petty_cash';
     /**
      * Display a listing of the resource.
      */
@@ -27,11 +34,12 @@ class PettyCashTransactionController extends Controller
 
         $balance = $totalIncome - $totalExpense;
 
+        $categories = Category::where('type', 'pengeluaran')->get();
+
         return Inertia::render('admin/PettyCash/Index', [
             'pettyCashTransactions' => $pettyCashTransactions,
             'balance' => $balance,
-            'totalIncome' => $totalIncome,
-            'totalExpense' => $totalExpense,
+            'categories' => $categories,
         ]);
     }
 
@@ -48,13 +56,36 @@ class PettyCashTransactionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'date' => 'required|date',
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:1',
             'description' => 'nullable|string',
+            'evidence' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'expense_category' => 'nullable|string'
         ]);
+
+        if ($request->hasFile('evidence')) {
+            
+            $evidence = $request->file('evidence');
+
+            $fileName = Str::uuid().'.webp';
+            
+            $destination = public_path($this->uploadPath);
+
+            //create folder
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
+
+            $manager = new ImageManager(new Driver);
+            $img = $manager->read($evidence->getRealPath());
+
+            $img->scale(width: 1200);
+            $img->toWebp(80)->save($destination.'/'.$fileName);
+
+            $validated['evidence'] = $this->savePath . '/' . $fileName;
+        }
 
         // validasi tambahan jika expense
         if ($request->type === 'expense' && !$request->expense_category) {
@@ -64,13 +95,14 @@ class PettyCashTransactionController extends Controller
         }
 
         PettyCashTransaction::create([
-            'date' => $request->date,
-            'type' => $request->type,
-            'amount' => $request->amount,
-            'expense_category' => $request->type === 'expense'
-                ? $request->expense_category
+            'date' => $validated['date'],
+            'type' => $validated['type'],
+            'amount' => $validated['amount'],
+            'evidence' => $validated['evidence'],
+            'expense_category' => $validated['type'] === 'expense'
+                ? $validated['expense_category']
                 : null,
-            'description' => $request->description,
+            'description' => $validated['description'],
             'created_by' => Auth::id()
         ]);
 
@@ -87,8 +119,38 @@ class PettyCashTransactionController extends Controller
             'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:1',
             'description' => 'nullable|string',
+            'evidence' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'expense_category' => 'nullable|string'
         ]);
+
+        $destination = public_path($this->uploadPath);
+
+        if ($request->hasFile('evidence')) {
+
+            if ($pettyCashTransaction->evidence) {
+                $oldEvidence = public_path($pettyCashTransaction->evidence);
+
+                if (File::exists($oldEvidence)) {
+                    File::delete($oldEvidence);
+                }
+            }
+
+            $evidence = $request->file('evidence');
+
+            $fileName = Str::uuid() . '.webp';
+
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
+
+            $manager = new ImageManager(new Driver());
+
+            $img = $manager->read($evidence->getRealPath());
+            $img->scale(width: 1200);
+            $img->toWebp(80)->save($destination . '/' . $fileName);
+
+            $validated['evidence'] = $this->savePath . '/' . $fileName;
+        }
 
         // validasi tambahan jika expense
         if ($request->type === 'expense' && !$request->expense_category) {
@@ -101,6 +163,7 @@ class PettyCashTransactionController extends Controller
             'date' => $validated['date'],
             'type' => $validated['type'],
             'amount' => $validated['amount'],
+            'evidence' => $validated['evidence'] ?? $pettyCashTransaction->evidence,
             'description' => $validated['description'],
             'expense_category' => $validated['type'] === 'expense'
                 ? ($validated['expense_category'] ?: $pettyCashTransaction->expense_category)

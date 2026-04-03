@@ -31,6 +31,7 @@ class DeliveryOrder extends Model
 
     protected $casts = [
         'date' => 'date',
+        'evidence' => 'array',
     ];
 
     public function supplier()
@@ -56,13 +57,6 @@ class DeliveryOrder extends Model
     public function scopeOut($query)
     {
         return $query->where('type', 'out');
-    }
-
-    public function getEvidenceUrlAttribute()
-    {
-        return $this->evidence
-            ? asset($this->evidence)
-            : null;
     }
 
     public function getSenderSignatureUrlAttribute()

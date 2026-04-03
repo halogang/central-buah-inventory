@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\SignatureService;
 use App\Services\DeliveryOrderService;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class DeliveryOrderController extends Controller
 {
@@ -142,7 +145,8 @@ class DeliveryOrderController extends Controller
     {
         $validated = $this->validateRequest($request);
 
-        DB::transaction(function () use ($validated, $signatureService, $service) {
+
+        DB::transaction(function () use ($validated, $signatureService, $service, $request) {
 
             $doNumber = $this->generateDoNumber($validated['type']);
             $user = Auth::user();
@@ -183,11 +187,41 @@ class DeliveryOrderController extends Controller
                 $service->updateStock($deliveryOrder, $validated['items']);
             }
 
+            
             // update total amount
             $deliveryOrder->update([
                 'total_amount' => $totalAmount,
                 'total_weight' => $totalWeight
             ]);
+
+            /**
+             * 🔥 HANDLE MULTIPLE EVIDENCE (HANYA SAAT DONE)
+             */
+            if ($validated['status'] === 'done' && $request->hasFile('evidence')) {
+
+                $paths = [];
+                $destination = public_path($this->evidenceUploadPath);
+
+                if (!File::exists($destination)) {
+                    File::makeDirectory($destination, 0755, true);
+                }
+
+                $manager = new ImageManager(new Driver());
+
+                foreach ($request->file('evidence') as $file) {
+                    $fileName = Str::uuid() . '.webp';
+                    
+                    $img = $manager->read($file->getRealPath());
+                    $img->scale(width: 1200);
+                    $img->toWebp(80)->save($destination . '/' . $fileName);
+
+                    $paths[] = $this->evidenceSavePath . '/' . $fileName;
+                }
+
+                $deliveryOrder->update([
+                    'evidence' => $paths // otomatis ke-cast json
+                ]);
+            }
 
             // auto create invoice
             $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
@@ -236,16 +270,9 @@ class DeliveryOrderController extends Controller
             }
 
             /**
-             * 2️⃣ Handle evidence upload
+             * 2️⃣ Handle MULTIPLE evidence (replace lama)
              */
-            if ($request->hasFile('evidence')) {
-
-                if ($deliveryOrder->evidence && File::exists(public_path($deliveryOrder->evidence))) {
-                    File::delete(public_path($deliveryOrder->evidence));
-                }
-
-                $file = $request->file('evidence');
-                $filename = time().'_'.$file->getClientOriginalName();
+            if ($validated['status'] === 'done') {
 
                 $destination = public_path($this->evidenceUploadPath);
 
@@ -253,9 +280,45 @@ class DeliveryOrderController extends Controller
                     File::makeDirectory($destination, 0755, true);
                 }
 
-                $file->move($destination, $filename);
+                $manager = new ImageManager(new Driver());
 
-                $validated['evidence'] = $this->evidenceSavePath.'/'.$filename;
+                $existing = $request->input('existing_evidence', []);
+                $deleted = $request->input('deleted_evidence', []);
+                $newFiles = $request->file('evidence', []);
+
+                /**
+                 * 🔥 1. DELETE FILE
+                 */
+                foreach ($deleted as $path) {
+                    if (File::exists(public_path($path))) {
+                        File::delete(public_path($path));
+                    }
+                }
+
+                /**
+                 * 🔥 2. UPLOAD NEW FILE
+                 */
+                $newPaths = [];
+
+                if ($newFiles) {
+                    foreach ($newFiles as $file) {
+
+                        $fileName = Str::uuid() . '.webp';
+
+                        $img = $manager->read($file->getRealPath());
+                        $img->scale(width: 1200);
+                        $img->toWebp(80)->save($destination . '/' . $fileName);
+
+                        $newPaths[] = $this->evidenceSavePath . '/' . $fileName;
+                    }
+                }
+
+                /**
+                 * 🔥 3. FINAL MERGE
+                 */
+                $finalPaths = array_values(array_merge($existing, $newPaths));
+
+                $validated['evidence'] = $finalPaths;
             }
 
             /**

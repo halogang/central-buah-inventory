@@ -1,51 +1,49 @@
 import { router } from "@inertiajs/react";
 import { X } from "lucide-react";
 import { useState } from "react";
-import { FormInput, FormSelect } from "@/components/admin";
+import { FormImageUpload, FormInput, FormSelect } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notify";
 import { store, update } from "@/routes/keuangan";
 
+interface Category {
+    id: number
+    name: string
+}
+
 interface Props {
     pettyCashTransaction?: any
     transactionType: 'income' | 'expense'
+    categories?: Category[]
     onClose: () => void
 }
 
 export default function Form({
     pettyCashTransaction,
     transactionType,
+    categories,
     onClose,
 }: Props) {
 
-    const categories = [
-        {
-            name: 'Operasional'
-        },
-        {
-            name: 'Utilitas'
-        },
-        {
-            name: 'Transportasi'
-        },
-        {
-            name: 'Gaji'
-        },
-        {
-            name: 'Lainnya'
-        },
-    ]
 
     const emptyForm = {
+        evidence: null as File | null,
         date: '',
+        type: transactionType,
         amount: '',
         description: '',
         expense_category: '',
     };
 
+    const [preview, setPreview] = useState<string | undefined>(
+        pettyCashTransaction?.evidence ? pettyCashTransaction.evidence : undefined
+    )
+
     const [form, setForm] = useState(
         pettyCashTransaction ? {
+            evidence: null as File | null,
             date: pettyCashTransaction.date,
+            type: transactionType,
             amount: pettyCashTransaction.amount,
             description: pettyCashTransaction.description,
             expense_category: pettyCashTransaction.expense_category,
@@ -55,14 +53,23 @@ export default function Form({
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const payload = {
-            ...form,
-            type: transactionType,
-            amount: Number(form.amount),
-        };
+        const payload = new FormData();
+
+        payload.append('date', form.date);
+        payload.append('amount', String(form.amount));
+        payload.append('type', transactionType);
+        payload.append('description', String(form.description));
+        payload.append('expense_category', String(form.expense_category));
+
+        if (form.evidence) {
+            payload.append('evidence', form.evidence);
+        }
 
         if (pettyCashTransaction) {
-            router.put(update(pettyCashTransaction.id), payload, {
+            payload.append('_method', 'PUT');
+
+            router.post(update(pettyCashTransaction.id), payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.description} berhasil diperbarui`)
                     onClose()
@@ -73,6 +80,7 @@ export default function Form({
             })
         } else {
             router.post(store(), payload, {
+                forceFormData: true,
                 onSuccess: () => {
                     notify.success(`${form.description} berhasil ditambahkan`)
                     onClose()
@@ -129,10 +137,14 @@ export default function Form({
                                         label: 'Pilih Kategori',
                                         value: '',
                                     },
-                                    ...categories.map((s: any) => ({
+                                    ...(categories || []).map((s: Category) => ({
                                         label: s.name,
                                         value: s.name
-                                    }))
+                                    })),
+                                    {
+                                        label: 'Lainnya',
+                                        value: 'Lainnya',
+                                    }
                                 ]}
                                 required
                             />
@@ -144,6 +156,19 @@ export default function Form({
                         value={form.description}
                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                         placeholder={`Contoh: ${transactionType === 'income' ? 'Tambah Modal Harian' : 'Beli kantong plastik'}`}
+                    />
+
+                    <FormImageUpload 
+                        label="Bukti Transaksi"
+                        preview={preview}
+                        onChange={(file) => {
+                            setForm({ ...form, evidence: file });
+
+                            if (file) {
+                                setPreview(URL.createObjectURL(file));
+                            }
+                        }}
+                        hint="maksimal 2MB"
                     />
 
                     <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
