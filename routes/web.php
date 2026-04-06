@@ -110,9 +110,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('pos', \App\Http\Controllers\Admin\POSController::class)
         ->middleware('permission:POS Kasir');
 
-    Route::resource('laporan', \App\Http\Controllers\Admin\ReportController::class)
-        ->middleware('permission:Laporan');
-
     Route::resource('stock-movement', \App\Http\Controllers\Admin\StockMovementController::class);
         // ->middleware('permission:Laporan');
         

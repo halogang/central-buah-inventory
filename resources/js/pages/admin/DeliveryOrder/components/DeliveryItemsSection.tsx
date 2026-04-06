@@ -1,6 +1,7 @@
-import { Package, Plus, Trash2, Image } from "lucide-react"
+import { Package, Plus, Trash2, Image, Dot } from "lucide-react"
 import { FormInput, FormSelect } from "@/components/admin"
 import { formatCurrency, formatNumber } from "@/helpers/format"
+import { useState } from "react";
 
 export default function DeliveryItemsSection({
     form,
@@ -20,6 +21,26 @@ export default function DeliveryItemsSection({
     getItemTotal,
     carts
 }: any) {
+    const [errors, setErrors] = useState({});
+
+    const handleNumberInput = (index, field, value, max) => {
+        const num = Number(value);
+
+        if (num > max) {
+            setErrors((prev) => ({
+                ...prev,
+                [`${field}-${index}`]: `Maksimal ${max}`,
+            }));
+            return;
+        }
+
+        setErrors((prev) => ({
+            ...prev,
+            [`${field}-${index}`]: null,
+        }));
+
+        updateItem(index, field, num);
+    };
 
     return (
 
@@ -32,136 +53,146 @@ export default function DeliveryItemsSection({
                 </div>
             </div>
 
-            {form.items.map((item: any, index: number) => (
+            {form.items.map((item: any, index: number) => {
+                return (
+                    <div
+                        key={index}
+                        className="flex flex-col gap-2 border rounded-lg p-3"
+                    >
 
-                <div
-                    key={index}
-                    className="flex flex-col gap-2 border rounded-lg p-3"
-                >
+                        <div className="flex justify-between items-center">
 
-                    <div className="flex justify-between items-center">
+                            <div className="flex gap-1 items-center">
 
-                        <div className="flex gap-1 items-center">
+                                {item.image ?
 
-                            {item.image ?
+                                    <img
+                                        src={item.image_url}
+                                        className="w-8 h-8 object-cover rounded"
+                                    />
 
-                                <img
-                                    src={item.image_url}
-                                    className="w-8 h-8 object-cover rounded"
-                                />
+                                :
 
-                            :
+                                    <div className="p-2 text-muted-foreground rounded-md">
+                                        <Image />
+                                    </div>
 
-                                <div className="p-2 text-muted-foreground rounded-md">
-                                    <Image />
+                                }
+
+                                <div className="flex flex-col">
+                                    <p className="text-sm font-bold">
+                                        {item.name ?? "Pisang Cavendish"}
+                                    </p>
+
+                                    <div className="flex items-center gap-1">
+                                        <p className="text-xs font-light">
+                                            {item.stock ?? "stok"} {item.unit?.unit_code ?? "kg"}
+                                        </p>
+                                        <p className="text-xs font-light">
+                                            
+                                        </p>
+                                    </div>
                                 </div>
 
-                            }
-
-                            <div className="flex flex-col">
-                                <p className="text-sm font-bold">
-                                    {item.name ?? "Pisang Cavendish"}
-                                </p>
-
-                                <p className="text-xs font-light">
-                                    {item.unit?.unit_code ?? "kg"}
-                                </p>
                             </div>
+
+                            <button
+                                type="button"
+                                onClick={() => removeItem(index)}
+                            >
+                                <Trash2 className="size-4 text-muted-foreground hover:text-red-500 cursor-pointer" />
+                            </button>
 
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={() => removeItem(index)}
-                        >
-                            <Trash2 className="size-4 text-muted-foreground hover:text-red-500 cursor-pointer" />
-                        </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+
+                            <FormInput
+                                label="Jumlah"
+                                type="number"
+                                max={item.stock ?? ''}
+                                value={item.quantity}
+                                onChange={(e) =>
+                                    handleNumberInput(index, "quantity", e.target.value, item.stock)
+                                }
+                            />
+                            
+
+                            <FormInput
+                                label="Bad Stock"
+                                type="number"
+                                max={item.stock ?? ''}
+                                value={item.bad_stock}
+                                onChange={(e) =>
+                                    handleNumberInput(index, "bad_stock", e.target.value, item.stock)
+                                }
+                            />
+
+                            <FormInput
+                                label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/-'}`}
+                                type="number"
+                                value={item.price}
+                                onChange={(e) =>
+                                    updateItem(index, "price", e.target.value)
+                                }
+                            />
+
+                            <FormSelect
+                                label="Keranjang"
+                                value={item.cart_id}
+                                onChange={(e) =>
+                                    updateItem(index, "cart_id", e.target.value)
+                                }
+                                options={
+                                    [{
+                                        label: 'Pilih Keranjang',
+                                        value: '',
+                                        disabled: true
+                                    },
+                                    ...carts.map((s: any) => ({
+                                        label: s.name,
+                                        value: s.id
+                                    }))]
+                                }
+                                required
+                            />
+                            <FormInput
+                                label="Jumlah"
+                                type="number"
+                                value={item.cart_qty}
+                            onChange={(e) =>
+                                    updateItem(index, "cart_qty", e.target.value)
+                                }
+                            />
+
+                            <FormInput
+                                label="Berat/Keranjang"
+                                type="number"
+                                value={item.cart_weight}
+                                onChange={(e) =>
+                                    updateItem(index, "cart_weight", e.target.value)
+                                }
+                            />
+
+                        </div>
+
+                        <div className="border-t border-dashed border-muted-foreground/25 pt-2 flex justify-between">
+
+                            <span className="text-xs font-light text-muted-foreground">
+                                Net: {getNetQty(item)}
+                            </span>
+
+                            <span className="text-xs font-light text-orange-500">
+                                {formatCurrency(getItemTotal(item))}
+                            </span>
+
+                        </div>
 
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
-
-                        <FormInput
-                            label="Jumlah"
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                                updateItem(index, "quantity", e.target.value)
-                            }
-                        />
-
-                        <FormInput
-                            label="Bad Stock"
-                            type="number"
-                            value={item.bad_stock}
-                            onChange={(e) =>
-                                updateItem(index, "bad_stock", e.target.value)
-                            }
-                        />
-
-                        <FormInput
-                            label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/-'}`}
-                            type="number"
-                            value={item.price}
-                            onChange={(e) =>
-                                updateItem(index, "price", e.target.value)
-                            }
-                        />
-
-                        <FormSelect
-                            label="Keranjang"
-                            value={item.cart_id}
-                            onChange={(e) =>
-                                updateItem(index, "cart_id", e.target.value)
-                            }
-                            options={
-                                [{
-                                    label: 'Pilih Keranjang',
-                                    value: '',
-                                    disabled: true
-                                },
-                                ...carts.map((s: any) => ({
-                                    label: s.name,
-                                    value: s.id
-                                }))]
-                            }
-                            required
-                        />
-                        <FormInput
-                            label="Jumlah"
-                            type="number"
-                            value={item.cart_qty}
-                           onChange={(e) =>
-                                updateItem(index, "cart_qty", e.target.value)
-                            }
-                        />
-
-                        <FormInput
-                            label="Berat/Keranjang"
-                            type="number"
-                            value={item.cart_weight}
-                            onChange={(e) =>
-                                updateItem(index, "cart_weight", e.target.value)
-                            }
-                        />
-
-                    </div>
-
-                    <div className="border-t border-dashed border-muted-foreground/25 pt-2 flex justify-between">
-
-                        <span className="text-xs font-light text-muted-foreground">
-                            Net: {getNetQty(item)}
-                        </span>
-
-                        <span className="text-xs font-light text-orange-500">
-                            {formatCurrency(getItemTotal(item))}
-                        </span>
-
-                    </div>
-
-                </div>
-
-            ))}
+                )
+            }
+            )}
 
             {!selectingItem && (
 
@@ -217,7 +248,7 @@ export default function DeliveryItemsSection({
                                     <div className="flex flex-col text-left">
                                         <span className="text-sm font-medium">{item.name}</span>
                                         <span className="text-xs text-muted-foreground">
-                                            {item.unit?.unit_code}
+                                            {item.stock + " " + item.unit?.unit_code}
                                         </span>
                                     </div>
 

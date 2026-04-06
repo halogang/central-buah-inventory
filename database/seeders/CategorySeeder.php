@@ -10,11 +10,25 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Minuman', 'description' => 'Berbagai jenis minuman segar', 'type' => 'barang'],
-            ['name' => 'Gaji Karyawan', 'description' => 'Pengeluaran gaji karyawan bulanan', 'type' => 'pengeluaran'],
-            ['name' => 'Sewa Tempat', 'description' => 'Pengeluaran sewa gudang dan toko', 'type' => 'pengeluaran'],
-            ['name' => 'Listrik & Air', 'description' => 'Pengeluaran utilitas listrik dan air', 'type' => 'pengeluaran'],
-            ['name' => 'Transportasi', 'description' => 'Pengeluaran transportasi dan logistik', 'type' => 'pengeluaran'],
+            // Kategori Barang (Buah)
+            ['name' => 'Apel', 'type' => 'barang'],
+            ['name' => 'Pir', 'type' => 'barang'],
+            ['name' => 'Jeruk', 'type' => 'barang'],
+            ['name' => 'Anggur', 'type' => 'barang'],
+            ['name' => 'Mangga', 'type' => 'barang'],
+            ['name' => 'Pisang', 'type' => 'barang'],
+            ['name' => 'Semangka', 'type' => 'barang'],
+            ['name' => 'Melon', 'type' => 'barang'],
+            ['name' => 'Nanas', 'type' => 'barang'],
+            ['name' => 'Kurma', 'type' => 'barang'],
+            ['name' => 'Lemon', 'type' => 'barang'],
+            ['name' => 'Lainnya', 'type' => 'barang'],
+
+            // Pengeluaran (biar tetap ada)
+            ['name' => 'Gaji Karyawan', 'type' => 'pengeluaran'],
+            ['name' => 'Sewa Tempat', 'type' => 'pengeluaran'],
+            ['name' => 'Listrik & Air', 'type' => 'pengeluaran'],
+            ['name' => 'Transportasi', 'type' => 'pengeluaran'],
         ];
 
         foreach ($categories as $category) {

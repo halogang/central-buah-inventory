@@ -2,6 +2,7 @@ import { TrendingUp, DollarSign, Settings, Wallet } from "lucide-react";
 import { SummaryCard } from "@/components/report/SummaryCard";
 import { ChartCashflow } from "@/components/report/ChartCashflow";
 import { TableLaporan } from "@/components/report/TableLaporan";
+import { formatCurrency } from "@/helpers/format";
 
 const trendData = [
   { name: "Sep", pendapatan: 42000000, hpp: 21000000, bebanOps: 4000000, labaBersih: 14000000 },
@@ -21,30 +22,28 @@ const tableData = [
   { bulan: "Feb 2026", pendapatan: 58000000, hpp: 24000000, bebanOps: 8000000, labaBersih: 26000000, margin: "44.8%" },
 ];
 
-const formatRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
-
-export function TabLabaRugi() {
+export function TabLabaRugi({ data }: { data: any }) {
   const columns = [
     { key: "bulan", label: "Bulan" },
-    { key: "pendapatan", label: "Pendapatan", align: "right" as const, render: (v: number) => formatRp(v) },
-    { key: "hpp", label: "HPP", align: "right" as const, render: (v: number) => <span className="text-destructive">{formatRp(v)}</span> },
-    { key: "bebanOps", label: "Beban Ops", align: "right" as const, render: (v: number) => <span className="text-destructive">{formatRp(v)}</span> },
-    { key: "labaBersih", label: "Laba Bersih", align: "right" as const, render: (v: number) => <span className="text-primary font-semibold">{formatRp(v)}</span> },
+    { key: "pendapatan", label: "Pendapatan", align: "right" as const, render: (v: number) => formatCurrency(v) },
+    { key: "hpp", label: "HPP", align: "right" as const, render: (v: number) => <span className="text-destructive">{formatCurrency(v)}</span> },
+    { key: "bebanOps", label: "Beban Ops", align: "right" as const, render: (v: number) => <span className="text-destructive">{formatCurrency(v)}</span> },
+    { key: "labaBersih", label: "Laba Bersih", align: "right" as const, render: (v: number) => <span className="text-primary font-semibold">{formatCurrency(v)}</span> },
     { key: "margin", label: "Margin", align: "right" as const },
   ];
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard title="Pendapatan" value="Rp 58.000.000" subtitle="▲ +2.4%" subtitleColor="success" icon={TrendingUp} />
-        <SummaryCard title="HPP" value="Rp 24.000.000" subtitle="▲ -21.4% vs lalu" subtitleColor="success" icon={DollarSign} />
-        <SummaryCard title="Beban Ops" value="Rp 8.000.000" subtitle="▲ 35.8% total" subtitleColor="destructive" icon={Settings} />
-        <SummaryCard title="Laba Bersih" value="Rp 26.000.000" subtitle="▲ Margin 44.8%" subtitleColor="success" icon={Wallet} />
+        <SummaryCard title="Pendapatan" value={formatCurrency(data.summary.pendapatan)} subtitle="▲ +2.4%" subtitleColor="success" icon={TrendingUp} />
+        <SummaryCard title="HPP" value={formatCurrency(data.summary.hpp)} subtitle="▲ -21.4% vs lalu" subtitleColor="success" icon={DollarSign} />
+        <SummaryCard title="Beban Ops" value={formatCurrency(data.summary.bebanOps)} subtitle="▲ 35.8% total" subtitleColor="destructive" icon={Settings} />
+        <SummaryCard title="Laba Bersih" value={formatCurrency(data.summary.labaBersih)} subtitle={`▲ Margin ${data.summary.margin}%`} subtitleColor="success" icon={Wallet} />
       </div>
 
       <ChartCashflow
         title="📈 Tren Laba Rugi 2026"
-        data={trendData}
+        data={data.chart}
         lines={[
           { dataKey: "pendapatan", color: "#10B981", name: "Pendapatan" },
           { dataKey: "hpp", color: "#EF4444", name: "HPP" },
@@ -53,7 +52,7 @@ export function TabLabaRugi() {
         ]}
       />
 
-      <TableLaporan title="Laporan Laba Rugi" columns={columns} data={tableData} />
+      <TableLaporan title="Laporan Laba Rugi" columns={columns} data={data.table} />
     </div>
   );
 }

@@ -27,11 +27,11 @@ const detailData = [
   { produk: "Pisang", terjual: 65, revenue: 1300000, persen: "4.5%" },
   { produk: "Jeruk", terjual: 85, revenue: 3825000, persen: "17.2%" },
   { produk: "Anggur", terjual: 40, revenue: 2400000, persen: "12.1%" },
-];
+];  
 
 const formatRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
 
-export function TabPenjualan() {
+export function TabPenjualan({ data }: { data: any }) {
   const columns = [
     { key: "produk", label: "Produk" },
     { key: "terjual", label: "Terjual", align: "right" as const },
@@ -47,17 +47,17 @@ export function TabPenjualan() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard title="Total Terjual" value="715 unit" subtitle="▲ +17% bulan lalu" subtitleColor="success" icon={ShoppingCart} />
-        <SummaryCard title="Revenue" value="Rp 25.9 Jt" subtitle="▲ +8.3%" subtitleColor="success" icon={DollarSign} />
-        <SummaryCard title="Bad Stock" value="29 unit" subtitle="▲ 5 Tipe barang" subtitleColor="destructive" icon={AlertCircle} />
-        <SummaryCard title="Avg Order" value="Rp 1.2 Jt" icon={Receipt} />
+        <SummaryCard title="Total Terjual" value={data.summary.totalTerjual} subtitle="▲ +17% bulan lalu" subtitleColor="success" icon={ShoppingCart} />
+        <SummaryCard title="Revenue" value={formatRp(data.summary.revenue)} subtitle="▲ +8.3%" subtitleColor="success" icon={DollarSign} />
+        <SummaryCard title="Bad Stock" value={data.summary.badStock ?? 0} subtitle="▲ 5 Tipe barang" subtitleColor="destructive" icon={AlertCircle} />
+        <SummaryCard title="Avg Order" value={formatRp(data.summary.avgOrder ?? 0)} icon={Receipt} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3">
           <ChartBar
             title="Produk Terlaris"
-            data={salesByProduct}
+            data={data.chart}
             bars={[{ dataKey: "value", color: "#10B981", name: "Terjual" }]}
           />
         </div>
@@ -66,7 +66,7 @@ export function TabPenjualan() {
         </div>
       </div>
 
-      <TableLaporan title="Detail Penjualan per Produk" columns={columns} data={detailData} />
+      <TableLaporan title="Detail Penjualan per Produk" columns={columns} data={data.table} />
     </div>
   );
 }

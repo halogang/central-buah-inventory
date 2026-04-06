@@ -98,7 +98,7 @@ class PettyCashTransactionController extends Controller
             'date' => $validated['date'],
             'type' => $validated['type'],
             'amount' => $validated['amount'],
-            'evidence' => $validated['evidence'],
+            'evidence' => $validated['evidence'] ?? '',
             'expense_category' => $validated['type'] === 'expense'
                 ? $validated['expense_category']
                 : null,
@@ -163,7 +163,7 @@ class PettyCashTransactionController extends Controller
             'date' => $validated['date'],
             'type' => $validated['type'],
             'amount' => $validated['amount'],
-            'evidence' => $validated['evidence'] ?? $pettyCashTransaction->evidence,
+            'evidence' => $validated['evidence'] ?? $pettyCashTransaction->evidence ?? '',
             'description' => $validated['description'],
             'expense_category' => $validated['type'] === 'expense'
                 ? ($validated['expense_category'] ?: $pettyCashTransaction->expense_category)

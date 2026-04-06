@@ -568,6 +568,11 @@ class DeliveryOrderController extends Controller
             $deliveryOrder->items()->delete();
 
             /**
+             * 4️⃣ Hapus invoices
+             */
+            $deliveryOrder->invoice()->delete();
+
+            /**
              * 5️⃣ Hapus delivery order
              */
             $deliveryOrder->delete();

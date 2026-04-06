@@ -21,15 +21,30 @@ const trendData = [
 
 const formatRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
 
+interface Breakdown {
+  category: string
+  amount: number
+  persen: number
+}
+
+interface Data {
+  summary: {
+    total: string
+    stok: string
+    operasional: string
+  };
+  breakdown: Breakdown[]
+}
+
 const maxAmount = Math.max(...breakdownData.map((d) => d.amount));
 
-export function TabPengeluaran() {
+export function TabPengeluaran({ data }: { data: Data }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <SummaryCard title="Total Pengeluaran" value="Rp 36.8 Jt" subtitle="▼ -3.2% vs lalu" subtitleColor="destructive" icon={TrendingDown} />
-        <SummaryCard title="Pembelian Stok" value="Rp 24 Jt" subtitle="▲ 65% Total" subtitleColor="success" icon={ShoppingCart} />
-        <SummaryCard title="Beban Operasional" value="Rp 12.8 Jt" subtitle="▲ 35% Total" subtitleColor="destructive" icon={Settings} />
+        <SummaryCard title="Total Pengeluaran" value={data.summary.total} subtitle="▼ -3.2% vs lalu" subtitleColor="destructive" icon={TrendingDown} />
+        <SummaryCard title="Pembelian Stok" value={data.summary.stok} subtitle="▲ 65% Total" subtitleColor="success" icon={ShoppingCart} />
+        <SummaryCard title="Beban Operasional" value={data.summary.operasional} subtitle="▲ 35% Total" subtitleColor="destructive" icon={Settings} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -37,7 +52,7 @@ export function TabPengeluaran() {
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h3 className="mb-5 text-sm font-semibold text-foreground">Breakdown Pengeluaran</h3>
           <div className="space-y-4">
-            {breakdownData.map((item) => (
+            {data.breakdown.map((item) => (
               <div key={item.category} className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground font-medium">{item.category}</span>

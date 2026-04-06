@@ -131,6 +131,7 @@ export default function Form({
             image: item.image,
             image_url: item.image_url,
             unit: item.unit,
+            stock: item.stock,
             quantity: "",
             bad_stock: "",
             price: type === 'in' ? item.purchase_price : item.selling_price,

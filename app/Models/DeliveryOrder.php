@@ -44,6 +44,11 @@ class DeliveryOrder extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
     public function items()
     {
         return $this->hasMany(DeliveryOrderItem::class);

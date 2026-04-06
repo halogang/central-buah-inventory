@@ -71,6 +71,7 @@ interface Customer {
 interface Item {
     id: number
     name: string
+    stock: number
 }
 
 interface Props {

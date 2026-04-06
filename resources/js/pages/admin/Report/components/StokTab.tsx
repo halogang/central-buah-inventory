@@ -2,6 +2,7 @@ import { Package, AlertTriangle, Boxes, DollarSign } from "lucide-react";
 import { SummaryCard } from "@/components/report/SummaryCard";
 import { TableLaporan } from "@/components/report/TableLaporan";
 import { ChartBar } from "@/components/report/ChartBar";
+import { formatCurrency } from "@/helpers/format";
 
 const stockData = [
   { barang: "Mangga Harum Manis", stok: "150 kg", masuk: "+200", keluar: "-180", sisa: 2, status: "Aman" },
@@ -23,7 +24,7 @@ const comparisonData = [
   { name: "Anggur", masuk: 50, keluar: 40 },
 ];
 
-export function TabStok() {
+export function TabStok({ data }: { data: any }) {
   const columns = [
     { key: "barang", label: "Barang" },
     { key: "stok", label: "Stok", align: "right" as const },
@@ -57,17 +58,17 @@ export function TabStok() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard title="Total SKU" value="12" icon={Package} />
-        <SummaryCard title="Stok Rendah" value="1" subtitle="▲ Strawberry < Min" subtitleColor="destructive" icon={AlertTriangle} />
-        <SummaryCard title="Total Stok Barang" value="29 unit" subtitle="▲ Terkini" subtitleColor="success" icon={Boxes} />
-        <SummaryCard title="Nilai Stok" value="Rp 18.4 Jt" icon={DollarSign} />
+        <SummaryCard title="Total SKU" value={data.summary.totalSku} icon={Package} />
+        <SummaryCard title="Stok Rendah" value={data.summary.lowStock}  icon={AlertTriangle} />
+        <SummaryCard title="Total Stok Barang" value={data.summary.totalStock + " Unit"}  subtitleColor="success" icon={Boxes} />
+        <SummaryCard title="Nilai Stok" value={formatCurrency(data.summary.stockValue)} icon={DollarSign} />
       </div>
 
-      <TableLaporan title="📦 Laporan Stok Barang" columns={columns} data={stockData} />
+      <TableLaporan title="📦 Laporan Stok Barang" columns={columns} data={data.table} />
 
       <ChartBar
         title="Perbandingan Stok Masuk vs Keluar"
-        data={comparisonData}
+        data={data.chart}
         bars={[
           { dataKey: "masuk", color: "#10B981", name: "Masuk" },
           { dataKey: "keluar", color: "#111827", name: "Keluar" },
