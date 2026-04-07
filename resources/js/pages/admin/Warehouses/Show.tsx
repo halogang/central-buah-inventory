@@ -100,7 +100,9 @@ export default function Show({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={warehouse.name} />
+            <Head title={warehouse.name} >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="p-4 space-y-4">
                 {/* Back button */}

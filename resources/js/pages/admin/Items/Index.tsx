@@ -82,7 +82,9 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Items" />
+            <Head title="Barang" >
+                <meta name="robots" content="noindex" />
+            </Head>
             <div className="p-4">
                 <div className="grid grid-cols-3 gap-4 mb-4">
                     <div className='rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border text-center'>

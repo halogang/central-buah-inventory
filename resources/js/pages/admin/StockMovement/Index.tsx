@@ -73,7 +73,9 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Stock Movement" />
+            <Head title="Stock Movement" >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="space-y-6 p-4">
 
@@ -236,6 +238,12 @@ export default function Index() {
                         );
                     })}
                 </div>
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goTo}
+                />
 
             </div>
         </AppLayout>

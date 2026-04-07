@@ -84,93 +84,95 @@ const DeliverySchedule = () => {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-    <Head title="Delivery Schedule"/>
+      <Head title="Jadwal Surat Jalan" >
+        <meta name="robots" content="noindex" />
+      </Head>
 
-    <div className="flex-1 flex flex-col bg-background overflow-hidden">
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-border">
-        <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-foreground">Jadwal Surat Jalan</h1>
-            <div className="flex items-center gap-2">
-            {/* Filter */}
-            <div className="flex items-center gap-1 bg-secondary rounded-lg p-1 text-sm">
-                {(["all", "in", "out"] as const).map((t) => (
-                <button
-                    key={t}
-                    onClick={() => setFilterType(t)}
-                    className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
-                    filterType === t
-                        ? "bg-card text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                >
-                    {t === "all" ? "Semua" : t === "in" ? "Pembelian" : "Pengiriman"}
-                </button>
-                ))}
-            </div>
-            </div>
-        </div>
+      <div className="flex-1 flex flex-col bg-background overflow-hidden">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 border-b border-border">
+          <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-bold text-foreground">Jadwal Surat Jalan</h1>
+              <div className="flex items-center gap-2">
+              {/* Filter */}
+              <div className="flex items-center gap-1 bg-secondary rounded-lg p-1 text-sm">
+                  {(["all", "in", "out"] as const).map((t) => (
+                  <button
+                      key={t}
+                      onClick={() => setFilterType(t)}
+                      className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                      filterType === t
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                  >
+                      {t === "all" ? "Semua" : t === "in" ? "Pembelian" : "Pengiriman"}
+                  </button>
+                  ))}
+              </div>
+              </div>
+          </div>
 
-        <div className="flex items-center justify-between">
-            {/* Legend */}
-            <div className="flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                Pembelian (IN)
-            </span>
-            <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-blue-500" />
-                Pengiriman (OUT)
-            </span>
-            </div>
+          <div className="flex items-center justify-between">
+              {/* Legend */}
+              <div className="flex items-center gap-4 text-sm">
+              <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                  Pembelian (IN)
+              </span>
+              <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-blue-500" />
+                  Pengiriman (OUT)
+              </span>
+              </div>
 
-            {/* Navigation */}
-            <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={goToday}>
-                Hari Ini
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={goPrev}>
-                <ChevronLeft size={16} />
-            </Button>
-            <span className="text-sm font-semibold min-w-35 text-center capitalize">
-                {monthLabel}
-            </span>
-            <Button variant="outline" size="icon" className="h-8 w-8" onClick={goNext}>
-                <ChevronRight size={16} />
-            </Button>
-            </div>
-        </div>
-        </div>
+              {/* Navigation */}
+              <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={goToday}>
+                  Hari Ini
+              </Button>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goPrev}>
+                  <ChevronLeft size={16} />
+              </Button>
+              <span className="text-sm font-semibold min-w-35 text-center capitalize">
+                  {monthLabel}
+              </span>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goNext}>
+                  <ChevronRight size={16} />
+              </Button>
+              </div>
+          </div>
+          </div>
 
-        {/* Calendar */}
-        <div className="flex-1 overflow-auto p-6">
-        <CalendarView
-            currentDate={currentDate}
-            orders={filteredOrders}
-            onEventClick={handleEventClick}
-            onDateClick={handleDateClick}
-        />
-        </div>
-    </div>
+          {/* Calendar */}
+          <div className="flex-1 overflow-auto p-6">
+          <CalendarView
+              currentDate={currentDate}
+              orders={filteredOrders}
+              onEventClick={handleEventClick}
+              onDateClick={handleDateClick}
+          />
+          </div>
+      </div>
 
-    {/* Modals */}
-    {showDetail && selectedOrder && (
-        <DeliveryDetailModal
-        order={selectedOrder}
-        onClose={() => setShowDetail(false)}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        />
-    )}
+      {/* Modals */}
+      {showDetail && selectedOrder && (
+          <DeliveryDetailModal
+          order={selectedOrder}
+          onClose={() => setShowDetail(false)}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          />
+      )}
 
-    {showForm && (
-        <DeliveryFormModal
-        order={editingOrder}
-        defaultDate={createDate}
-        onClose={() => { setShowForm(false); setEditingOrder(null); }}
-        onSave={handleSave}
-        />
-    )}
+      {showForm && (
+          <DeliveryFormModal
+          order={editingOrder}
+          defaultDate={createDate}
+          onClose={() => { setShowForm(false); setEditingOrder(null); }}
+          onSave={handleSave}
+          />
+      )}
     </AppLayout>
   );
 };

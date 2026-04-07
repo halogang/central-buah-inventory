@@ -8,7 +8,7 @@ import {TabPenjualan} from "./components/PenjualanTab";
 import {TabPengeluaran} from "./components/PengeluaranTab";
 import {TabLabaRugi} from "./components/LabaRugiTab";
 import AppLayout from "@/layouts/app-layout";
-import { router, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 
 const TABS = [
     {
@@ -70,6 +70,9 @@ export default function LaporanPage() {
 
     return (
         <AppLayout>
+            <Head title="Laporan">
+                <meta name="robots" content="noindex" />
+            </Head>
             <div className="p-4 space-y-6">
                 {/* Header */}
                 <div>

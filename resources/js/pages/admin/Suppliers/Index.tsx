@@ -118,7 +118,9 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Suppliers" />
+            <Head title="Suplier" >
+                <meta name="robots" content="noindex" />
+            </Head>
             <div className="p-4">
                 <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
                     <SearchInput

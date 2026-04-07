@@ -24,7 +24,7 @@ export function SummaryCard({
   iconBgColor,
 }: SummaryCardProps) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm flex flex-col justify-between min-h-[100px]">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm flex flex-col justify-between min-h-25">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>

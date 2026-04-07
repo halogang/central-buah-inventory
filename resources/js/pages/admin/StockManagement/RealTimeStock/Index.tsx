@@ -129,7 +129,9 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Stok Real-Time" />
+            <Head title="Stok Real-Time" >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="space-y-6 p-4">
 

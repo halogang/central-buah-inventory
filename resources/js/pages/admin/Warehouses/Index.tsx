@@ -149,7 +149,9 @@ export default function Warehouses() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Warehouses" />
+            <Head title="Gudang" >
+                <meta name="robots" content="noindex" />
+            </Head>
             <div className="p-4">
                 <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
                     <SearchInput

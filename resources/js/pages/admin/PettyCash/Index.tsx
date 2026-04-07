@@ -139,7 +139,9 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title='Keuangan - Petty Cash'/>
+            <Head title='Keuangan - Petty Cash'>
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="p-4 sm:p-6 flex flex-col gap-6">
 

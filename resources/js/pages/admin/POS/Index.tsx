@@ -149,7 +149,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-        <Head title="POS Kasir" />
+        <Head title="POS Kasir" >
+          <meta name="robots" content="noindex" />
+        </Head>
         <div className="p-4">
             <div className="flex flex-1">
                 <ProductGrid

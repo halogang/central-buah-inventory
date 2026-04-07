@@ -123,7 +123,9 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Invoices"/>
+            <Head title="Invoice" >
+                <meta name="robots" content="noindex" />
+            </Head>
             <div className="p-4">
                 <div className="flex justify-between items-center mb-4 gap-2">
                     <button

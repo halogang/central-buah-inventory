@@ -1,4 +1,4 @@
-import { router } from "@inertiajs/react"
+import { Head, router } from "@inertiajs/react"
 import type { FormEvent } from "react"
 import { useState } from "react"
 import { FormImageUpload, FormInput, FormTextarea } from "@/components/admin"
@@ -87,11 +87,7 @@ export default function WebsiteInfoIndex({ info }: any) {
             delete payload.about_image
         }
 
-        router.post(`/master/website-info/${info.id}`, {
-            ...form,
-            _method: 'put',
-            jam_operasional: jamPreview
-        }, {
+        router.post(`/master/website-info/${info.id}`, payload, {
             forceFormData: true,
             onSuccess: () => notify.success('Informasi berhasil diperbarui'),
             onError: (errors) => {
@@ -102,6 +98,9 @@ export default function WebsiteInfoIndex({ info }: any) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Informasi Website" >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="p-6 space-y-6">
 

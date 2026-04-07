@@ -118,7 +118,9 @@ export default function StockOpnames(){
             {title:'Stock Opname',href:'/inventory/stock-opnames'}
         ]}>
 
-        <Head title="Stock Opname"/>
+        <Head title="Stock Opname" >
+            <meta name="robots" content="noindex" />
+        </Head>
 
         <div className="p-4">
 

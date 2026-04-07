@@ -163,7 +163,9 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Surat Jalan" />
+            <Head title="Surat Jalan" >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="space-y-6 p-4">
 

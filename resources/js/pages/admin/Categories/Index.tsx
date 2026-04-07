@@ -83,7 +83,9 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Categories" />
+            <Head title="Kategori" >
+                <meta name="robots" content="noindex" />
+            </Head>
             <div className="p-4">
                 <div className="flex justify-between items-center mb-4 gap-2">
                     <button

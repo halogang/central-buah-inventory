@@ -141,7 +141,9 @@ export default function Show({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={category.name} />
+            <Head title={category.name} >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="p-4 space-y-4">
                 {/* Back button */}

@@ -88,7 +88,9 @@ export default function Index() {
 
     return (
         <AppLayout>
-            <Head title="Users & Roles" />
+            <Head title="Pengguna & Role" >
+                <meta name="robots" content="noindex" />
+            </Head>
 
             <div className="p-4">
 
