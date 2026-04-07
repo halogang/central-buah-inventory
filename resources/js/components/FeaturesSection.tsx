@@ -1,7 +1,7 @@
 import {Leaf, ShieldCheck, Star } from "lucide-react";
 
 const features = [
-  { icon: Leaf, title: "100% Segar", desc: "Buah dipetik langsung dari kebun dan dikirim fresh ke toko kami." },
+  { icon: Leaf, title: "100% Buah Segar", desc: "Buah dipetik langsung dari kebun dan dikirim fresh ke toko kami." },
   { icon: ShieldCheck, title: "Garansi Kualitas", desc: "Jaminan pengembalian jika buah tidak sesuai kualitas." },
   { icon: Star, title: "Buah Pilihan", desc: "Seleksi ketat dari petani terpercaya, lokal maupun import." },
 ];

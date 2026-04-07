@@ -1,4 +1,4 @@
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import AboutSection from "@/components/AboutSection";
 import CTASection from "@/components/CTASection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -22,7 +22,11 @@ interface WebsiteInfo {
   kontak: string;
   email: string;
   jam_operasional: string;
-  link_maps: string
+  link_maps: string;
+  hero_image: string;
+  hero_image_url: string;
+  about_image: string;
+  about_image_url: string;
 }
 
 interface Unit {
@@ -53,16 +57,25 @@ export default function Home() {
   }>().props;
 
   return (
-    <div className="min-h-screen scroll-smooth">
-      <Navbar websiteInfo={websiteInfo}/>
-      <HeroSection websiteInfo={websiteInfo} />
-      <FeaturesSection />
-      <ItemsSection items={items} categories={categories} />
-      <AboutSection />
-      <CTASection />
-      <LocationSection websiteInfo={websiteInfo}/>
-      <Footer websiteInfo={websiteInfo}/>
-    </div>
+    <>
+      <Head>
+        <title>Central Buah Sutomo - Toko Buah Terdekat di Cilacap</title>
+        <meta
+          name="description"
+          content="Cari toko, kios, agen buah segar berkualitas di Cilacap? Central Buah Sutomo: 100% segar, garansi kualitas, buah pilihan. BISA PESAN ONLINE."
+        />
+      </Head>
+      <div className="min-h-screen scroll-smooth">
+        <Navbar websiteInfo={websiteInfo}/>
+        <HeroSection websiteInfo={websiteInfo} />
+        <FeaturesSection />
+        <ItemsSection items={items} categories={categories} />
+        <AboutSection websiteInfo={websiteInfo}/>
+        <CTASection websiteInfo={websiteInfo}/>
+        <LocationSection websiteInfo={websiteInfo}/>
+        <Footer websiteInfo={websiteInfo}/>
+      </div>
+    </>
   )
 }
 

@@ -33,6 +33,11 @@ return new class extends Migration
 
             $table->string('footer_copyright')->nullable();
 
+            $table->string('hero_image')->nullable();
+
+            $table->string('about_content')->nullable();
+            $table->string('about_image')->nullable();
+
             $table->timestamps();
         });
     }

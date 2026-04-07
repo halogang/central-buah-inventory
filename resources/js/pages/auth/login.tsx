@@ -27,7 +27,9 @@ export default function Login({
     const [showPassword, setShowPassword] = useState(false);
     return (
         <>
-            <Head title="Login" />
+            <Head title="Login">
+                <meta name="robots" content="noindex"/>
+            </Head>
 
             <div className="flex min-h-screen">
                 

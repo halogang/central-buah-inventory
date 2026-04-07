@@ -13,10 +13,10 @@ import { email } from '@/routes/password';
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <AuthLayout
-            title="Forgot password"
-            description="Enter your email to receive a password reset link"
+            title="Lupa Password"
+            description="Masukkan email Anda untuk menerima tautan reset kata sandi"
         >
-            <Head title="Forgot password" />
+            <Head title="Lupa Password" />
 
             {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
@@ -29,7 +29,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email">Alamat email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -51,7 +51,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Email password reset link
+                                    {/* Email password reset link */}
+                                    Link reset kata sandi email
                                 </Button>
                             </div>
                         </>
@@ -59,7 +60,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Or, return to</span>
+                    <span>Atau, kembali ke</span>
                     <TextLink href={login()}>log in</TextLink>
                 </div>
             </div>

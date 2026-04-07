@@ -44,7 +44,7 @@ const Footer = ({ websiteInfo }: FooterProps) => (
               <p>{websiteInfo.kontak}</p>
             </div>
             <div className="flex gap-2 items-center">
-              <Mail size={16}/>
+              <Mail size={16} className="shrink-0"/>
               <p>{websiteInfo.email}</p>
             </div>
           </div>
@@ -63,9 +63,9 @@ const Footer = ({ websiteInfo }: FooterProps) => (
           </div>
         </div>
       </div>
-      <div className="mt-10 pt-6 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/40">
-        © 2026 {websiteInfo.nama_usaha}. All rights reserved.
-      </div>
+    </div>
+    <div className="mt-10 pt-6 border-t border-primary-foreground/10 text-center text-sm text-white">
+      © 2026 {websiteInfo.nama_usaha}. All rights reserved.
     </div>
   </footer>
 );

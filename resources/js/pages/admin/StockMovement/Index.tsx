@@ -65,11 +65,11 @@ export default function Index() {
 
     const totalIn = stockMovements
         .filter((m) => m.type === "in")
-        .reduce((sum, m) => sum + m.quantity, 0);
+        .reduce((sum, m) => sum + Number(m.quantity), 0);
 
     const totalOut = stockMovements
         .filter((m) => m.type === "out")
-        .reduce((sum, m) => sum + m.quantity, 0);
+        .reduce((sum, m) => sum + Number(m.quantity), 0);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

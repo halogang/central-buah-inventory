@@ -7,7 +7,7 @@ const points = [
   "Pelayanan ramah dan sistem pemesanan mudah."
 ];
 
-const AboutSection = () => (
+const AboutSection = ({ websiteInfo }: any) => (
   <section id="about" className="py-20 md:py-28 bg-muted/50 transition-all">
     <div className="container mx-auto px-4 max-w-6xl">
       <div className="flex flex-col md:flex-row items-center gap-12">
@@ -15,7 +15,7 @@ const AboutSection = () => (
         {/* Kiri: Gambar */}
         <div className="md:w-1/2">
           <img
-            src={AboutImage}
+            src={websiteInfo.about_image_url ?? AboutImage}
             alt="Buah segar"
             className="w-full h-auto rounded-lg shadow-lg object-cover"
           />
@@ -39,7 +39,7 @@ const AboutSection = () => (
             {points.map((p) => (
               <div key={p} className="flex items-start gap-3">
                 <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm text-foreground">{p}</span>
+                <span className="text-sm text-muted-foreground">{p}</span>
               </div>
             ))}
           </div>

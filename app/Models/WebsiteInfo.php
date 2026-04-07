@@ -19,6 +19,25 @@ class WebsiteInfo extends Model
         'facebook',
         'instagram',
         'whatsapp',
-        'footer_copyright'
+        'footer_copyright',
+        'hero_image',
+        'about_content',
+        'about_image'
     ];
+
+    protected $appends = ['hero_image_url', 'about_image_url'];
+
+    public function getHeroImageUrlAttribute()
+    {
+        return $this->hero_image
+            ? asset($this->hero_image)
+            : null;
+    }
+
+    public function getAboutImageUrlAttribute()
+    {
+        return $this->about_image
+            ? asset($this->about_image)
+            : null;
+    }
 }
