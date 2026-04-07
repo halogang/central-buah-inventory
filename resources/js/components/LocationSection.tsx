@@ -98,15 +98,11 @@ const LocationSection = ({websiteInfo} : Props) => {
                                 </Button>
                             </a>
 
-                            <button
-                                onClick={sendWhatsApp}
-                                className="w-full">
-                                <Button
-                                    className="w-full bg-green-500 hover:bg-green-600/80 text-white rounded-lg px-6 py-5">
-                                    <MessageCircle size={18} className=""/>
-                                    Hubungi WhatsApp
-                                </Button>
-                            </button>
+                            <Button onClick={sendWhatsApp}
+                                className="w-full bg-green-500 hover:bg-green-600/80 text-white rounded-lg px-6 py-5">
+                                <MessageCircle size={18} className=""/>
+                                Hubungi WhatsApp
+                            </Button>
 
                         </div>
 

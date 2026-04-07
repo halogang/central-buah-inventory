@@ -35,7 +35,7 @@ return new class extends Migration
 
             $table->string('hero_image')->nullable();
 
-            $table->string('about_content')->nullable();
+            $table->text('about_content')->nullable();
             $table->string('about_image')->nullable();
 
             $table->timestamps();
