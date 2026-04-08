@@ -22,10 +22,15 @@ return new class extends Migration
             $table->integer('tax')->nullable();
             $table->integer('total');
 
-           $table->string('payment_method')->default('cash');
+            $table->string('payment_method')->default('cash');
             
             $table->integer('paid_amount')->nullable();
             $table->integer('change_amount')->nullable();
+            
+            //add type (self buying or delivery) and charge / postage
+            $table->string('type')->default('self-buying');
+            $table->integer('charge')->nullable();
+
             $table->timestamps();
         });
     }

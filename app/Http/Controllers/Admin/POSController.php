@@ -21,7 +21,7 @@ class POSController extends Controller
     {
         $productData = Item::with('unit', 'warehouse.branch')->whereHas('warehouse.branch', function($q){
             $q->where('name', 'Retail');
-        })->get()->map(function ($item) {
+        })->where('stock', '>', 0)->get()->map(function ($item) {
             return [
                 'id' => $item->id,
                 'name' => $item->name,
@@ -59,6 +59,8 @@ class POSController extends Controller
             'payment_method' => 'required|string',
             'paid_amount' => 'nullable|integer',
             'change_amount' => 'nullable|integer',
+            'type' => 'required|string',
+            'charge' => 'nullable|integer',
 
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.item_name' => 'required|string',

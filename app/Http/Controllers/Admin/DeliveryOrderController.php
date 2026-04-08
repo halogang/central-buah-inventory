@@ -57,15 +57,21 @@ class DeliveryOrderController extends Controller
 
     public function index()
     {
-        $deliveryOrders = DeliveryOrder::with([
+        $user = Auth::user();
+
+        $query = DeliveryOrder::with([
             'supplier',
             'customer',
             'items.item',
             'items.cart',
-        ])
-        ->latest()
-        ->get()
-        ->map(function ($do) {
+        ])->latest();
+
+        // ✅ khusus staff antar
+        if ($user->hasRole('staff_antar')) {
+            $query->where('type', 'out');
+        }
+
+        $deliveryOrders = $query->get()->map(function ($do) {
 
             return [
                 'id' => $do->id,
@@ -134,6 +140,7 @@ class DeliveryOrderController extends Controller
 
         return Inertia::render('admin/DeliveryOrder/Index', [
             'deliveryOrders' => $deliveryOrders,
+            'isStaffAntar' => $user->hasRole('staff_antar'),
             'suppliers' => Supplier::select('id','name')->get(),
             'items' => $items,
             'customers' => Customer::select('id','name','phone')->get(),

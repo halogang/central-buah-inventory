@@ -76,15 +76,16 @@ interface Item {
 
 interface Props {
     deliveryOrders: DeliveryOrder[]
+    isStaffAntar: boolean
     suppliers: Supplier[]
     items: Item[]
     customers: Customer[]
     carts: Cart[]
 }
 
-export default function Index({ deliveryOrders, suppliers, items, customers, carts }: Props) {
+export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, customers, carts }: Props) {
 
-    const [activeTab, setActiveTab] = useState<"in" | "out">("in")
+    const [activeTab, setActiveTab] = useState<"in" | "out">(isStaffAntar ? "out" : "in")
     const [search, setSearch] = useState("")
 
     const [openForm, setOpenForm] = useState(false)
@@ -92,6 +93,8 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
 
     const [openShow, setOpenShow] = useState(false)
     const [selected, setSelected] = useState(null)
+
+        
 
     const confirmDelete = (delivery: DeliveryOrder) => {
         notify.confirmDelete({
@@ -172,18 +175,20 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
                 {/* TAB */}
                 <div className="flex gap-2">
 
-                    <button
-                        onClick={() => setActiveTab("in")}
-                        className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition
-                        ${
-                            activeTab === "in"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        }`}
-                    >
-                        <ArrowDownToLine className="size-4" />
-                        SJ Masuk
-                    </button>
+                    {!isStaffAntar && (
+                        <button
+                            onClick={() => setActiveTab("in")}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition
+                            ${
+                                activeTab === "in"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            }`}
+                        >
+                            <ArrowDownToLine className="size-4" />
+                            Surat Jalan Masuk
+                        </button>
+                    )}
 
                     <button
                         onClick={() => setActiveTab("out")}
@@ -195,7 +200,7 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
                         }`}
                     >
                         <ArrowUpToLine className="size-4" />
-                        SJ Keluar
+                        Surat Jalan Keluar
                     </button>
 
                 </div>
@@ -239,10 +244,12 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
                         onChange={(e) => setSearch(e.target.value)}
                     />
 
-                    <Button onClick={openCreate}>
-                        <Plus />
-                        Buat
-                    </Button>
+                    {!isStaffAntar && (
+                        <Button onClick={openCreate}>
+                            <Plus />
+                            Buat
+                        </Button>
+                    )}
 
                 </div>
 
@@ -278,9 +285,11 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
                                     </span>
                                 </div>
 
-                                <button onClick={() => confirmDelete(delivery)}>
-                                    <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
-                                </button>
+                                {!isStaffAntar && (
+                                    <button onClick={() => confirmDelete(delivery)}>
+                                        <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
+                                    </button>
+                                )}
 
                             </div>
 
@@ -359,6 +368,7 @@ export default function Index({ deliveryOrders, suppliers, items, customers, car
             {/* FORM MODAL */}
             {openForm && (
                 <Form
+                    isStaffAntar={isStaffAntar}
                     data={selectedData}
                     suppliers={suppliers}
                     items={items}

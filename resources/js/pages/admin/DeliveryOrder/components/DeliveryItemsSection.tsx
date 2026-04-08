@@ -19,7 +19,8 @@ export default function DeliveryItemsSection({
     cartUnit,
     getNetQty,
     getItemTotal,
-    carts
+    carts,
+    disabled
 }: any) {
     const [errors, setErrors] = useState({});
 
@@ -96,12 +97,14 @@ export default function DeliveryItemsSection({
 
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => removeItem(index)}
-                            >
-                                <Trash2 className="size-4 text-muted-foreground hover:text-red-500 cursor-pointer" />
-                            </button>
+                            {!disabled && (
+                                <button
+                                    type="button"
+                                    onClick={() => removeItem(index)}
+                                >
+                                    <Trash2 className="size-4 text-muted-foreground hover:text-red-500 cursor-pointer" />
+                                </button>
+                            )}
 
                         </div>
 
@@ -110,6 +113,7 @@ export default function DeliveryItemsSection({
                             <FormInput
                                 label="Jumlah"
                                 type="number"
+                                disabled={disabled}
                                 max={item.stock ?? ''}
                                 value={item.quantity}
                                 onChange={(e) =>
@@ -121,6 +125,7 @@ export default function DeliveryItemsSection({
                             <FormInput
                                 label="Bad Stock"
                                 type="number"
+                                disabled={disabled}
                                 max={item.stock ?? ''}
                                 value={item.bad_stock}
                                 onChange={(e) =>
@@ -131,6 +136,7 @@ export default function DeliveryItemsSection({
                             <FormInput
                                 label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/-'}`}
                                 type="number"
+                                disabled={disabled}
                                 value={item.price}
                                 onChange={(e) =>
                                     updateItem(index, "price", e.target.value)
@@ -139,6 +145,7 @@ export default function DeliveryItemsSection({
 
                             <FormSelect
                                 label="Keranjang"
+                                disabled={disabled}
                                 value={item.cart_id}
                                 onChange={(e) =>
                                     updateItem(index, "cart_id", e.target.value)
@@ -159,6 +166,7 @@ export default function DeliveryItemsSection({
                             <FormInput
                                 label="Jumlah"
                                 type="number"
+                                disabled={disabled}
                                 value={item.cart_qty}
                             onChange={(e) =>
                                     updateItem(index, "cart_qty", e.target.value)
@@ -168,6 +176,7 @@ export default function DeliveryItemsSection({
                             <FormInput
                                 label="Berat/Keranjang"
                                 type="number"
+                                disabled={disabled}
                                 value={item.cart_weight}
                                 onChange={(e) =>
                                     updateItem(index, "cart_weight", e.target.value)
@@ -194,7 +203,7 @@ export default function DeliveryItemsSection({
             }
             )}
 
-            {!selectingItem && (
+            {!selectingItem && !disabled && (
 
                 <button
                     type="button"

@@ -101,8 +101,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     0
   );
 
-  const handlePaySuccess = (cashReceived: number, change: number) => {
-    setLastTransaction({ total: subtotal, cashReceived, change });
+  const handlePaySuccess = (cashReceived: number, change: number, finalTotal: number) => {
+    setLastTransaction({ total: finalTotal, cashReceived, change });
     setShowPayment(false);
     setShowSuccess(true);
   };

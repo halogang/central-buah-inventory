@@ -22,7 +22,7 @@ export default function FormInput({
             </label>
             <input
                 className={cn(
-                    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white',
+                    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:bg-muted',
                     error && 'border-red-500 focus:ring-red-500',
                     className
                 )}

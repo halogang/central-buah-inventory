@@ -48,6 +48,7 @@ type DeliveryForm = {
 
 export default function Form({
     data,
+    isStaffAntar,
     suppliers,
     customers,
     items,
@@ -321,6 +322,7 @@ export default function Form({
                             suppliers={suppliers}
                             customers={customers}
                             type={type}
+                            disabled={isStaffAntar}
                             setForm={setForm}
                         />
 
@@ -341,6 +343,7 @@ export default function Form({
                             cartUnit={cartUnit}
                             getNetQty={getNetQty}
                             getItemTotal={getItemTotal}
+                            disabled={isStaffAntar}
                         />
 
                         {form.status === 'done' && (

@@ -23,6 +23,9 @@ class Pos extends Model
 
         'paid_amount',
         'change_amount',
+
+        'type',
+        'charge',
     ];
 
     public function user()

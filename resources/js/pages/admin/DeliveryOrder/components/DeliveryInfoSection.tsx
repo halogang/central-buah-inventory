@@ -7,6 +7,7 @@ export default function DeliveryInfoSection({
     suppliers,
     customers,
     type,
+    disabled,
     setForm
 }: any) {
 
@@ -23,6 +24,7 @@ export default function DeliveryInfoSection({
                 label="Tanggal"
                 type="date"
                 value={form.date}
+                disabled={disabled}
                 onChange={(e) =>
                     setForm({ ...form, date: e.target.value })
                 }
@@ -33,6 +35,7 @@ export default function DeliveryInfoSection({
                 <FormSelect
                     label="Supplier"
                     value={form.supplier_id}
+                    disabled={disabled}
                     onChange={(e) =>
                         setForm({ ...form, supplier_id: e.target.value })
                     }
@@ -53,6 +56,7 @@ export default function DeliveryInfoSection({
                 <FormSelect
                     label="Pelangggan"
                     value={form.customer_id}
+                    disabled={disabled}
                     onChange={(e) =>
                         setForm({ ...form, customer_id: e.target.value })
                     }

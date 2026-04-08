@@ -1,18 +1,22 @@
 import { useState } from "react";
-import { X, CheckCircle, Printer, Apple } from "lucide-react";
+import { X, CheckCircle, Printer, Apple, Truck } from "lucide-react";
 import { CartItem, PaymentMethod, formatRupiah } from "@/data/products";
 import { store } from "@/routes/pos";
 import { router } from "@inertiajs/react";
+import { FormInput, FormSelect } from "@/components/admin";
 
 interface PaymentModalProps {
   cart: CartItem[];
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (m: PaymentMethod) => void;
   onClose: () => void;
-  onSuccess: (cashReceived: number, change: number) => void;
+  onSuccess: (cashReceived: number, change: number, finalTotal: number) => void;
 }
 
 const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onSuccess }: PaymentModalProps) => {
+  const [purchaseType, setPurchaseType] = useState<"self-buying" | "delivery">("self-buying");
+  const [charge, setCharge] = useState<number>(10000);
+
   const total = cart.reduce(
     (sum, item) => sum + (item.customPrice ?? item.product.price) * item.qty,
     0
@@ -20,9 +24,11 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
   const [cashReceived, setCashReceived] = useState<number | "">("");
   const [error, setError] = useState("");
 
+  const finalTotal = total + (purchaseType === "delivery" ? charge : 0);
+
   const quickAmounts = [
-    total,
-    Math.ceil(total / 10000) * 10000 + 10000,
+    finalTotal,
+    Math.ceil(finalTotal / 10000) * 10000 + 10000,
     100000,
     200000,
     500000,
@@ -34,20 +40,21 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
     { key: "qris", label: "QRIS", icon: "📱" },
   ];
 
+
   const handleProcess = () => {
-    let paid = total;
+    let paid = finalTotal;
     let changeAmount = 0;
 
     if (paymentMethod === "tunai") {
       const received = Number(cashReceived);
 
-      if (!received || received < total) {
+      if (!received || received < finalTotal) {
         setError("Nominal kurang");
         return;
       }
 
       paid = received;
-      changeAmount = received - total;
+      changeAmount = received - finalTotal;
     }
 
     // 🔥 mapping cart → payload items
@@ -66,17 +73,22 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
       subtotal: total,
       discount: 0,
       tax: 0,
-      total: total,
+      total: finalTotal,
+
       payment_method: paymentMethod,
       paid_amount: paid,
       change_amount: changeAmount,
+
+      type: purchaseType,
+      charge: purchaseType === "delivery" ? charge : 0,
+
       status: 1,
       items,
     };
 
     router.post(store(), payload, {
       onSuccess: () => {
-        onSuccess(paid, changeAmount);
+        onSuccess(paid, changeAmount, finalTotal);
       },
       onError: (errors) => {
         console.error(errors);
@@ -110,9 +122,20 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
                 </span>
               </div>
             ))}
+            {purchaseType === "delivery" && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-foreground">
+                  <Truck className="w-4 h-4 inline mr-1.5"/>
+                  Biaya Antar
+                </span>
+                <span className="font-medium text-foreground tabular-nums">
+                  {formatRupiah(charge)}
+                </span>
+              </div>
+            )}
             <div className="border-t border-border pt-2 flex items-center justify-between">
               <span className="font-bold text-foreground">TOTAL</span>
-              <span className="font-bold text-lg pos-price-text tabular-nums">{formatRupiah(total)}</span>
+              <span className="font-bold text-lg pos-price-text tabular-nums">{formatRupiah(finalTotal)}</span>
             </div>
           </div>
 
@@ -135,6 +158,40 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Purchase Type */}
+          <div>
+            <FormSelect
+              label="Tipe Pembelian"
+              value={purchaseType}
+              onChange={(e) => {
+                const value = e.target.value as "self-buying" | "delivery";
+                setPurchaseType(value);
+
+                // reset charge kalau bukan delivery
+                if (value !== "delivery") {
+                  setCharge(10000);
+                }
+              }}
+              options={[
+                { value: "self-buying", label: "Ambil Sendiri" },
+                { value: "delivery", label: "Diantar" },
+              ]}
+            />
+
+            {/* Charge input kalau delivery */}
+            {purchaseType === "delivery" && (
+              <div className="mt-3">
+                <FormInput
+                  label="Biaya Antar"
+                  type="number"
+                  value={charge}
+                  onChange={(e) => setCharge(Number(e.target.value))}
+                  placeholder="Masukkan biaya antar..."
+                />
+              </div>
+            )}
           </div>
 
           {/* Cash input */}
@@ -180,6 +237,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
 // --- Success Modal ---
 interface SuccessModalProps {
   total: number;
+  // finalTotal: number;
   cashReceived: number;
   change: number;
   paymentMethod: PaymentMethod;
