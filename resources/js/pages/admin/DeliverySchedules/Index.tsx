@@ -178,7 +178,9 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
     };
 
     if (isEdit) {
-      router.put(update(Number(form.id!)), payload, {
+      payload.append('_method', 'PUT');
+
+      router.post(update(Number(form.id!)), payload, {
         forceFormData: true,
         onSuccess: handleSuccess,
         onError: handleError,
