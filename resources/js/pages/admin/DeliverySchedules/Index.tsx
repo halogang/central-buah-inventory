@@ -84,14 +84,6 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
     }
   }, [selectedOrder]);
 
-  const handleDelete = useCallback(() => {
-    if (selectedOrder) {
-      setOrders((prev) => prev.filter((o) => o.id !== selectedOrder.id));
-      setShowDetail(false);
-      setSelectedOrder(null);
-    }
-  }, [selectedOrder]);
-
   const handleSave = (form: DeliveryFormPayload) => {
 
     const payload = new FormData();
@@ -125,31 +117,31 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
 
     const isEdit = !!form.id;
 
-    router.post(isEdit ? update(Number(form.id!)) : store(), payload, {
-      forceFormData: true,
+    const handleSuccess = () => {
 
-      onSuccess: () => {
+      // ✅ AUTO FLOW
+      if (!isEdit && form.type === "out" && !form.meta?.isAutoFlow) {
 
-        // ✅ AUTO FLOW LOGIC
-        if (!isEdit && form.type === "out" && !form.meta?.isAutoFlow) {
+        const outDate = new Date(form.date);
+        const today = new Date();
 
-          const outDate = new Date(form.date);
-          const today = new Date();
+        const diffDays = Math.abs(
+          (today.getTime() - outDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
-          const diffDays = Math.abs(
-            (today.getTime() - outDate.getTime()) / (1000 * 60 * 60 * 24)
-          );
+        let newDate;
 
-          let newDate;
+        if (diffDays < 7) {
+          newDate = today;
+        } else {
+          newDate = new Date(outDate);
+          newDate.setDate(outDate.getDate() - 7);
+        }
 
-          if (diffDays < 7) {
-            newDate = today;
-          } else {
-            newDate = new Date(outDate);
-            newDate.setDate(outDate.getDate() - 7);
-          }
+        // 🔥 penting: trigger remount modal
+        setShowForm(false);
 
-          // 🔥 buka form lagi (IN)
+        setTimeout(() => {
           setAutoFlowData({
             ...form,
             id: undefined,
@@ -161,25 +153,43 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
           });
 
           setShowForm(true);
+        }, 50);
 
-          notify.success("Silakan lengkapi Surat Jalan Masuk");
-          return;
-        }
-
-        // ✅ FINAL SUCCESS
-        notify.success(
-          form.meta?.isAutoFlow
-            ? "Surat Jalan masuk & keluar berhasil dibuat"
-            : "Surat Jalan berhasil disimpan"
-        );
-
-        router.get(index());
-      },
-
-      onError: (errors) => {
-        notify.error(Object.values(errors).join("\n"));
+        notify.success("Silakan lengkapi Surat Jalan Masuk");
+        return;
       }
-    });
+
+      // ✅ FINAL SUCCESS
+      notify.success(
+        form.meta?.isAutoFlow
+          ? "Surat Jalan masuk & keluar berhasil dibuat"
+          : isEdit
+          ? "Surat Jalan berhasil diperbarui"
+          : "Surat Jalan berhasil disimpan"
+      );
+
+      setTimeout(() => {
+        router.get(index());
+      }, 1500);
+    };
+
+    const handleError = (errors: any) => {
+      notify.error(Object.values(errors).join("\n"));
+    };
+
+    if (isEdit) {
+      router.put(update(Number(form.id!)), payload, {
+        forceFormData: true,
+        onSuccess: handleSuccess,
+        onError: handleError,
+      });
+    } else {
+      router.post(store(), payload, {
+        forceFormData: true,
+        onSuccess: handleSuccess,
+        onError: handleError,
+      });
+    }
   };
 
   return (
@@ -261,7 +271,7 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
           order={selectedOrder}
           onClose={() => setShowDetail(false)}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          // onDelete={handleDelete}
           />
       )}
 
