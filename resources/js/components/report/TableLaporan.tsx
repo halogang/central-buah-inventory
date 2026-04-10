@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { SearchInput } from "../search-input";
 import { usePagination } from "@/hooks/use-pagination";
 import Pagination from "../Pagination";
+import { SearchInput } from "../search-input";
 
 interface Column {
   key: string;

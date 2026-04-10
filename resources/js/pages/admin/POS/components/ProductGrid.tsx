@@ -1,8 +1,8 @@
 import { Image, Search } from "lucide-react";
-import { Product } from "@/data/products";
+import Pagination from "@/components/Pagination";
+import type { Product } from "@/data/products";
 import { formatCurrency } from "@/helpers/format";
 import { usePagination } from "@/hooks/use-pagination";
-import Pagination from "@/components/Pagination";
 
 interface ProductGridProps {
   products: Product[];

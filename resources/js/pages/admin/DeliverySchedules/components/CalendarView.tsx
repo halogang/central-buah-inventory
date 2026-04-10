@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import { DeliveryOrder, calcTotalWeight } from "@/data/deliveryOrders";
+import { useMemo, useState } from "react";
+import type { DeliveryOrder} from "@/data/deliveryOrders";
+import { calcTotalWeight } from "@/data/deliveryOrders";
 
 interface Props {
   currentDate: Date;
@@ -17,6 +18,10 @@ const statusDot: Record<string, string> = {
 };
 
 const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props) => {
+  const [showMoreModal, setShowMoreModal] = useState(false);
+  const [selectedEvents, setSelectedEvents] = useState<DeliveryOrder[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
   const cells = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -110,9 +115,17 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
                       </button>
                     ))}
                     {events.length > maxShow && (
-                      <div className="text-[10px] text-muted-foreground font-medium pl-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEvents(events);
+                          setSelectedDate(cell.dateStr);
+                          setShowMoreModal(true);
+                        }}
+                        className="text-[10px] text-primary font-medium pl-1 hover:underline"
+                      >
                         +{events.length - maxShow} lainnya
-                      </div>
+                      </button>
                     )}
                   </div>
                 </>
@@ -121,8 +134,67 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
           );
         })}
       </div>
+
+      {showMoreModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setShowMoreModal(false)}
+        >
+          <div
+            className="bg-card rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-sm font-bold">
+                Jadwal {selectedDate}
+              </h2>
+              <button
+                onClick={() => setShowMoreModal(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+    
+            {/* List Events */}
+            <div className="space-y-2">
+              {selectedEvents.map((ev) => (
+                <button
+                  key={ev.id}
+                  onClick={() => {
+                    setShowMoreModal(false);
+                    onEventClick(ev);
+                  }}
+                  className={`cursor-pointer w-full text-left rounded-md px-2 py-2 text-xs transition hover:opacity-80 ${
+                    ev.type === "in"
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                      : "bg-blue-100 text-blue-800 border border-blue-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${statusDot[ev.status]}`} />
+                    <span className="font-semibold">
+                      {ev.type === "in" ? "IN" : "OUT"}
+                    </span>
+                  </div>
+    
+                  <div className="truncate">
+                    {ev.type === "in" ? ev.supplier_name : ev.customer_name}
+                  </div>
+    
+                  <div className="text-[10px] opacity-70">
+                    {calcTotalWeight(ev.items)} kg
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
+  
 };
 
 export default CalendarView;

@@ -7,13 +7,13 @@ import {
     FormSwitch,
     FormSelect,
 } from '@/components/admin';
+import Pagination from '@/components/Pagination';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
+import { usePagination } from '@/hooks/use-pagination';
 import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy, show } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
-import { usePagination } from '@/hooks/use-pagination';
-import Pagination from '@/components/Pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -1,6 +1,6 @@
 import { TrendingDown, ShoppingCart, Settings } from "lucide-react";
-import { SummaryCard } from "@/components/report/SummaryCard";
 import { ChartArea } from "@/components/report/ChartArea";
+import { SummaryCard } from "@/components/report/SummaryCard";
 
 const breakdownData = [
   { category: "Pembelian Stok", amount: 24000000, persen: "65%" },

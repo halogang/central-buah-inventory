@@ -1,41 +1,8 @@
-import { TrendingUp, TrendingDown, DollarSign, Wallet } from "lucide-react";
-import { SummaryCard } from "@/components/report/SummaryCard";
+import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import { ChartCashflow } from "@/components/report/ChartCashflow";
+import { SummaryCard } from "@/components/report/SummaryCard";
 import { TableLaporan } from "@/components/report/TableLaporan";
 import { formatCurrency } from "@/helpers/format";
-
-const cashflowData = [
-  { name: "Sep", pendapatan: 42000000, pengeluaran: 28000000 },
-  { name: "Okt", pendapatan: 48000000, pengeluaran: 30000000 },
-  { name: "Nov", pendapatan: 45000000, pengeluaran: 32000000 },
-  { name: "Des", pendapatan: 42000000, pengeluaran: 35000000 },
-  { name: "Jan", pendapatan: 50000000, pengeluaran: 30000000 },
-  { name: "Feb", pendapatan: 58000000, pengeluaran: 32000000 },
-];
-
-const pettyCashData = [
-  { tanggal: "2026-02-18", keterangan: "Modal Awal", jenis: "Modal", jumlah: 10000000 },
-  { tanggal: "2026-02-16", keterangan: "Beli kantong plastik", jenis: "Pengeluaran", jumlah: -150000 },
-  { tanggal: "2026-02-17", keterangan: "Bayar listrik", jenis: "Pengeluaran", jumlah: -800000 },
-  { tanggal: "2026-02-17", keterangan: "Tambah modal", jenis: "Modal", jumlah: 2000000 },
-  { tanggal: "2026-02-16", keterangan: "Beli es batu", jenis: "Pengeluaran", jumlah: -50000 },
-];
-
-const dailyCashData = [
-  { tanggal: "2026-02-03", modal: 10000000, pendapatan: 250000, pengeluaran: null, saldo: 9750000 },
-  { tanggal: "2026-02-05", modal: null, pendapatan: null, pengeluaran: 800000, saldo: 8950000 },
-  { tanggal: "2026-02-05", modal: 2000000, pendapatan: 150000, pengeluaran: null, saldo: 10800000 },
-  { tanggal: "2026-02-08", modal: null, pendapatan: null, pengeluaran: 500000, saldo: 10300000 },
-  { tanggal: "2026-02-10", modal: null, pendapatan: null, pengeluaran: 350000, saldo: 7950000 },
-  { tanggal: "2026-02-12", modal: null, pendapatan: null, pengeluaran: 1200000, saldo: 8750000 },
-  { tanggal: "2026-02-15", modal: 3000000, pendapatan: 450000, pengeluaran: null, saldo: 11350000 },
-  { tanggal: "2026-02-16", modal: null, pendapatan: 80000, pengeluaran: null, saldo: 11250000 },
-  { tanggal: "2026-02-17", modal: 2000000, pendapatan: 800000, pengeluaran: null, saldo: 12450000 },
-  { tanggal: "2026-02-18", modal: 10000000, pendapatan: 180000, pengeluaran: null, saldo: 22300000 },
-  { tanggal: "2026-02-20", modal: null, pendapatan: null, pengeluaran: 600000, saldo: 21700000 },
-  { tanggal: "2026-02-22", modal: null, pendapatan: 300000, pengeluaran: null, saldo: 21400000 },
-  { tanggal: "2026-02-24", modal: null, pendapatan: null, pengeluaran: 400000, saldo: 21000000 },
-];
 
 type KeuanganData = {
   summary: {

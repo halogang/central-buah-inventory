@@ -1,11 +1,10 @@
-import { Package, Plus, Trash2, Image, Dot } from "lucide-react"
+import { Package, Plus, Trash2, Image } from "lucide-react"
+import { useState } from "react";
 import { FormInput, FormSelect } from "@/components/admin"
 import { formatCurrency, formatNumber } from "@/helpers/format"
-import { useState } from "react";
 
 export default function DeliveryItemsSection({
     form,
-    setForm,
     selectingItem,
     searchItem,
     filteredItems,
@@ -20,7 +19,7 @@ export default function DeliveryItemsSection({
     getNetQty,
     getItemTotal,
     carts,
-    disabled
+    disabled,
 }: any) {
     const [errors, setErrors] = useState({});
 

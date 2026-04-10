@@ -1,15 +1,15 @@
 import { Head } from '@inertiajs/react';
 
+import { usePage } from "@inertiajs/react";
 import InvoiceCard from '@/components/dashboard/InvoiceCard';
 import LowStockCard from '@/components/dashboard/LowStockCard';
 import StatsCard from '@/components/dashboard/StatsCard';
 import TransactionList from '@/components/dashboard/TransactionList';
+import { formatCurrency, formatNumber } from '@/helpers/format';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { StatCard } from "@/types/dashboard";
-import { formatCurrency, formatNumber } from '@/helpers/format';
-import { usePage } from "@inertiajs/react";
 
 
 const breadcrumbs: BreadcrumbItem[] = [

@@ -1,6 +1,7 @@
 import { Minus, Plus, Trash2, Pencil, ShoppingCart, Apple } from "lucide-react";
-import { CartItem, PaymentMethod, formatRupiah } from "@/data/products";
 import { useState } from "react";
+import type { CartItem, PaymentMethod} from "@/data/products";
+import { formatRupiah } from "@/data/products";
 
 interface CartPanelProps {
   cart: CartItem[];

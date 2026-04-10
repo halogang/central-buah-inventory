@@ -29,6 +29,7 @@ type DeliveryForm = {
     do_number: string
     supplier_id: string | number | null
     customer_id: string | number | null
+    sender_id: string | number | null
     date: string
     status: string
     sender_name: string
@@ -54,6 +55,7 @@ export default function Form({
     items,
     type,
     carts,
+    stafAntar,
     onClose
 }: any) {
     
@@ -64,6 +66,7 @@ export default function Form({
         do_number: "",
         supplier_id: "",
         customer_id: "",
+        sender_id: "",
         date: "",
         status: "draft",
         sender_name: "",
@@ -321,6 +324,7 @@ export default function Form({
                             form={form}
                             suppliers={suppliers}
                             customers={customers}
+                            stafAntar={stafAntar}
                             type={type}
                             disabled={isStaffAntar}
                             setForm={setForm}

@@ -1,7 +1,7 @@
+import Pagination from "@/components/Pagination"
+import { usePagination } from "@/hooks/use-pagination"
 import type { Permission, RoleData } from "../types"
 import RoleCard from "./RoleCard"
-import { usePagination } from "@/hooks/use-pagination"
-import Pagination from "@/components/Pagination"
 
 interface Props {
     roles: RoleData[]

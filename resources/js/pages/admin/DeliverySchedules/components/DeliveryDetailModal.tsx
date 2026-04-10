@@ -1,19 +1,46 @@
-import { DeliveryOrder, calcTotalWeight, calcTotalAmount, getStatusLabel } from "@/data/deliveryOrders";
-import { formatRupiah } from "@/data/products";
-import { X, Truck, Package, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { router } from "@inertiajs/react";
+import { X, Truck, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { DeliveryOrder} from "@/data/deliveryOrders";
+import { calcTotalWeight, calcTotalAmount, getStatusLabel } from "@/data/deliveryOrders";
+import { formatRupiah } from "@/data/products";
+import { notify } from "@/lib/notify";
+import { index } from "@/routes/delivery-schedules";
+import { destroy } from "@/routes/surat-jalan";
 
 interface Props {
   order: DeliveryOrder;
   onClose: () => void;
   onEdit: () => void;
-  onDelete: () => void;
 }
 
-const DeliveryDetailModal = ({ order, onClose, onEdit, onDelete }: Props) => {
-  const [confirmDelete, setConfirmDelete] = useState(false);
+const DeliveryDetailModal = ({ order, onClose, onEdit }: Props) => {
+  // const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const confirmDelete = (order: DeliveryOrder) => {
+    notify.confirmDelete({
+      message: `Hapus ${order.do_number}?`,
+      onConfirm: () => performDelete(order)
+    })
+  }
+
+  const performDelete = (order: DeliveryOrder) => {
+    const loading = notify.loading("Menghapus surat jalan...")
+
+    router.delete(destroy(Number(order.id)), {
+      onSuccess: () => {
+        onClose()
+        router.get(index())
+        notify.dismiss(loading)
+        notify.success(`Surat Jalan ${order.do_number} berhasil dihapus`)
+      },
+      onError: () => {
+        notify.dismiss(loading)
+        notify.error(`Gagal menghapus ${order.do_number}`)
+      },
+    })
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
@@ -80,6 +107,7 @@ const DeliveryDetailModal = ({ order, onClose, onEdit, onDelete }: Props) => {
                 <thead className="bg-secondary">
                   <tr>
                     <th className="text-left px-3 py-2 text-muted-foreground font-medium">Nama Buah</th>
+                    <th className="text-right px-3 py-2 text-muted-foreground font-medium">Keranjang</th>
                     <th className="text-right px-3 py-2 text-muted-foreground font-medium">Qty (kg)</th>
                     <th className="text-right px-3 py-2 text-muted-foreground font-medium">Harga</th>
                     <th className="text-right px-3 py-2 text-muted-foreground font-medium">Subtotal</th>
@@ -89,6 +117,15 @@ const DeliveryDetailModal = ({ order, onClose, onEdit, onDelete }: Props) => {
                   {order.items.map((item, i) => (
                     <tr key={i} className="border-t border-border">
                       <td className="px-3 py-2 text-foreground">{item.name}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex flex-col gap-1 justify-end">
+                            <span>{item.cart?.name ?? 'kosong'}</span>
+                            <div className="flex flex-col items-start text-xs text-muted-foreground">
+                                <span>jumlah: {item.cart_qty ?? 'kosong'}</span>
+                                <span>berat/keranjang: {item.cart_weight ?? 'kosong'}</span>
+                            </div>
+                        </div>
+                      </td>
                       <td className="px-3 py-2 text-right tabular-nums">{item.quantity}</td>
                       <td className="px-3 py-2 text-right tabular-nums">{formatRupiah(item.price)}</td>
                       <td className="px-3 py-2 text-right font-semibold tabular-nums">{formatRupiah(item.quantity * item.price)}</td>
@@ -112,21 +149,10 @@ const DeliveryDetailModal = ({ order, onClose, onEdit, onDelete }: Props) => {
 
         {/* Actions */}
         <div className="flex items-center gap-2 p-5 border-t border-border">
-          {confirmDelete ? (
-            <div className="flex-1 flex items-center gap-2">
-              <AlertTriangle size={16} className="text-destructive shrink-0" />
-              <span className="text-sm text-destructive">Yakin ingin menghapus?</span>
-              <Button variant="destructive" size="sm" onClick={onDelete}>Ya, Hapus</Button>
-              <Button variant="outline" size="sm" onClick={() => setConfirmDelete(false)}>Batal</Button>
-            </div>
-          ) : (
-            <>
-              <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)}>Delete</Button>
-              <div className="flex-1" />
-              <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
-              <Button size="sm" onClick={onEdit}>Edit</Button>
-            </>
-          )}
+          <Button variant="destructive" size="sm" onClick={() => confirmDelete(order)}>Delete</Button>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+          <Button size="sm" onClick={onEdit}>Edit</Button>
         </div>
       </div>
     </div>

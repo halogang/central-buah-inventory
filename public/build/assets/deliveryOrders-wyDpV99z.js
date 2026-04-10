@@ -1,0 +1,1 @@
+import{p as c}from"./products-hCxJfRGA.js";const s=t=>{switch(t){case"draft":return"Draft";case"sent":return"Dikirim";case"done":return"Selesai"}},i=t=>t.reduce((a,e)=>a+e.quantity,0),n=t=>t.reduce((a,e)=>a+e.quantity*e.price,0);c.map(t=>({id:t.id,name:t.name,price:t.price}));export{n as a,i as c,s as g};

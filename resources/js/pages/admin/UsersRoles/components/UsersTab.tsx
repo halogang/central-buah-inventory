@@ -1,7 +1,7 @@
+import Pagination from "@/components/Pagination"
+import { usePagination } from "@/hooks/use-pagination"
 import type { UserData } from "../types"
 import UserCard from "./UserCard"
-import { usePagination } from "@/hooks/use-pagination"
-import Pagination from "@/components/Pagination"
 
 interface Props {
     users: UserData[]

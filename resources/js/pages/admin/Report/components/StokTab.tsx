@@ -1,28 +1,8 @@
 import { Package, AlertTriangle, Boxes, DollarSign } from "lucide-react";
+import { ChartBar } from "@/components/report/ChartBar";
 import { SummaryCard } from "@/components/report/SummaryCard";
 import { TableLaporan } from "@/components/report/TableLaporan";
-import { ChartBar } from "@/components/report/ChartBar";
 import { formatCurrency } from "@/helpers/format";
-
-const stockData = [
-  { barang: "Mangga Harum Manis", stok: "150 kg", masuk: "+200", keluar: "-180", sisa: 2, status: "Aman" },
-  { barang: "Apel Fuji Import", stok: "80 kg", masuk: "+100", keluar: "-95", sisa: 2, status: "Aman" },
-  { barang: "Semangka Merah", stok: "200 kg", masuk: "+300", keluar: "-250", sisa: 0, status: "Aman" },
-  { barang: "Pisang Cavendish", stok: "45 ikat", masuk: "+80", keluar: "-65", sisa: 3, status: "Aman" },
-  { barang: "Jeruk Mandarin", stok: "60 kg", masuk: "+100", keluar: "-85", sisa: 4, status: "Aman" },
-  { barang: "Anggur Red Globe", stok: "35 kg", masuk: "+50", keluar: "-40", sisa: 1, status: "Aman" },
-  { barang: "Strawberry", stok: "8 pack", masuk: "+30", keluar: "-28", sisa: 0, status: "Rendah" },
-  { barang: "Durian Musang King", stok: "25 kg", masuk: "+40", keluar: "-30", sisa: 0, status: "Aman" },
-];
-
-const comparisonData = [
-  { name: "Mangga", masuk: 200, keluar: 180 },
-  { name: "Apel Fuji", masuk: 100, keluar: 95 },
-  { name: "Semangka", masuk: 300, keluar: 250 },
-  { name: "Pisang", masuk: 80, keluar: 65 },
-  { name: "Jeruk", masuk: 100, keluar: 85 },
-  { name: "Anggur", masuk: 50, keluar: 40 },
-];
 
 export function TabStok({ data }: { data: any }) {
   const columns = [

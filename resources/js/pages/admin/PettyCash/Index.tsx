@@ -1,16 +1,16 @@
-import type { BreadcrumbItem } from '@/types';
-import AppLayout from "@/layouts/app-layout";
+import type { PageProps as InertiaPageProps } from '@inertiajs/core'
 import { Head, router, usePage } from '@inertiajs/react';
-import { formatCurrency } from '@/helpers/format';
-import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil, Trash2, ImageIcon, X } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
-import { PageProps as InertiaPageProps } from '@inertiajs/core'
-import Form from './components/Form';
-import { destroy } from '@/routes/keuangan';
-import { notify } from '@/lib/notify';
-import { SearchInput } from '@/components/search-input';
-import { usePagination } from '@/hooks/use-pagination';
 import Pagination from '@/components/Pagination';
+import { SearchInput } from '@/components/search-input';
+import { formatCurrency } from '@/helpers/format';
+import { usePagination } from '@/hooks/use-pagination';
+import AppLayout from "@/layouts/app-layout";
+import { notify } from '@/lib/notify';
+import { destroy } from '@/routes/keuangan';
+import type { BreadcrumbItem } from '@/types';
+import Form from './components/Form';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,11 +38,12 @@ interface PageProps extends InertiaPageProps {
     pettyCashTransactions: Transaction[]
     categories: Category[]
     balance: any
+    isAdmin: boolean
 }
 
 export default function Index() {
     
-    const { pettyCashTransactions, balance, categories } = usePage<PageProps>().props
+    const { pettyCashTransactions, balance, categories, isAdmin } = usePage<PageProps>().props
 
     const [showModal, setShowModal] = useState(false)
     const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income')
@@ -184,13 +185,15 @@ export default function Index() {
 
                 {/* ACTION */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                        onClick={openCreateModal}
-                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-primary text-white"
-                    >
-                        <Plus className="size-4" />
-                        Tambah Modal
-                    </button>
+                    {!isAdmin && (
+                        <button
+                            onClick={openCreateModal}
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-primary text-white"
+                        >
+                            <Plus className="size-4" />
+                            Tambah Modal
+                        </button>
+                    )}
 
                     <button
                         onClick={openCreateExpense}

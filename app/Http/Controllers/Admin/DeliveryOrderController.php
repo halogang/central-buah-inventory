@@ -12,6 +12,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Item;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +35,9 @@ class DeliveryOrderController extends Controller
             'type' => 'required|in:in,out',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'customer_id' => 'nullable|exists:customers,id',
+            'sender_id' => 'nullable|exists:users,id',
             'status' => 'required|in:draft,sent,done',
+            'date' => 'required|date',
 
             'sender_name' => 'nullable|string|max:255',
             'receiver_name' => 'nullable|string|max:255',
@@ -84,6 +87,8 @@ class DeliveryOrderController extends Controller
 
                 'customer_id' => $do->customer_id,
                 'customer' => $do->customer?->name,
+                
+                'sender_id' => User::where('name', $do->sender_name)->value('id'),
 
                 'status' => $do->status,
 
@@ -145,17 +150,18 @@ class DeliveryOrderController extends Controller
             'items' => $items,
             'customers' => Customer::select('id','name','phone')->get(),
             'carts' => Cart::select('id','name')->get(),
+            'stafAntar' => User::role('staff_antar')->select('id','name')->get(),
         ]);
     }
 
     public function store(Request $request, SignatureService $signatureService, DeliveryOrderService $service)
     {
         $validated = $this->validateRequest($request);
-
+        // dd($validated);
 
         DB::transaction(function () use ($validated, $signatureService, $service, $request) {
 
-            $doNumber = $this->generateDoNumber($validated['type']);
+            $doNumber = $service->generateDoNumber($validated['type'], $validated['date']);
             $user = Auth::user();
 
             if ($validated['type'] === 'in') {
@@ -170,8 +176,9 @@ class DeliveryOrderController extends Controller
                         );
                 }
             } else {
-                $validated['sender_name'] = $user->name;
-                $validated['sender_signature'] = $user->signature ?? null;
+                $sender = User::find($validated['sender_id']);
+                $validated['sender_name'] = $sender ? $sender->name : $user->name;
+                $validated['sender_signature'] = $sender ? $sender->signature ?? null : $user->signature ?? null;
 
                 if ($validated['receiver_signature'] && str_contains($validated['receiver_signature'], 'base64')) {
     
@@ -185,7 +192,6 @@ class DeliveryOrderController extends Controller
             $deliveryOrder = DeliveryOrder::create([
                 ...$validated,
                 'do_number' => $doNumber,
-                'date' => now(),
             ]);
 
             [$totalAmount, $totalWeight] = $service->handleItems($deliveryOrder, $validated['items']);
@@ -257,8 +263,9 @@ class DeliveryOrderController extends Controller
             $validated['receiver_name'] = $user->name;
             $validated['receiver_signature'] = $user->signature ?? null;
         } else {
-            $validated['sender_name'] = $user->name;
-            $validated['sender_signature'] = $user->signature ?? null;
+            $sender = User::find($validated['sender_id']);
+            $validated['sender_name'] = $sender ? $sender->name : $user->name;
+            $validated['sender_signature'] = $sender ? $sender->signature ?? null : $user->signature ?? null;
         }
 
         DB::transaction(function () use (
@@ -492,33 +499,8 @@ class DeliveryOrderController extends Controller
 
     }
 
-    private function generateDoNumber($type)
+    public function destroy(DeliveryOrder $deliveryOrder)
     {
-
-        $prefix = $type === 'in' ? 'SJM' : 'SJK';
-        $date = now()->format('Ymd');
-
-        $lastNumber = DeliveryOrder::where('type', $type)
-            ->whereDate('created_at', now()->toDateString())
-            ->lockForUpdate()
-            ->orderByDesc('id')
-            ->value('do_number');
-
-        if ($lastNumber) {
-            $lastSequence = (int) substr($lastNumber, -3);
-            $nextSequence = $lastSequence + 1;
-        } else {
-            $nextSequence = 1;
-        }
-
-        $sequence = str_pad($nextSequence, 3, '0', STR_PAD_LEFT);
-
-        return "{$prefix}/{$date}/{$sequence}";
-    }
-
-    public function destroy(DeliveryOrder $surat_jalan)
-    {
-        $deliveryOrder = $surat_jalan;
 
         DB::transaction(function () use ($deliveryOrder) {
 

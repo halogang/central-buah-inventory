@@ -12,8 +12,10 @@ import {
     Trash2
 } from "lucide-react"
 import { useState } from "react"
+import Pagination from "@/components/Pagination"
 import { SearchInput } from "@/components/search-input"
 import { Button } from "@/components/ui/button"
+import { usePagination } from "@/hooks/use-pagination"
 import AppLayout from "@/layouts/app-layout"
 import { notify } from "@/lib/notify"
 import { destroy } from "@/routes/surat-jalan"
@@ -23,8 +25,6 @@ import type { BreadcrumbItem } from "@/types"
 import Form from "./components/Form"
 import Show from "./components/Show"
 
-import { usePagination } from "@/hooks/use-pagination"
-import Pagination from "@/components/Pagination"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,6 +33,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ]
 
+interface User {
+    id: number,
+    name: string,
+}
+
 interface DeliveryOrder {
     id: number
     do_number: string
@@ -40,6 +45,8 @@ interface DeliveryOrder {
     date: string
     supplier: string
     customer: string
+    sender_id: number | string | null
+    sender_name: string
     total_weight: number
     status: "draft" | "sent" | "done"
     items_count: number
@@ -81,9 +88,10 @@ interface Props {
     items: Item[]
     customers: Customer[]
     carts: Cart[]
+    stafAntar: User[]
 }
 
-export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, customers, carts }: Props) {
+export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, customers, carts, stafAntar }: Props) {
 
     const [activeTab, setActiveTab] = useState<"in" | "out">(isStaffAntar ? "out" : "in")
     const [search, setSearch] = useState("")
@@ -373,6 +381,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                     suppliers={suppliers}
                     items={items}
                     customers={customers}
+                    stafAntar={stafAntar}
                     carts={carts}
                     type={activeTab}
                     onClose={() => setOpenForm(false)}

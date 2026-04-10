@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\DeliveryOrder;
 use App\Models\DeliveryOrderItem;
 use App\Models\Item;
 use App\Models\StockMovement;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class DeliveryorderService {
@@ -105,5 +107,32 @@ class DeliveryorderService {
         StockMovement::where('reference_id', $deliveryOrder->id)
             ->where('reference_type', 'delivery_order')
             ->delete();
+    }
+
+    public function generateDoNumber($type, $date = null)
+    {
+        $prefix = $type === 'in' ? 'SJM' : 'SJK';
+
+        // 🔥 FIX: pastikan jadi Carbon
+        $dateObj = $date ? Carbon::parse($date) : now();
+
+        $doDate = $dateObj->format('Ymd');
+
+        $lastNumber = DeliveryOrder::where('type', $type)
+            ->whereDate('date', $dateObj->toDateString()) // 🔥 juga diperbaiki
+            ->lockForUpdate()
+            ->orderByDesc('id')
+            ->value('do_number');
+
+        if ($lastNumber) {
+            $lastSequence = (int) substr($lastNumber, -3);
+            $nextSequence = $lastSequence + 1;
+        } else {
+            $nextSequence = 1;
+        }
+
+        $sequence = str_pad($nextSequence, 3, '0', STR_PAD_LEFT);
+
+        return "{$prefix}/{$doDate}/{$sequence}";
     }
 }

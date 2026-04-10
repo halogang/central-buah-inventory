@@ -20,7 +20,7 @@ export default function FormSelect({
 }: FormSelectProps) {
     return (
         <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-xs font-medium text-muted-foreground dark:text-gray-300">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -28,7 +28,7 @@ export default function FormSelect({
             <select
                 className={cn(
                     // appearance-none menghilangkan arrow
-                    'w-full appearance-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-900 disabled:bg-muted',
+                    'text-sm w-full appearance-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-gray-900 disabled:bg-muted',
                     // style focus
                     'focus:outline-none focus:ring-2 focus:ring-blue-500',
                     // dark mode

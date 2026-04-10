@@ -8,7 +8,8 @@ export default function DeliveryInfoSection({
     customers,
     type,
     disabled,
-    setForm
+    setForm,
+    stafAntar   
 }: any) {
 
     return (
@@ -74,6 +75,29 @@ export default function DeliveryInfoSection({
                     required
                 />
             }
+
+            {type === 'out' && (
+                <FormSelect
+                    label="Pengirim"
+                    value={form.sender_id}
+                    disabled={disabled}
+                    onChange={(e) =>
+                        setForm({ ...form, sender_id: e.target.value })
+                    }
+                    options={[
+                        {
+                            label: 'Pilih Pengirim',
+                            value: '',
+                            disabled: true
+                        },
+                        ...stafAntar.map((s: any) => ({
+                            label: s.name,
+                            value: s.id
+                        }))
+                    ]}
+                    required
+                />
+            )}
 
             <FormSelect
                 label="Status"

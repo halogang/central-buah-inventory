@@ -10,15 +10,15 @@ import {
     Printer
 } from "lucide-react";
 import {useState} from "react";
+import Pagination from "@/components/Pagination"
 import {SearchInput} from "@/components/search-input";
 import {Button} from "@/components/ui/button";
 import {formatCurrency} from "@/helpers/format";
+import { usePagination } from "@/hooks/use-pagination"
 import AppLayout from "@/layouts/app-layout";
 import type {BreadcrumbItem} from '@/types';
 import Payment from "./components/Payment";
 import Show from "./components/Show";
-import { usePagination } from "@/hooks/use-pagination"
-import Pagination from "@/components/Pagination"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

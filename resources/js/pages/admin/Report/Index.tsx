@@ -1,14 +1,14 @@
-import {useState} from "react";
-import {DollarSign, Package, ShoppingCart, Receipt, TrendingDown} from "lucide-react";
-import {FilterBar} from "@/components/report/FilterBar";
-import {ExportButtons} from "@/components/report/ExportButtons";
-import {TabKeuangan} from "./components/KeuanganTab";
-import {TabStok} from "./components/StokTab";
-import {TabPenjualan} from "./components/PenjualanTab";
-import {TabPengeluaran} from "./components/PengeluaranTab";
-import {TabLabaRugi} from "./components/LabaRugiTab";
-import AppLayout from "@/layouts/app-layout";
 import { Head, router, usePage } from "@inertiajs/react";
+import {DollarSign, Package, ShoppingCart, Receipt, TrendingDown} from "lucide-react";
+import {useState} from "react";
+import {ExportButtons} from "@/components/report/ExportButtons";
+import {FilterBar} from "@/components/report/FilterBar";
+import AppLayout from "@/layouts/app-layout";
+import {TabKeuangan} from "./components/KeuanganTab";
+import {TabLabaRugi} from "./components/LabaRugiTab";
+import {TabPengeluaran} from "./components/PengeluaranTab";
+import {TabPenjualan} from "./components/PenjualanTab";
+import {TabStok} from "./components/StokTab";
 
 const TABS = [
     {

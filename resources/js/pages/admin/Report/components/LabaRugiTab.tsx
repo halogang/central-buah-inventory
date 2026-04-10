@@ -1,26 +1,8 @@
 import { TrendingUp, DollarSign, Settings, Wallet } from "lucide-react";
-import { SummaryCard } from "@/components/report/SummaryCard";
 import { ChartCashflow } from "@/components/report/ChartCashflow";
+import { SummaryCard } from "@/components/report/SummaryCard";
 import { TableLaporan } from "@/components/report/TableLaporan";
 import { formatCurrency } from "@/helpers/format";
-
-const trendData = [
-  { name: "Sep", pendapatan: 42000000, hpp: 21000000, bebanOps: 4000000, labaBersih: 14000000 },
-  { name: "Okt", pendapatan: 48000000, hpp: 25000000, bebanOps: 4200000, labaBersih: 18800000 },
-  { name: "Nov", pendapatan: 45000000, hpp: 23000000, bebanOps: 4000000, labaBersih: 16000000 },
-  { name: "Des", pendapatan: 42000000, hpp: 30000000, bebanOps: 6000000, labaBersih: 24000000 },
-  { name: "Jan", pendapatan: 50000000, hpp: 24000000, bebanOps: 4000000, labaBersih: 21000000 },
-  { name: "Feb", pendapatan: 58000000, hpp: 24000000, bebanOps: 8000000, labaBersih: 26000000 },
-];
-
-const tableData = [
-  { bulan: "Sep 2026", pendapatan: 42000000, hpp: 21000000, bebanOps: 4000000, labaBersih: 14000000, margin: "33.3%" },
-  { bulan: "Okt 2026", pendapatan: 48000000, hpp: 25000000, bebanOps: 4200000, labaBersih: 18800000, margin: "39.0%" },
-  { bulan: "Nov 2026", pendapatan: 45000000, hpp: 23000000, bebanOps: 4000000, labaBersih: 16000000, margin: "35.6%" },
-  { bulan: "Des 2026", pendapatan: 42000000, hpp: 30000000, bebanOps: 6000000, labaBersih: 24000000, margin: "38.7%" },
-  { bulan: "Jan 2026", pendapatan: 50000000, hpp: 24000000, bebanOps: 4000000, labaBersih: 21000000, margin: "38.2%" },
-  { bulan: "Feb 2026", pendapatan: 58000000, hpp: 24000000, bebanOps: 8000000, labaBersih: 26000000, margin: "44.8%" },
-];
 
 export function TabLabaRugi({ data }: { data: any }) {
   const columns = [

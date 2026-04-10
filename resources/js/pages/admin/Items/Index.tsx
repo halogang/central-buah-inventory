@@ -1,12 +1,12 @@
 import { Head, usePage, router } from '@inertiajs/react';
 import { Eye, Tag } from 'lucide-react';
 import { useState } from 'react';
+import Pagination from "@/components/Pagination";
 import { SearchInput } from '@/components/search-input';
+import { usePagination } from "@/hooks/use-pagination";
 import AppLayout from '@/layouts/app-layout';
 import { show } from '@/routes/master/items';
 import type { BreadcrumbItem } from '@/types';
-import { usePagination } from "@/hooks/use-pagination";
-import Pagination from "@/components/Pagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

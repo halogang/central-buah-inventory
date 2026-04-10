@@ -16,13 +16,13 @@ export default function FormInput({
 }: FormInputProps) {
     return (
         <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-xs font-medium text-muted-foreground">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             <input
                 className={cn(
-                    'w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:bg-muted',
+                    'text-sm w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white disabled:bg-muted',
                     error && 'border-red-500 focus:ring-red-500',
                     className
                 )}
@@ -33,7 +33,7 @@ export default function FormInput({
                 <p className="text-xs text-gray-500 dark:text-gray-400">{hint}</p>
             )}
             {error && (
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
             )}
         </div>
     );

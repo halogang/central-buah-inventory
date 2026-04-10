@@ -1,14 +1,14 @@
 import { Head, usePage, router, Link } from '@inertiajs/react'
 import { ClipboardList, Eye, Plus, SquarePen, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import Pagination from '@/components/Pagination'
 import { SearchInput } from '@/components/search-input'
 import { Button } from '@/components/ui/button'
+import { usePagination } from '@/hooks/use-pagination'
 import AppLayout from '@/layouts/app-layout'
 import { notify } from '@/lib/notify'
 import { destroy, show } from '@/routes/stok/stok-opname'
 import Form from './components/Form'
-import { usePagination } from '@/hooks/use-pagination'
-import Pagination from '@/components/Pagination'
 
 interface Opname {
     id:number

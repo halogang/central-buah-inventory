@@ -1,17 +1,25 @@
+import { Head, router } from "@inertiajs/react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import type {
+  DeliveryOrder,
+  DeliveryType,
+  Item,
+  Cart,
+  Supplier,
+  Customer,
+  User,
+  DeliveryFormPayload,
+} from "@/data/deliveryOrders";
+import AppLayout from "@/layouts/app-layout";
+import { notify } from "@/lib/notify";
+import { index } from "@/routes/delivery-schedules";
+import { store, update } from "@/routes/surat-jalan";
+import type { BreadcrumbItem } from "@/types/navigation";
 import CalendarView from "./components/CalendarView";
 import DeliveryDetailModal from "./components/DeliveryDetailModal";
 import DeliveryFormModal from "./components/DeliveryFormModal";
-import {
-  DeliveryOrder,
-  DeliveryType,
-  initialDeliveryOrders,
-} from "@/data/deliveryOrders";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { BreadcrumbItem } from "@/types/navigation";
-import AppLayout from "@/layouts/app-layout";
-import { Head } from "@inertiajs/react";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,22 +28,38 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const DeliverySchedule = () => {
-  const [orders, setOrders] = useState<DeliveryOrder[]>(initialDeliveryOrders);
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // March 2026
+interface Props {
+  deliveryOrders: DeliveryOrder[];
+  items: Item[];
+  carts: Cart[];
+  suppliers: Supplier[];
+  customers: Customer[];
+  stafAntar: User[];
+}
+
+const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, stafAntar }: Props) => {
+  const [orders, setOrders] = useState<DeliveryOrder[]>(deliveryOrders);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedOrder, setSelectedOrder] = useState<DeliveryOrder | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingOrder, setEditingOrder] = useState<DeliveryOrder | null>(null);
   const [createDate, setCreateDate] = useState<string>("");
   const [filterType, setFilterType] = useState<DeliveryType | "all">("all");
+  const [autoFlowData, setAutoFlowData] = useState<DeliveryFormPayload | null>(null);
+
+  const order = autoFlowData ?? editingOrder;
 
   const filteredOrders = useMemo(
     () => filterType === "all" ? orders : orders.filter((o) => o.type === filterType),
     [orders, filterType]
   );
 
-  const goToday = () => setCurrentDate(new Date(2026, 2, 1));
+
+  const goToday = () => {
+    const today = new Date();
+    setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+  };
   const goPrev = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   const goNext = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
@@ -68,19 +92,95 @@ const DeliverySchedule = () => {
     }
   }, [selectedOrder]);
 
-  const handleSave = useCallback((order: DeliveryOrder) => {
-    setOrders((prev) => {
-      const idx = prev.findIndex((o) => o.id === order.id);
-      if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = order;
-        return next;
-      }
-      return [...prev, order];
+  const handleSave = (form: DeliveryFormPayload) => {
+
+    const payload = new FormData();
+
+    payload.append("type", form.type);
+    payload.append("date", form.date);
+    payload.append("status", form.status || "");
+
+    payload.append("sender_name", form.sender_name || "");
+    payload.append("receiver_name", form.receiver_name || "");
+    payload.append("receiver_signature", "");
+    payload.append("sender_signature", "");
+    payload.append("note", form.note || "");
+
+    if (form.type === "in") {
+      payload.append("supplier_id", form.supplier_id || "");
+    } else {
+      payload.append("customer_id", form.customer_id || "");
+      payload.append("sender_id", form.sender_id || "");
+    }
+
+    form.items.forEach((item, index) => {
+      payload.append(`items[${index}][item_id]`, item.item_id);
+      payload.append(`items[${index}][quantity]`, String(item.quantity || 0));
+      payload.append(`items[${index}][bad_stock]`, String(item.bad_stock || 0));
+      payload.append(`items[${index}][price]`, String(item.price || 0));
+      payload.append(`items[${index}][cart_id]`, item.cart_id ? String(item.cart_id) : "");
+      payload.append(`items[${index}][cart_qty]`, String(item.cart_qty || 0));
+      payload.append(`items[${index}][cart_weight]`, String(item.cart_weight || 0));
     });
-    setShowForm(false);
-    setEditingOrder(null);
-  }, []);
+
+    const isEdit = !!form.id;
+
+    router.post(isEdit ? update(Number(form.id!)) : store(), payload, {
+      forceFormData: true,
+
+      onSuccess: () => {
+
+        // ✅ AUTO FLOW LOGIC
+        if (!isEdit && form.type === "out" && !form.meta?.isAutoFlow) {
+
+          const outDate = new Date(form.date);
+          const today = new Date();
+
+          const diffDays = Math.abs(
+            (today.getTime() - outDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          let newDate;
+
+          if (diffDays < 7) {
+            newDate = today;
+          } else {
+            newDate = new Date(outDate);
+            newDate.setDate(outDate.getDate() - 7);
+          }
+
+          // 🔥 buka form lagi (IN)
+          setAutoFlowData({
+            ...form,
+            id: undefined,
+            type: "in",
+            date: newDate.toISOString().split("T")[0],
+            supplier_id: null,
+            customer_id: null,
+            meta: { isAutoFlow: true }
+          });
+
+          setShowForm(true);
+
+          notify.success("Silakan lengkapi Surat Jalan Masuk");
+          return;
+        }
+
+        // ✅ FINAL SUCCESS
+        notify.success(
+          form.meta?.isAutoFlow
+            ? "Surat Jalan masuk & keluar berhasil dibuat"
+            : "Surat Jalan berhasil disimpan"
+        );
+
+        router.get(index());
+      },
+
+      onError: (errors) => {
+        notify.error(Object.values(errors).join("\n"));
+      }
+    });
+  };
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -167,10 +267,24 @@ const DeliverySchedule = () => {
 
       {showForm && (
           <DeliveryFormModal
-          order={editingOrder}
-          defaultDate={createDate}
-          onClose={() => { setShowForm(false); setEditingOrder(null); }}
-          onSave={handleSave}
+            key={
+              order?.id ??
+              `${order?.date ?? "no-date"}-${order?.type ?? "no-type"}`
+            }
+            order={autoFlowData ?? editingOrder}
+            products={items}
+            carts={carts}
+            suppliers={suppliers}
+            customers={customers}
+            stafAntar={stafAntar}
+            defaultDate={createDate}
+            orders={deliveryOrders}
+            onClose={() => {
+              setShowForm(false);
+              setEditingOrder(null);
+              setAutoFlowData(null);
+            }}
+            onSave={handleSave}
           />
       )}
     </AppLayout>

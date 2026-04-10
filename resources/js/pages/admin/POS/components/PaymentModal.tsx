@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { X, CheckCircle, Printer, Apple, Truck } from "lucide-react";
-import { CartItem, PaymentMethod, formatRupiah } from "@/data/products";
-import { store } from "@/routes/pos";
 import { router } from "@inertiajs/react";
+import { X, CheckCircle, Printer, Apple, Truck } from "lucide-react";
+import { useState } from "react";
 import { FormInput, FormSelect } from "@/components/admin";
+import type { CartItem, PaymentMethod} from "@/data/products";
+import { formatRupiah } from "@/data/products";
+import { store } from "@/routes/pos";
 
 interface PaymentModalProps {
   cart: CartItem[];

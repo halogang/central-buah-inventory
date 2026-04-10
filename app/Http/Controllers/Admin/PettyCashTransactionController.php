@@ -34,12 +34,15 @@ class PettyCashTransactionController extends Controller
 
         $balance = $totalIncome - $totalExpense;
 
+        $isAdmin = Auth::user()->hasRole('admin');
+
         $categories = Category::where('type', 'pengeluaran')->get();
 
         return Inertia::render('admin/PettyCash/Index', [
             'pettyCashTransactions' => $pettyCashTransactions,
             'balance' => $balance,
             'categories' => $categories,
+            'isAdmin' => $isAdmin,
         ]);
     }
 

@@ -1,17 +1,8 @@
 import { ShoppingCart, DollarSign, AlertCircle, Receipt } from "lucide-react";
-import { SummaryCard } from "@/components/report/SummaryCard";
-import { TableLaporan } from "@/components/report/TableLaporan";
 import { ChartBar } from "@/components/report/ChartBar";
 import { ChartDonut } from "@/components/report/ChartDonut";
-
-const salesByProduct = [
-  { name: "Mangga", value: 180 },
-  { name: "Apel Fuji", value: 130 },
-  { name: "Semangka", value: 250 },
-  { name: "Pisang", value: 65 },
-  { name: "Jeruk", value: 85 },
-  { name: "Anggur", value: 40 },
-];
+import { SummaryCard } from "@/components/report/SummaryCard";
+import { TableLaporan } from "@/components/report/TableLaporan";
 
 const categoryData = [
   { name: "Buah Lokal", value: 45, color: "#10B981" },
@@ -19,15 +10,6 @@ const categoryData = [
   { name: "Buah Potong", value: 20, color: "#111827" },
   { name: "Paket Parcel", value: 10, color: "#6B7280" },
 ];
-
-const detailData = [
-  { produk: "Mangga", terjual: 180, revenue: 4500000, persen: "22.4%" },
-  { produk: "Apel Fuji", terjual: 95, revenue: 3225000, persen: "16.2%" },
-  { produk: "Semangka", terjual: 250, revenue: 2500000, persen: "12.5%" },
-  { produk: "Pisang", terjual: 65, revenue: 1300000, persen: "4.5%" },
-  { produk: "Jeruk", terjual: 85, revenue: 3825000, persen: "17.2%" },
-  { produk: "Anggur", terjual: 40, revenue: 2400000, persen: "12.1%" },
-];  
 
 const formatRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
 

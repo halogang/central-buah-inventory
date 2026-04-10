@@ -1,15 +1,15 @@
 import { Head, router, usePage } from "@inertiajs/react";
 import { Edit3, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import Pagination from "@/components/Pagination";
 import { SearchInput } from "@/components/search-input";
 import { Button } from "@/components/ui/button";
+import { usePagination } from "@/hooks/use-pagination";
 import AppLayout from "@/layouts/app-layout";
 import { notify } from "@/lib/notify";
 import { destroy } from "@/routes/master/carts";
 import type { BreadcrumbItem } from '@/types';
 import Form from "./components/Form";
-import { usePagination } from "@/hooks/use-pagination";
-import Pagination from "@/components/Pagination";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

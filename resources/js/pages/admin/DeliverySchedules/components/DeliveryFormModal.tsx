@@ -1,66 +1,178 @@
-import { useState, useMemo } from "react";
-import { DeliveryOrder, DeliveryItem, DeliveryType, DeliveryStatus, fruitOptions, calcTotalWeight, calcTotalAmount } from "@/data/deliveryOrders";
-import { formatRupiah } from "@/data/products";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Image } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FormInput, FormSelect } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { DeliveryOrder, DeliveryItem, DeliveryType, Item, Cart, Supplier, Customer, User, DeliveryFormPayload } from "@/data/deliveryOrders";
+import { formatRupiah } from "@/data/products";
 
 interface Props {
-  order: DeliveryOrder | null;
+  order: DeliveryFormPayload | DeliveryOrder | null;
   defaultDate: string;
   onClose: () => void;
-  onSave: (order: DeliveryOrder) => void;
+  onSave: (order: DeliveryFormPayload) => void;
+  orders: DeliveryOrder[];
+  products: Item[];
+  carts: Cart[];
+  suppliers: Supplier[];
+  customers: Customer[];
+  stafAntar: User[];
+
 }
 
-const DeliveryFormModal = ({ order, defaultDate, onClose, onSave }: Props) => {
+const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, products, carts, suppliers, customers, stafAntar }: Props) => {
   const isEdit = !!order;
 
-  const [date, setDate] = useState(order?.date || defaultDate);
-  const [type, setType] = useState<DeliveryType>(order?.type || "in");
-  const [doNumber, setDoNumber] = useState(order?.do_number || `DO-${Date.now().toString(36).toUpperCase()}`);
-  const [supplierName, setSupplierName] = useState(order?.supplier_name || "");
-  const [customerName, setCustomerName] = useState(order?.customer_name || "");
-  const [senderName, setSenderName] = useState(order?.sender_name || "");
-  const [receiverName, setReceiverName] = useState(order?.receiver_name || "");
-  const [note, setNote] = useState(order?.note || "");
-  const [status, setStatus] = useState<DeliveryStatus>(order?.status || "draft");
-  const [items, setItems] = useState<DeliveryItem[]>(
-    order?.items || [{ item_id: "", name: "", quantity: 0, price: 0 }]
-  );
+  const generateDoNumber = (
+    type: DeliveryType,
+    date: string,
+    orders: DeliveryOrder[]
+  ) => {
+    const prefix = type === "in" ? "SJM" : "SJK";
 
-  const totalWeight = useMemo(() => calcTotalWeight(items), [items]);
-  const totalAmount = useMemo(() => calcTotalAmount(items), [items]);
+    const formattedDate = date.replaceAll("-", "");
 
-  const updateItem = (idx: number, field: keyof DeliveryItem, value: string | number) => {
-    setItems((prev) => prev.map((it, i) => {
-      if (i !== idx) return it;
-      if (field === "item_id") {
-        const fruit = fruitOptions.find((f) => f.id === value);
-        return { ...it, item_id: value as string, name: fruit?.name || "", price: fruit?.price || 0 };
-      }
-      return { ...it, [field]: value };
-    }));
+    const sameDayOrders = orders.filter(
+      (o) => o.type === type && o.date === date
+    );
+
+    let nextSequence = 1;
+
+    if (sameDayOrders.length > 0) {
+      // const lastSequence = parseInt(lastNumber.slice(-3));
+      const maxSequence = Math.max(
+        ...sameDayOrders.map((o) => parseInt(o.do_number.slice(-3)))
+      );
+
+      nextSequence = maxSequence + 1;
+    }
+
+    const sequence = String(nextSequence).padStart(3, "0");
+
+    return `${prefix}/${formattedDate}/${sequence}`;
   };
 
-  const addItem = () => setItems((prev) => [...prev, { item_id: "", name: "", quantity: 0, price: 0 }]);
-  const removeItem = (idx: number) => setItems((prev) => prev.filter((_, i) => i !== idx));
+  const [date, setDate] = useState(order?.date || defaultDate);
+  const [type, setType] = useState<DeliveryType>(order?.type || "out");
+  const [doNumber, setDoNumber] = useState(
+    order?.do_number || generateDoNumber(type, date, orders)
+  );
+  const [supplierId, setSupplierId] = useState(order?.supplier_id || "");
+  const [customerId, setCustomerId] = useState(order?.customer_id || "");
+  const [senderName, setSenderName] = useState(order?.sender_name || "");
+  const [senderId, setSenderId] = useState(order?.sender?.id ? String(order.sender.id) : "");
+  const [receiverName, setReceiverName] = useState(order?.receiver_name || "");
+  const [note, setNote] = useState(order?.note || "");
+  const [selectingItem, setSelectingItem] = useState(false)
+  const [searchItem, setSearchItem] = useState("")
+
+  const [items, setItems] = useState<DeliveryItem[]>(
+    order?.items || []
+  )
+
+  const filteredItems = products.filter((i) => {
+    const matchesSearch = i.name
+      .toLowerCase()
+      .includes(searchItem.toLowerCase());
+
+    const nonSelected = !items.some(
+      (selected) => selected.item_id == String(i.id)
+    );
+
+    return matchesSearch && nonSelected;
+  });
+
+  const selectItem = (item: Item) => {
+    const newItem: DeliveryItem = {
+      item_id: String(item.id),
+      item: item,
+      name: item.name,
+      quantity: 0,
+      bad_stock: 0,
+      price: type === 'in' ? item.purchase_price : item.selling_price,
+      cart_id: null,
+      cart_qty: 0,
+      cart_weight: 0,
+    };
+
+    setItems((prev) => [...prev, newItem]);
+    setSelectingItem(false);
+    setSearchItem("");
+  };
+
+  const updateItem = (
+    index: number,
+    field: keyof DeliveryItem,
+    value: string | number | null
+  ) => {
+    setItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              [field]:
+                field === "cart_id"
+                  ? value === "" ? null : Number(value)
+                  : typeof item[field] === "number"
+                  ? Number(value)
+                  : value,
+            }
+          : item
+      )
+    );
+  };
+
+  const removeItem = (index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const getNetQty = (item: DeliveryItem) => {
+    return (Number(item.quantity || 0) - Number(item.bad_stock || 0));
+  };
+
+  const getItemTotal = (item: DeliveryItem) => {
+    return getNetQty(item) * Number(item.price || 0);
+  };
+
+
+  const totalAmount = items.reduce((sum, item) => {
+    return sum + getItemTotal(item);
+  }, 0);
+
+  const totalWeight = items.reduce((sum, item) => {
+    const qty = Number(item.quantity || 0);
+    const cartQty = Number(item.cart_qty || 0);
+    const cartWeight = Number(item.cart_weight || 0);
+
+    return sum + qty + (cartQty * cartWeight);
+  }, 0);
 
   const handleSubmit = () => {
-    const result: DeliveryOrder = {
-      id: order?.id || `do-${Date.now()}`,
-      do_number: doNumber,
-      date,
+    const payload = {
+      id: order?.id,
       type,
-      supplier_name: type === "in" ? supplierName : undefined,
-      customer_name: type === "out" ? customerName : undefined,
+      date,
+      do_number: null,
+      sender: null,
+      status: "draft",
+      supplier_id: supplierId || null,
+      customer_id: customerId || null,
+      sender_id: senderId || null,
       sender_name: senderName,
       receiver_name: receiverName,
       note,
-      status,
-      items: items.filter((it) => it.item_id && it.quantity > 0),
+      items,
     };
-    onSave(result);
+
+    onSave(payload);
   };
+
+  useEffect(() => {
+    if (!isEdit) {
+      const newDo = generateDoNumber(type, date, orders);
+      setDoNumber(newDo);
+    }
+  }, [type, date])
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
@@ -79,12 +191,22 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave }: Props) => {
           {/* Row 1 */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Tanggal</label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <FormInput
+                    label="Tanggal"
+                    type="date"
+                    value={date}
+                    // disabled={disabled}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">DO Number</label>
-              <Input value={doNumber} onChange={(e) => setDoNumber(e.target.value)} />
+              <FormInput
+                    label="Nomor Surat Jalan"
+                    value={doNumber}
+                    onChange={(e) => setDoNumber(e.target.value)}
+                    readOnly
+              />
             </div>
           </div>
 
@@ -112,49 +234,56 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave }: Props) => {
 
           {/* Supplier / Customer */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">
-              {type === "in" ? "Nama Supplier" : "Nama Customer"}
-            </label>
-            <Input
-              value={type === "in" ? supplierName : customerName}
-              onChange={(e) => type === "in" ? setSupplierName(e.target.value) : setCustomerName(e.target.value)}
-              placeholder={type === "in" ? "Nama supplier..." : "Nama customer..."}
+            <FormSelect
+                label={type === 'in' ? "Pilih Supplier" : "Pilih Customer"}
+                value={type === 'in' ? supplierId : customerId}
+                onChange={(e) => {
+                    if (type === 'in') {
+                        setSupplierId(e.target.value);
+                    } else {
+                        setCustomerId(e.target.value);
+                    }
+                }}
+                options={[
+                    {
+                        label: type === 'in' ? 'Pilih Supplier' : 'Pilih Customer',
+                        value: '',
+                        // disabled: true
+                    },
+                    ...(type === 'in' ? suppliers.map((s: any) => ({
+                        label: s.name,
+                        value: s.id
+                    })) : customers.map((c: any) => ({
+                        label: c.name,
+                        value: c.id
+                    })))
+
+                ]}
+                required
             />
           </div>
 
-          {/* Sender / Receiver */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Pengirim/Sender */}
+          {type === 'out' && (
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Pengirim</label>
-              <Input value={senderName} onChange={(e) => setSenderName(e.target.value)} placeholder="Nama pengirim" />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Penerima</label>
-              <Input value={receiverName} onChange={(e) => setReceiverName(e.target.value)} placeholder="Nama penerima" />
-            </div>
-          </div>
+              <FormSelect
+                  label="Pilih Pengirim"
+                  value={senderId}
+                  onChange={(e) => setSenderId(e.target.value)}
+                  options={[
+                      {
+                          label: "Pilih Pengirim",
+                          value: '',
+                          // disabled: true
+                      },
+                      ...stafAntar.map((s: any) => ({
+                          label: s.name,
+                          value: String(s.id)
+                      }))
 
-          {/* Status (edit only) */}
-          {isEdit && (
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Status</label>
-              <div className="flex gap-2">
-                {(["draft", "sent", "done"] as const).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setStatus(s)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                      status === s
-                        ? s === "draft" ? "bg-gray-100 text-gray-800 border-gray-300"
-                        : s === "sent" ? "bg-amber-100 text-amber-800 border-amber-300"
-                        : "bg-emerald-100 text-emerald-800 border-emerald-300"
-                        : "bg-secondary text-muted-foreground border-border"
-                    }`}
-                  >
-                    {s === "draft" ? "Draft" : s === "sent" ? "Dikirim" : "Selesai"}
-                  </button>
-                ))}
-              </div>
+                  ]}
+                  required
+              />
             </div>
           )}
 
@@ -163,50 +292,188 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave }: Props) => {
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Catatan</label>
             <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Catatan opsional..." />
           </div>
+          
+          {/* </div>  */}
+          <div className="p-4 border rounded-lg flex flex-col gap-2">
 
-          {/* Items */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-muted-foreground">Items</label>
-              <Button variant="outline" size="sm" onClick={addItem} className="h-7 text-xs">
-                <Plus size={14} /> Tambah
-              </Button>
+            <div className="flex justify-between items-center">
+              <span className="font-bold text-sm">Daftar Barang</span>
             </div>
-            <div className="space-y-2">
-              {items.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2 bg-secondary/50 rounded-lg p-2">
-                  <select
-                    value={item.item_id}
-                    onChange={(e) => updateItem(idx, "item_id", e.target.value)}
-                    className="flex-1 bg-background border border-input rounded-md px-2 py-1.5 text-sm"
-                  >
-                    <option value="">Pilih buah...</option>
-                    {fruitOptions.map((f) => (
-                      <option key={f.id} value={f.id}>{f.name}</option>
-                    ))}
-                  </select>
-                  <Input
-                    type="number"
-                    value={item.quantity || ""}
-                    onChange={(e) => updateItem(idx, "quantity", Number(e.target.value))}
-                    placeholder="Qty"
-                    className="w-20 text-center"
-                  />
-                  <Input
-                    type="number"
-                    value={item.price || ""}
-                    onChange={(e) => updateItem(idx, "price", Number(e.target.value))}
-                    placeholder="Harga"
-                    className="w-28"
-                  />
-                  {items.length > 1 && (
-                    <button onClick={() => removeItem(idx)} className="text-destructive hover:text-destructive/80 p-1">
-                      <Trash2 size={14} />
-                    </button>
-                  )}
+
+            {items.map((item, index) => (
+              <div key={index} className="flex flex-col gap-2 border rounded-lg p-3">
+
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-2 items-center">
+                    {item.item?.image ? (
+                      <img src={item.item?.image_url} className="w-8 h-8 rounded" />
+                    ) : (
+                      <Image className="size-8 text-muted-foreground"/>
+                    )}
+
+                    <div>
+                      <p className="text-sm font-bold">
+                        {item.name || "-"}
+                      </p>
+
+                      <p className="text-xs text-muted-foreground">
+                        {item.item?.stock} {item.item?.unit_code}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button onClick={() => removeItem(index)}>
+                    <Trash2 className="size-4 text-red-500" />
+                  </button>
                 </div>
-              ))}
+
+                <div className="grid grid-cols-3 gap-2">
+
+                  <FormInput
+                    label="Jumlah"
+                    type="number"
+                    placeholder="Qty"
+                    value={item.quantity}
+                    onChange={(e) => updateItem(index, "quantity", Number(e.target.value))}
+                  />
+
+                  <FormInput
+                    label="Bad Stock"
+                    type="number"
+                    placeholder="Bad"
+                    value={item.bad_stock}
+                    onChange={(e) => updateItem(index, "bad_stock", Number(e.target.value))}
+                  />
+
+                  <FormInput
+                    label="Harga"
+                    type="number"
+                    placeholder="Harga"
+                    value={item.price}
+                    onChange={(e) => updateItem(index, "price", Number(e.target.value))}
+                  />
+
+                  <FormSelect
+                    label="Pilih Keranjang"
+                    value={item.cart_id ?? ""}
+                    onChange={(e) => updateItem(index, "cart_id", e.target.value)}
+                    options={
+                      [{
+                        label: 'Pilih Keranjang',
+                        value: '',
+                      },
+                      ...carts.map((c) => ({
+                        label: c.name,
+                        value: String(c.id)
+                      }))]
+                    }
+                  />
+                    {/* <option value="">Pilih keranjang</option>
+                    {carts.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))} */}
+
+                  <FormInput
+                    label="Jml Keranjang" 
+                    type="number"
+                    placeholder="Qty Keranjang"
+                    value={item.cart_qty}
+                    onChange={(e) => updateItem(index, "cart_qty", e.target.value)}
+                  />
+
+                  <FormInput
+                    label="Berat/Keranjang" 
+                    type="number"
+                    placeholder="Berat"
+                    value={item.cart_weight}
+                    onChange={(e) => updateItem(index, "cart_weight", e.target.value)}
+                  />
+
+                </div>
+
+                <div className="flex justify-between text-xs">
+                  <span>Net: {getNetQty(item)}</span>
+                  <span className="text-orange-500">
+                    Rp {getItemTotal(item).toLocaleString()}
+                  </span>
+                </div>
+
+              </div>
+            ))}
+
+            {!selectingItem && (
+              <button
+                  type="button"
+                  onClick={() => setSelectingItem(true)}
+                  className="p-4 border-2 rounded-lg border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-all text-primary flex gap-2 w-full items-center justify-center cursor-pointer"
+              >
+                  <Plus className="size-5"/>
+                  <span className="text-sm">Tambah Barang</span>
+              </button>
+            )}
+
+            {selectingItem && (
+              <div className="border rounded-lg">
+                <div className="p-3 flex flex-col gap-2">
+                  <input
+                    value={searchItem}
+                    onChange={(e) => setSearchItem(e.target.value)}
+                    placeholder="Cari barang..."
+                    className="w-full border rounded px-2 py-1 text-sm"
+                  />
+
+                  <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
+
+                    {filteredItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => selectItem(item)}
+                        className="flex gap-2 items-center p-2 rounded hover:bg-muted"
+                      >
+                        {item.image ?
+
+                            <img
+                                src={item.image_url}
+                                className="w-8 h-8 object-cover rounded"
+                            />
+
+                        :
+
+                            <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
+                                <Image className="size-4"/>
+                            </div>
+
+                        }
+
+                        <div className="flex flex-col text-left">
+                            <span className="text-sm font-medium">{item.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                                {item.stock + " " + item.unit_code || ""}
+                            </span>
+                        </div>
+                      </button>
+                    ))}
+
+                  </div>
+                </div>
+
+                <button onClick={() => setSelectingItem(false)}
+                    className="border-t p-2 text-center cursor-pointer hover:bg-accent w-full font-medium text-sm text-muted-foreground">
+                    Tutup
+                </button>
+              </div>
+            )}
+
+            {/* <div className="bg-primary/10 p-2 flex justify-between">
+              <span>Total Berat</span>
+              <span>{totalWeight} {cartUnit}</span>
             </div>
+
+            <div className="bg-primary/10 p-2 flex justify-between">
+              <span>Total</span>
+              <span>Rp {totalAmount.toLocaleString()}</span>
+            </div> */}
+
           </div>
 
           {/* Totals */}

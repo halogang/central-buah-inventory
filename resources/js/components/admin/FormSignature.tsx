@@ -29,7 +29,7 @@ export default function FormSignature({ label, value, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2">
 
-      <span className="text-sm font-medium">
+      <span className="text-xs text-muted-foreground font-medium">
         {label}
       </span>
 

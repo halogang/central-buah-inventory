@@ -1,12 +1,12 @@
+import { Head, usePage } from "@inertiajs/react";
 import { useState, useCallback } from "react";
-import ProductGrid from "./components/ProductGrid";
+import type { CartItem, PaymentMethod, Product } from "@/data/products";
+import AppLayout from "@/layouts/app-layout";
+import { notify } from "@/lib/notify";
+import type { BreadcrumbItem } from '@/types';
 import CartPanel from "./components/CartPanel";
 import PaymentModal, { SuccessModal } from "./components/PaymentModal";
-import { CartItem, PaymentMethod, Product } from "@/data/products";
-import AppLayout from "@/layouts/app-layout";
-import { Head, usePage } from "@inertiajs/react";
-import type { BreadcrumbItem } from '@/types';
-import { notify } from "@/lib/notify";
+import ProductGrid from "./components/ProductGrid";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -95,11 +95,6 @@ const breadcrumbs: BreadcrumbItem[] = [
       )
     );
   }, []);
-
-  const subtotal = cart.reduce(
-    (sum, item) => sum + (item.customPrice ?? item.product.price) * item.qty,
-    0
-  );
 
   const handlePaySuccess = (cashReceived: number, change: number, finalTotal: number) => {
     setLastTransaction({ total: finalTotal, cashReceived, change });
