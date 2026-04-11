@@ -2,7 +2,28 @@ import { Menu, X} from "lucide-react";
 import { useState } from "react";
 import AppLogoIcon from '@/components/app-logo-icon';
 
-const navLinks = ["Home", "Products", "About", "Contact"];
+const navLinks = [
+  {
+    id: 1,
+    label: "Home",
+    href: '#home'
+  },
+  {
+    id: 2,
+    label: "Katalog",
+    href: '#products'
+  },
+  {
+    id: 3,
+    label: "Tentang",
+    href: '#about'
+  },
+  {
+    id: 4,
+    label: "Kontak",
+    href: '#contact'
+  }
+];
 
 interface WebsiteInfo {
   id: number;
@@ -34,11 +55,11 @@ const Navbar = ({ websiteInfo }: NavbarProps) => {
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
+              key={link.id}
+              href={link.href}
               className="text-sm font-medium text-muted hover:text-primary transition-colors"
             >
-              {link}
+              {link.label}
             </a>
           ))}
         </div>
@@ -54,12 +75,12 @@ const Navbar = ({ websiteInfo }: NavbarProps) => {
         <div className="md:hidden absolute top-16 left-0 w-full bg-card border-b border-border px-4 py-4 space-y-4 shadow-lg">
           {navLinks.map((link) => (
             <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
+              key={link.id}
+              href={link.href}
               className="block text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               onClick={() => setOpen(false)}
             >
-              {link}
+              {link.label}
             </a>
           ))}
         </div>

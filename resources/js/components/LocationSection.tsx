@@ -33,8 +33,7 @@ const LocationSection = ({websiteInfo} : Props) => {
                 <div className="text-center max-w-2xl mx-auto mb-14">
                     <h2 className="text-6xl font-extrabold font-display">
                         Lokasi
-                        <span className="text-yellow-300">
-                            Kami</span>
+                        <span className="text-yellow-300"> Kami</span>
                     </h2>
 
                     <p className="mt-4 text-primary-foreground/80">

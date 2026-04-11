@@ -534,10 +534,23 @@ class DeliveryOrderController extends Controller
             }
 
             /**
-             * 2️⃣ Hapus file evidence
-             */
-            if ($deliveryOrder->evidence && File::exists(public_path($deliveryOrder->evidence))) {
-                File::delete(public_path($deliveryOrder->evidence));
+             * 2️⃣ Hapus file evidence (handle array)
+            */
+            if ($deliveryOrder->evidence) {
+
+                $paths = is_array($deliveryOrder->evidence)
+                    ? $deliveryOrder->evidence
+                    : json_decode($deliveryOrder->evidence, true);
+
+                if (is_array($paths)) {
+                    foreach ($paths as $path) {
+                        $fullPath = public_path($path);
+
+                        if (File::exists($fullPath)) {
+                            File::delete($fullPath);
+                        }
+                    }
+                }
             }
 
             /**

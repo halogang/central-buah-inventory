@@ -42,6 +42,14 @@ const DeliveryDetailModal = ({ order, onClose, onEdit }: Props) => {
     })
   }
 
+  const totalWeight = order.items.reduce((sum, item) => {
+    const qty = Number(item.quantity || 0);
+    const cartQty = Number(item.cart_qty || 0);
+    const cartWeight = Number(item.cart_weight || 0);
+
+    return sum + qty + (cartQty * cartWeight);
+  }, 0);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -139,7 +147,7 @@ const DeliveryDetailModal = ({ order, onClose, onEdit }: Props) => {
           {/* Totals */}
           <div className="flex justify-between text-sm pt-2 border-t border-border">
             <span className="text-muted-foreground">Total Berat</span>
-            <span className="font-bold text-foreground">{calcTotalWeight(order.items)} kg</span>
+            <span className="font-bold text-foreground">{totalWeight} kg</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Total Amount</span>
