@@ -18,9 +18,11 @@ import UsersTab from "./components/UsersTab"
 
 
 import type { UserData, RoleData, Permission } from "./types"
+import { useCan } from "@/utils/permissions"
 
 
 export default function Index() {
+    const can = useCan();
 
     const { users = [], roles = [], permissions = [], auth } = usePage<{
         users: UserData[]
@@ -86,6 +88,24 @@ export default function Index() {
         })
     }
 
+    function groupPermissions(perms: Permission[]) {
+        const map: Record<string, Permission[]> = {}
+
+        perms.forEach((p) => {
+            const [module] = p.name.split('.')
+            if (!map[module]) map[module] = []
+            map[module].push(p)
+        })
+
+        return map
+    }
+
+    function formatModuleName(name: string) {
+        return name
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (c) => c.toUpperCase())
+    }
+
     return (
         <AppLayout>
             <Head title="Pengguna & Role" >
@@ -103,6 +123,8 @@ export default function Index() {
                 <PermissionSimulation
                     simulatedRole={simulatedRole}
                     permissions={permissions}
+                    groupPermissions={groupPermissions}
+                    formatModuleName={formatModuleName}
                 />
 
                 <div className="flex justify-between items-center mb-4 gap-2">
@@ -118,21 +140,23 @@ export default function Index() {
                         <Shield className="size-4" />
                         Pengguna
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('roles')}
-                        className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                            activeTab === 'roles'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                        }`}
-                    >
-                        <Shield className="size-4" />
-                        Role
-                    </button>
+                    {can('role.index') && (
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('roles')}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                                activeTab === 'roles'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                            }`}
+                        >
+                            <Shield className="size-4" />
+                            Role
+                        </button>
+                    )}
                 </div>
 
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between gap-2 items-center mb-4">
 
                     <SearchInput
                         placeholder="Search..."
@@ -140,14 +164,20 @@ export default function Index() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
 
-                    {isOwner && (
+                    {can('user.create') && activeTab == "users" && isOwner && (
                         <Button
                             onClick={() => {
-                                if (activeTab === "users") {
-                                    setShowUserModal(true)
-                                } else {
-                                    setShowRoleModal(true)
-                                }
+                                setShowUserModal(true)
+                            }}
+                        >
+                            <Plus />
+                            Tambah
+                        </Button>
+                    )}
+                    {can('role.create') && activeTab == "roles" && isOwner && (
+                        <Button
+                            onClick={() => {
+                                setShowRoleModal(true)
                             }}
                         >
                             <Plus />
@@ -179,6 +209,8 @@ export default function Index() {
                         permissions={permissions}
                         search={search}
                         isOwner={isOwner}
+                        groupPermissions={groupPermissions}
+                        formatModuleName={formatModuleName}
                         openEdit={(r) => {
                             setSelectedRole(r)
                             setShowRoleModal(true)

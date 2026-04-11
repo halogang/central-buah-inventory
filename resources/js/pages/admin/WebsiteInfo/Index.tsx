@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import AppLayout from "@/layouts/app-layout"
 import { notify } from "@/lib/notify"
 import type { BreadcrumbItem } from '@/types'
+import { useCan } from "@/utils/permissions"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,6 +19,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function WebsiteInfoIndex({ info }: any) {
+
+    const can = useCan();
 
     const [is24Hours, setIs24Hours] = useState(
         info?.jam_operasional === '24 jam'
@@ -306,16 +309,18 @@ export default function WebsiteInfoIndex({ info }: any) {
                     </div>
 
                     {/* submit */}
-                    <div className="flex justify-end">
+                    {can('info_website.update') && (
+                        <div className="flex justify-start">
 
-                        <Button
-                            type="submit"
-                            className="cursor-pointer px-6"
-                        >
-                            Simpan Perubahan
-                        </Button>
+                            <Button
+                                type="submit"
+                                className="cursor-pointer px-6"
+                            >
+                                Simpan Perubahan
+                            </Button>
 
-                    </div>
+                        </div>
+                    )}
 
                 </form>
 

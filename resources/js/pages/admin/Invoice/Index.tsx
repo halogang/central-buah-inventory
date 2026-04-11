@@ -19,6 +19,7 @@ import AppLayout from "@/layouts/app-layout";
 import type {BreadcrumbItem} from '@/types';
 import Payment from "./components/Payment";
 import Show from "./components/Show";
+import { useCan } from "@/utils/permissions";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -88,6 +89,7 @@ interface Props {
 }
 
 export default function Index({invoices, summary, paymentMethods} : Props) {
+    const can = useCan();
     
     const [activeTab, setActiveTab] = useState < "in" | "out" > ("in");
     const [search, setSearch] = useState("")
@@ -308,7 +310,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                                             Cetak
                                         </Button>
 
-                                        {invoice.remaining > 0 && (
+                                        {invoice.remaining > 0 && can('invoice_payment') && (
                                             <Button variant="default" className="w-full" onClick={() => openPayModal(invoice)}>
                                                 <CreditCard className="size-4"/>
                                                 Bayar

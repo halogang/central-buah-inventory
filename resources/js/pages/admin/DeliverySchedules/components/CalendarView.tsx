@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { DeliveryOrder} from "@/data/deliveryOrders";
 import { calcTotalWeight } from "@/data/deliveryOrders";
+import { useCan } from "@/utils/permissions";
 
 interface Props {
   currentDate: Date;
@@ -18,6 +19,8 @@ const statusDot: Record<string, string> = {
 };
 
 const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props) => {
+  const can = useCan();
+
   const [showMoreModal, setShowMoreModal] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<DeliveryOrder[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -79,7 +82,7 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
           return (
             <div
               key={i}
-              onClick={() => cell.day && onDateClick(cell.dateStr)}
+              onClick={() => {can('delivery_schedule.create') && (cell.day && onDateClick(cell.dateStr))}}
               className={`min-h-27.5 border-t border-r border-border p-1.5 cursor-pointer transition-colors hover:bg-accent/5 ${
                 !cell.day ? "bg-muted/30" : ""
               } ${i % 7 === 0 ? "border-l-0" : ""}`}

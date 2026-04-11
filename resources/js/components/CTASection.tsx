@@ -34,17 +34,16 @@ const CTASection = ({websiteInfo} : any) => {
 
                 <div
                     className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href={websiteInfo.link_maps} target="_blank">
+                        <Button
+                            className="text-lg px-8 py-6 rounded-full text-muted border-2 bg-transparent border-muted hover:bg-yellow-500 hover:border-yellow-500 cursor-pointer">
+                            Lokasi Kami
+                        </Button>
+                    </a>
                     <a href="">
                         <Button onClick={sendWhatsApp}
                             className="text-lg px-8 py-6 rounded-full text-primary bg-muted hover:text-primary hover:bg-muted cursor-pointer border-2 border-muted">
-                            Hubungi Kami
-                        </Button>
-                    </a>
-
-                    <a href="#products">
-                        <Button
-                            className="text-lg px-8 py-6 rounded-full text-muted border-2 bg-transparent border-muted hover:bg-muted hover:text-primary cursor-pointer">
-                            Lihat Katalog
+                            Pesan Sekarang
                         </Button>
                     </a>
                 </div>

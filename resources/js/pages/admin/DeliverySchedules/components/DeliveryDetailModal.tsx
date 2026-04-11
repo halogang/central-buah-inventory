@@ -8,6 +8,7 @@ import { formatRupiah } from "@/data/products";
 import { notify } from "@/lib/notify";
 import { index } from "@/routes/delivery-schedules";
 import { destroy } from "@/routes/surat-jalan";
+import { useCan } from "@/utils/permissions";
 
 interface Props {
   order: DeliveryOrder;
@@ -16,7 +17,7 @@ interface Props {
 }
 
 const DeliveryDetailModal = ({ order, onClose, onEdit }: Props) => {
-  // const [confirmDelete, setConfirmDelete] = useState(false);
+  const can = useCan();
 
   const confirmDelete = (order: DeliveryOrder) => {
     notify.confirmDelete({
@@ -157,10 +158,14 @@ const DeliveryDetailModal = ({ order, onClose, onEdit }: Props) => {
 
         {/* Actions */}
         <div className="flex items-center gap-2 p-5 border-t border-border">
-          <Button variant="destructive" size="sm" onClick={() => confirmDelete(order)}>Delete</Button>
+          {can('delivery_schedule.delete') && (
+            <Button variant="destructive" size="sm" onClick={() => confirmDelete(order)}>Delete</Button>
+          )}
           <div className="flex-1" />
-          <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
-          <Button size="sm" onClick={onEdit}>Edit</Button>
+            <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+            {can('delivery_schedule.update') && (
+              <Button size="sm" onClick={onEdit}>Edit</Button>
+            )}
         </div>
       </div>
     </div>

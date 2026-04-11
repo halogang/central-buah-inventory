@@ -11,17 +11,17 @@ const navLinks = [
   {
     id: 2,
     label: "Katalog",
-    href: '#products'
+    href: '#katalog'
   },
   {
     id: 3,
     label: "Tentang",
-    href: '#about'
+    href: '#tentang'
   },
   {
     id: 4,
     label: "Kontak",
-    href: '#contact'
+    href: '#kontak'
   }
 ];
 
@@ -44,7 +44,7 @@ const Navbar = ({ websiteInfo }: NavbarProps) => {
   return (
     <nav className="sticky top-0 left-0 right-0 z-50 bg-primary/75 backdrop-blur-md">
       <div className="container mx-auto flex items-center justify-between h-16 px-6">
-        <a href="#" className="flex items-center gap-2 font-display text-xl font-bold text-muted">
+        <a href="https://centralbuahsutomo.com/" className="flex items-center gap-2 font-display text-xl font-bold text-muted">
           <div className="flex aspect-square size-9 sm:size-10 items-center justify-center rounded-md">
               <AppLogoIcon />
           </div>

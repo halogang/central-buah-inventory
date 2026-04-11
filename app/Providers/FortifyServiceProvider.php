@@ -40,30 +40,47 @@ class FortifyServiceProvider extends ServiceProvider
                 {
                     $user = $request->user();
 
-                    $redirectMap = [
-                        'Dashboard'         => 'dashboard',
-                        'Master Data'       => 'master.items.index',
-                        'Gudang'            => 'master.warehouses.index',
-                        'Pengguna & Role'   => 'master.users.index',
-                        'Manajemen Stok'    => 'stok.real-time.index',
-                        'Surat Jalan'       => 'surat-jalan.index',
-                        'Invoice'           => 'invoice.index',
-                        'POS Kasir'         => 'pos.index',
-                        'Keuangan'          => 'keuangan.index',
-                        'Laporan'           => 'laporan.index',
+                    $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+
+                    $redirectPriority = [
+                        'dashboard.view' => 'dashboard',
+
+                        // Master
+                        'barang.index' => 'master.items.index',
+                        'kategori.index' => 'master.categories.index',
+                        'supplier.index' => 'master.suppliers.index',
+                        'pelanggan.index' => 'master.customers.index',
+                        'gudang.index' => 'master.warehouses.index',
+
+                        // Stok
+                        'stock_realtime.index' => 'stok.realtime.index',
+                        'stock_opname.index' => 'stok.stok-opname.index',
+
+                        // Delivery
+                        'delivery_order.index' => 'surat-jalan.index',
+                        'delivery_schedule.index' => 'delivery-schedules.index',
+
+                        // Invoice
+                        'invoice.index' => 'invoice.index',
+
+                        // POS
+                        'pos.index' => 'pos.index',
+
+                        // Finance
+                        'finance.index' => 'keuangan.index',
+
+                        // Report
+                        'report.index' => 'laporan.index',
                     ];
 
-                    $permissions = $user->getAllPermissions()->pluck('name');
-
-                    foreach ($permissions as $permission) {
-                        if (isset($redirectMap[$permission]) && Route::has($redirectMap[$permission])) {
-
-                            return redirect()->route($redirectMap[$permission]);
+                    foreach ($redirectPriority as $permission => $route) {
+                        if (in_array($permission, $permissions) && Route::has($route)) {
+                            return redirect()->route($route);
                         }
                     }
 
-                    // fallback kalau tidak punya permission apa pun
-                    return redirect('/');
+                    // fallback
+                    return redirect('/login');
                 }
             };
         });

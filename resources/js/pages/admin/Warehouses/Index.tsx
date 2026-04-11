@@ -14,6 +14,7 @@ import { usePagination } from '@/hooks/use-pagination';
 import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy, show } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
+import { useCan } from '@/utils/permissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -51,6 +52,8 @@ type WarehouseForm = {
 };
 
 export default function Warehouses() {
+    const can = useCan();
+
     const { warehouses, users, branches } = usePage<{
         warehouses: Warehouse[]
         users: User[]
@@ -159,10 +162,12 @@ export default function Warehouses() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
-                        <Plus />
-                        Tambah
-                    </Button>
+                    {can('gudang.create') && (
+                        <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
+                            <Plus />
+                            Tambah
+                        </Button>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -219,12 +224,16 @@ export default function Warehouses() {
                                 <button onClick={() => router.get(show(w))}>
                                     <Eye className="size-4 text-muted-foreground hover:text-primary" />
                                 </button>
-                                <button onClick={() => openForm(w)}>
-                                    <SquarePen className="size-4 text-muted-foreground hover:text-primary" />
-                                </button>
-                                <button onClick={() => confirmDelete(w)}>
-                                    <Trash2 className="size-4 text-muted-foreground hover:text-red-600" />
-                                </button>
+                                {can('gudang.update') && (
+                                    <button onClick={() => openForm(w)}>
+                                        <SquarePen className="size-4 text-muted-foreground hover:text-primary" />
+                                    </button>
+                                )}
+                                {can('gudang.delete') && (
+                                    <button onClick={() => confirmDelete(w)}>
+                                        <Trash2 className="size-4 text-muted-foreground hover:text-red-600" />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}

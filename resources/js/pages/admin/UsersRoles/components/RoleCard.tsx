@@ -1,5 +1,6 @@
 import { SquarePen, Trash2, Shield } from "lucide-react"
 import type { RoleData, Permission } from "../types"
+import { useCan } from "@/utils/permissions"
 
 interface Props {
     role: RoleData
@@ -7,14 +8,19 @@ interface Props {
     isOwner: boolean
     onEdit: () => void
     onDelete: () => void
+    groupPermissions: (perms: Permission[]) => Record<string, Permission[]>
+    formatModuleName: (name: string) => string
 }
 
 export default function RoleCard({
     role,
     permissions,
     onEdit,
-    onDelete
+    onDelete,
+    groupPermissions,
+    formatModuleName
 }: Props) {
+    const can = useCan();
 
     const formatRoleName = (name: string) => {
         const words = name.replace(/_/g, " ").split(" ")
@@ -26,6 +32,10 @@ export default function RoleCard({
             })
             .join(" ")
     }
+
+    const grouped = groupPermissions(role.permissions || [])
+    const totalModules = Object.keys(groupPermissions(permissions)).length
+    const ownedModules = Object.keys(grouped).length
 
     return (
         <div
@@ -50,21 +60,19 @@ export default function RoleCard({
                     )}
 
                     <div className="flex flex-wrap gap-1 text-[10px] font-medium">
-                        {role.permissions.length === permissions.length ? (
-                            <span className="inline-block px-2 py-1 rounded-full bg-green-100 text-green-700">
+                        {ownedModules === totalModules ? (
+                            <span className="px-2 py-1 rounded-full bg-green-100 text-green-700">
                                 Akses penuh
                             </span>
                         ) : (
-                            <>
-                                {(role.permissions || []).map((perm) => (
-                                    <span
-                                        key={perm.id}
-                                        className="inline-block px-2 py-1 rounded-full bg-muted text-muted-foreground"
-                                    >
-                                        {perm.name}
-                                    </span>
-                                ))}
-                            </>
+                            Object.keys(grouped).map((module) => (
+                                <span
+                                    key={module}
+                                    className="px-2 py-1 rounded-full bg-muted text-muted-foreground"
+                                >
+                                    {formatModuleName(module)}
+                                </span>
+                            ))
                         )}
                     </div>
                     <div className="text-muted-foreground text-xs">
@@ -74,12 +82,16 @@ export default function RoleCard({
             </div>
 
             <div className="flex items-center gap-2 justify-end pt-2 border-t border-sidebar-border/50">
-                <button onClick={onEdit}>
-                    <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
-                </button>
-                <button onClick={onDelete}>
-                    <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
-                </button>
+                {can('role.update') && (
+                    <button onClick={onEdit}>
+                        <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
+                    </button>
+                )}
+                {can('role.delete') && (
+                    <button onClick={onDelete}>
+                        <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
+                    </button>
+                )}
             </div>
         </div>
     )

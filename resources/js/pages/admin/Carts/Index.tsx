@@ -10,6 +10,7 @@ import { notify } from "@/lib/notify";
 import { destroy } from "@/routes/master/carts";
 import type { BreadcrumbItem } from '@/types';
 import Form from "./components/Form";
+import { useCan } from "@/utils/permissions";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,6 +27,8 @@ interface Cart {
 }
 
 export default function Index() {
+    const can = useCan();
+
     const { carts } = usePage<{
         carts: Cart[];
         errors?: Record<string, string>;
@@ -87,10 +90,12 @@ export default function Index() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={openCreate} size="lg" className='w-full sm:w-fit'>
-                        <Plus />
-                        Tambah
-                    </Button>
+                    {can('keranjang.create') && (
+                        <Button onClick={openCreate} size="lg" className='w-full sm:w-fit'>
+                            <Plus />
+                            Tambah
+                        </Button>
+                    )}
                 </div>
 
                 <div className="rounded-xl border bg-background overflow-x-auto">
@@ -119,18 +124,22 @@ export default function Index() {
                                         {cart.note}
                                     </td>
                                     <td className="p-3 text-center">
-                                        <button
-                                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                                            onClick={() => openEdit(cart)}
-                                        >
-                                            <Edit3 className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                                            onClick={() => confirmDelete(cart)}
-                                        >
-                                            <Trash2 className="h-4 w-4 text-red-600" />
-                                        </button>
+                                        {can('keranjang.update') && (
+                                            <button
+                                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                                                onClick={() => openEdit(cart)}
+                                            >
+                                                <Edit3 className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                        {can('keranjang.delete') && (
+                                            <button
+                                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                                                onClick={() => confirmDelete(cart)}
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-600" />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

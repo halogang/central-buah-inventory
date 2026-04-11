@@ -27,9 +27,9 @@ const HeroSection = ({websiteInfo} : any) => {
             <div
                 className="relative z-10 container mx-auto px-4 py-16 md:py-28 text-center flex flex-col justify-center items-center">
                 <h1
-                    className="font-display text-center text-4xl md:text-6xl font-black text-primary-foreground leading-tight max-w-3xl animate-fade-up flex flex-col gap-1">
+                    className="font-display text-center text-4xl md:text-6xl font-black text-primary-foreground leading-tight max-w-6xl animate-fade-up flex flex-col gap-1">
                     <p className="">Toko Buah Terdekat di Cilacap</p>
-                    <span className="text-secondary text-xl md:text-4xl font-regular">Buka 24 Jam, Bisa Pesan Online</span>
+                    <span className="text-secondary text-xl md:text-4xl font-light">Buka 24 Jam, Bisa Pesan Online</span>
                 </h1>
                 <p
                     className="mt-6 text-sm md:text-xl text-primary-foreground/80 max-w-2xl text-center animate-fade-up"
@@ -44,23 +44,18 @@ const HeroSection = ({websiteInfo} : any) => {
                     style={{
                         animationDelay: "0.3s"
                     }}>
-                    <a href="">
-                        <Button onClick={sendWhatsApp}
-                            className="text-md sm:text-lg px-8 py-6 rounded-full text-primary bg-muted hover:text-primary hover:bg-muted cursor-pointer border-2 border-muted">
-                            Pesan Online
-                        </Button>
-                    </a>
-
-                    <a href="#products">
-                        <Button 
-                            className="text-md sm:text-lg px-8 py-6 rounded-full text-muted border-2 bg-transparent border-muted hover:bg-muted hover:border-muted hover:text-primary cursor-pointer">
-                            Lihat Katalog
-                        </Button>
-                    </a>
-                    {/* <Button size="lg" className="text-base px-8">
-          Get Started
-        </Button> */
-                    }
+                        <a href="#products">
+                            <Button 
+                                className="text-md sm:text-lg px-8 py-6 rounded-full text-muted border-2 bg-transparent border-muted hover:bg-muted hover:border-muted hover:text-primary cursor-pointer">
+                                Lihat Katalog
+                            </Button>
+                        </a>
+                        <a href="">
+                            <Button onClick={sendWhatsApp}
+                                className="text-md sm:text-lg px-8 py-6 rounded-full text-primary bg-muted hover:text-primary hover:bg-muted cursor-pointer border-2 border-muted">
+                                Pesan Sekarang
+                            </Button>
+                        </a>
                 </div>
             </div>
         </section>

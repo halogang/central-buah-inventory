@@ -21,21 +21,151 @@ class RolePermissionSeeder extends Seeder
         // ======================
 
         // 10 Indonesian permissions (simplified, no redundancy)
-        $permissions = [
-            'Dashboard',
-            'Master Data',
-            'Manajemen Stok',
-            'Gudang',
-            'Surat Jalan',
-            'Invoice',
-            'POS Kasir',
-            'Keuangan',
-            'Laporan',
-            'Pengguna & Role',
+        // $permissions = [
+        //     'Dashboard',
+        //     'Master Data',
+        //     'Manajemen Stok',
+        //     'Gudang',
+        //     'Surat Jalan',
+        //     'Invoice',
+        //     'POS Kasir',
+        //     'Keuangan',
+        //     'Laporan',
+        //     'Pengguna & Role',
+        // ];
+
+        $newPermissions = [
+
+            //dashboard
+            'dashboard.view',
+            
+            // ====================
+            // MASTER DATA
+            // ====================
+
+            //Info Website
+            'info_website.index',
+            'info_website.update',
+
+            //Barang
+            'barang.index',
+            'barang.create',
+            'barang.update',
+            'barang.delete',
+
+            //Keranjang
+            'keranjang.index',
+            'keranjang.create',
+            'keranjang.update',
+            'keranjang.delete',
+
+            //Gudang
+            'gudang.index',
+            'gudang.create',
+            'gudang.update',
+            'gudang.delete',
+
+            //Kategori
+            'kategori.index',
+            'kategori.create',
+            'kategori.update',
+            'kategori.delete',
+
+            //Supplier
+            'supplier.index',
+            'supplier.create',
+            'supplier.update',
+            'supplier.delete',
+
+            //Pelanggan
+            'pelanggan.index',
+            'pelanggan.create',
+            'pelanggan.update',
+            'pelanggan.delete',
+
+            // Pengguna & Role
+            'user.index',
+            'user.create',
+            'user.update',
+            'user.delete',
+
+            'role.index',
+            'role.create',
+            'role.update',
+            'role.delete',
+
+            // Metode Pembayaran
+            'payment_method.index',
+            'payment_method.create',
+            'payment_method.update',
+            'payment_method.delete',
+
+            // ======================
+            // MANAJEMEN STOK
+            // ======================
+
+            // Stok Realtime
+            'stock_realtime.index',
+
+            // Stok Opname
+            'stock_opname.index',
+            'stock_opname.create',
+            'stock_opname.update',
+            'stock_opname.delete',
+
+            // Stok Movement
+            'stock_movement.index',
+            'stock_movement.create',
+            'stock_movement.update',
+            'stock_movement.delete',
+
+            // ======================
+            // SURAT JALAN & INVOICE
+            // ======================
+
+            // Jadwal Surat Jalan
+            'delivery_schedule.index',
+            'delivery_schedule.create',
+            'delivery_schedule.update',
+            'delivery_schedule.delete',
+
+            // Surat Jalan
+            'delivery_order.index',
+            'delivery_order.create',
+            'delivery_order.update',
+            'delivery_order.delete',
+
+            // Invoice
+            'invoice.index',
+            'invoice.payment',
+
+            // ======================
+            // KEUANGAN
+            // ======================
+
+            'finance.index',
+            'finance.create.income',
+            'finance.create.expense',
+            'finance.update',
+            'finance.delete',
+
+            // ======================
+            // POS
+            // ======================
+
+            'pos.index',
+            'pos.create',
+
+            // ======================
+            // LAPORAN
+            // ======================
+
+            'report.index',
+
         ];
 
 
-        foreach ($permissions as $permission) {
+        foreach ($newPermissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
@@ -64,34 +194,60 @@ class RolePermissionSeeder extends Seeder
             ['description' => 'Staf pengantar']
         );
 
+
+        $all = fn($prefix) => collect($newPermissions)
+            ->filter(fn($p) => str_starts_with($p, $prefix))
+            ->values()
+            ->toArray();
+
         // Owner = full access
         $owner->syncPermissions(Permission::all());
 
         // Admin = Dashboard, Master Data, Manajemen Stok, Invoice, Keuangan, Laporan
-        $admin->syncPermissions([
-            'Dashboard',
-            'Master Data',
-            'Manajemen Stok',
-            'Invoice',
-            'Keuangan',
-            'Laporan',
-        ]);
+        $adminPermissions = array_merge(
+
+            //Dashboard
+            ['dashboard.view'],
+
+            //Master Data (exclude user & role)
+            collect($newPermissions)
+                ->filter(fn($p) =>
+                    str_starts_with($p, 'info_website') ||
+                    str_starts_with($p, 'barang') ||
+                    str_starts_with($p, 'keranjang') ||
+                    str_starts_with($p, 'gudang') ||
+                    str_starts_with($p, 'kategori') ||
+                    str_starts_with($p, 'supplier') ||
+                    str_starts_with($p, 'pelanggan') ||
+                    str_starts_with($p, 'payment_method')
+                )->toArray(),
+            
+            //Stok
+            $all('stock_'),
+
+            //invoice
+            $all('invoice'),
+
+            //keuangan
+            $all('finance'),
+
+            //laporan
+            ['report.index']
+        );
+
+        $admin->syncPermissions($adminPermissions);
 
         // SPV Gudang = Manajemen Stok, Surat Jalan
-        $spv->syncPermissions([
-            'Manajemen Stok',
-            'Surat Jalan',
-        ]);
+        $spv->syncPermissions(array_merge(
+            $all('stock_'),
+            $all('delivery_')
+        ));
 
         // Kasir = POS Kasir
-        $kasir->syncPermissions([
-            'POS Kasir',
-        ]);
+        $kasir->syncPermissions($all('pos'));
 
         // Staff Antar = Surat Jalan
-        $antar->syncPermissions([
-            'Surat Jalan',
-        ]);
+        $antar->syncPermissions($all('delivery_order'));
 
         // ======================
         // DEFAULT USERS

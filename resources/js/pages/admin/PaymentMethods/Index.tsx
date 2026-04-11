@@ -13,6 +13,7 @@ import AppLayout from '@/layouts/app-layout';
 import { notify } from '@/lib/notify';
 import { store, update, destroy } from '@/routes/master/payment-methods';
 import type { BreadcrumbItem } from '@/types';
+import { useCan } from '@/utils/permissions';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -37,6 +38,8 @@ type PaymentMethodForm = {
 };
 
 export default function Index() {
+    const can = useCan();
+
     const { methods } = usePage<{ methods: PaymentMethod[] }>().props;
     const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
     const [showCreate, setShowCreate] = useState(false);
@@ -170,10 +173,12 @@ export default function Index() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
-                        <Plus />
-                        Tambah
-                    </Button>
+                    {can('payment_method.create') && (
+                        <Button onClick={() => openForm()} size="lg" className='w-full sm:w-fit'>
+                            <Plus />
+                            Tambah
+                        </Button>
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -201,14 +206,18 @@ export default function Index() {
                                 </div>  
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'
-                                     onClick={() => openForm(m)}>
-                                    <SquarePen className="size-4 cursor-pointer" />
-                                </div>
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'
-                                     onClick={() => confirmDelete(m)}>
-                                    <Trash2 className="size-4 cursor-pointer" />
-                                </div>
+                                {can('payment_method.update') && (
+                                    <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'
+                                        onClick={() => openForm(m)}>
+                                        <SquarePen className="size-4 cursor-pointer" />
+                                    </div>
+                                )}
+                                {can('payment_method.delete') && (
+                                    <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'
+                                        onClick={() => confirmDelete(m)}>
+                                        <Trash2 className="size-4 cursor-pointer" />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

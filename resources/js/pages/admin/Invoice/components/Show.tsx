@@ -3,9 +3,12 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/helpers/format"
 import Payment from "./Payment"
+import { useCan } from "@/utils/permissions"
 
 
 export default function Show({data, paymentMethods, onClose}: any) {
+    const can = useCan();
+
     const [invoice, setInvoice] = useState(data)
     
     const [openPayment, setOpenPayment] = useState(false)
@@ -212,7 +215,7 @@ export default function Show({data, paymentMethods, onClose}: any) {
 
                     {/* )} */}
 
-                    {invoice.remaining > 0 && (
+                    {invoice.remaining > 0 && can('invoice.payment') && (
                         <Button
                             variant="default"
                             className="w-full cursor-pointer"

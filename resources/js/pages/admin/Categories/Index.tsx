@@ -10,6 +10,7 @@ import { notify } from '@/lib/notify';
 import { destroy } from '@/routes/master/categories';
 import type { BreadcrumbItem } from '@/types';
 import Form from './components/Form';
+import { useCan } from '@/utils/permissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,6 +32,8 @@ interface Category {
 }
 
 export default function Index() {
+    const can = useCan();
+
     const { categories } = usePage<{ categories: Category[] }>().props;
 
     const [showForm, setShowForm] = useState(false);
@@ -120,10 +123,12 @@ export default function Index() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={openCreate} size="lg" className='w-full sm:w-fit cursor-pointer'>
-                        <Plus />
-                        Tambah
-                    </Button>
+                    {can('kategori.create') && (
+                        <Button onClick={openCreate} size="lg" className='w-full sm:w-fit cursor-pointer'>
+                            <Plus />
+                            Tambah
+                        </Button>
+                    )}
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -169,14 +174,18 @@ export default function Index() {
                                 </div>  
                             </div>
                             <div className="flex items-center gap-1 text-muted-foreground">
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'>
-                                    <SquarePen className="size-4 cursor-pointer" onClick={() => openEdit(cat)} />
-                                </div>
-                                <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'>
-                                    <Trash2 className="size-4 cursor-pointer hover:bg-gray-100" 
-                                        onClick={() => confirmDelete(cat)}
-                                    />
-                                </div>
+                                {can('kategori.update') && (
+                                    <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-primary dark:hover:bg-gray-800'>
+                                        <SquarePen className="size-4 cursor-pointer" onClick={() => openEdit(cat)} />
+                                    </div>
+                                )}
+                                {can('kategori.delete') && (
+                                    <div className='p-2 rounded-xl hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800'>
+                                        <Trash2 className="size-4 cursor-pointer hover:bg-gray-100" 
+                                            onClick={() => confirmDelete(cat)}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

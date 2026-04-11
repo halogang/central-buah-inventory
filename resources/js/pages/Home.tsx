@@ -59,7 +59,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Central Buah Sutomo - Toko Buah Terdekat di Cilacap</title>
+        <title>Toko Buah Terdekat di Cilacap</title>
+        <link rel="canonical" href="https://centralbuahsutomo.com"></link>
         <meta
           name="description"
           content="Cari toko, kios, agen buah segar berkualitas di Cilacap? Central Buah Sutomo: 100% segar, garansi kualitas, buah pilihan. BISA PESAN ONLINE."

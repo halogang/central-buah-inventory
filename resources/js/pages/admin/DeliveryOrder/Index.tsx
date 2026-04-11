@@ -24,6 +24,7 @@ import type { BreadcrumbItem } from "@/types"
 
 import Form from "./components/Form"
 import Show from "./components/Show"
+import { useCan } from "@/utils/permissions"
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -92,6 +93,7 @@ interface Props {
 }
 
 export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, customers, carts, stafAntar }: Props) {
+    const can = useCan();
 
     const [activeTab, setActiveTab] = useState<"in" | "out">(isStaffAntar ? "out" : "in")
     const [search, setSearch] = useState("")
@@ -252,7 +254,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                         onChange={(e) => setSearch(e.target.value)}
                     />
 
-                    {!isStaffAntar && (
+                    {!isStaffAntar && can('delivery_order.create') && (
                         <Button onClick={openCreate}>
                             <Plus />
                             Buat
@@ -293,7 +295,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                                     </span>
                                 </div>
 
-                                {!isStaffAntar && (
+                                {!isStaffAntar && can('delivery_order.delete') && (
                                     <button onClick={() => confirmDelete(delivery)}>
                                         <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
                                     </button>
@@ -331,14 +333,16 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                                     Detail
                                 </Button>
                                 
-                                <Button
-                                    variant="secondary"
-                                    className="w-full"
-                                    onClick={() => openEdit(delivery)}
-                                >
-                                    <Edit3 className="size-4" />
-                                    Edit
-                                </Button>
+                                {can('delivery_order.update') && (
+                                    <Button
+                                        variant="secondary"
+                                        className="w-full"
+                                        onClick={() => openEdit(delivery)}
+                                    >
+                                        <Edit3 className="size-4" />
+                                        Edit
+                                    </Button>
+                                )}
 
                                 <Button
                                     variant="secondary"

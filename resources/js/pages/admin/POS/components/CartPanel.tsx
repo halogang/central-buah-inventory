@@ -2,6 +2,7 @@ import { Minus, Plus, Trash2, Pencil, ShoppingCart, Apple } from "lucide-react";
 import { useState } from "react";
 import type { CartItem, PaymentMethod} from "@/data/products";
 import { formatRupiah } from "@/data/products";
+import { useCan } from "@/utils/permissions";
 
 interface CartPanelProps {
   cart: CartItem[];
@@ -22,6 +23,8 @@ const CartPanel = ({
   onCustomPrice,
   onPay,
 }: CartPanelProps) => {
+  const can = useCan();
+
   const subtotal = cart.reduce(
     (sum, item) => sum + (item.customPrice ?? item.product.price) * item.qty,
     0
@@ -185,14 +188,16 @@ const CartPanel = ({
         </div>
 
         {/* Pay button */}
-        <button
-          onClick={onPay}
-          disabled={cart.length === 0}
-          className="w-full h-12 rounded-xl pos-pay-gradient text-primary-foreground bg-primary font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all"
-        >
-          <ShoppingCart size={16} />
-          Bayar {formatRupiah(subtotal)}
-        </button>
+        {can('pos.create') && (
+          <button
+            onClick={onPay}
+            disabled={cart.length === 0}
+            className="w-full h-12 rounded-xl pos-pay-gradient text-primary-foreground bg-primary font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            <ShoppingCart size={16} />
+            Bayar {formatRupiah(subtotal)}
+          </button>
+        )}
       </div>
     </div>
   );

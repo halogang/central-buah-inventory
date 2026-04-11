@@ -26,7 +26,7 @@ const LocationSection = ({websiteInfo} : Props) => {
             window.open(url, '_blank')
         }
     return (
-        <section id="contact" className="py-20 bg-primary text-primary-foreground">
+        <section id="kontak" className="py-20 bg-primary text-primary-foreground">
             <div className="container mx-auto px-6">
 
                 {/* Title */}

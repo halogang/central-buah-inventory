@@ -29,7 +29,7 @@ const Footer = ({ websiteInfo }: FooterProps) => (
         <div>
           <h4 className="font-display font-semibold mb-3">Menu</h4>
           <div className="space-y-2 text-sm text-primary-foreground/60">
-            {["Home", "Products", "About", "Contact"].map((l) => (
+            {["Home", "Katalog", "Tentang", "Kontak"].map((l) => (
               <a key={l} href={`#${l.toLowerCase()}`} className="block hover:text-primary-foreground transition-colors">
                 {l}
               </a>

@@ -11,6 +11,7 @@ import { notify } from '@/lib/notify';
 import { destroy } from '@/routes/keuangan';
 import type { BreadcrumbItem } from '@/types';
 import Form from './components/Form';
+import { useCan } from '@/utils/permissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -42,6 +43,7 @@ interface PageProps extends InertiaPageProps {
 }
 
 export default function Index() {
+    const can = useCan();
     
     const { pettyCashTransactions, balance, categories, isAdmin } = usePage<PageProps>().props
 
@@ -185,7 +187,7 @@ export default function Index() {
 
                 {/* ACTION */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {!isAdmin && (
+                    {can('finance.create.income') && (
                         <button
                             onClick={openCreateModal}
                             className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-primary text-white"
@@ -195,13 +197,15 @@ export default function Index() {
                         </button>
                     )}
 
-                    <button
-                        onClick={openCreateExpense}
-                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-orange-500 text-white"
-                    >
-                        <Wallet className="size-4" />
-                        Catat Pengeluaran
-                    </button>
+                    {can('finance.create.expense') && (
+                        <button
+                            onClick={openCreateExpense}
+                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-orange-500 text-white"
+                        >
+                            <Wallet className="size-4" />
+                            Catat Pengeluaran
+                        </button>
+                    )}
                 </div>
 
                 {/* LIST */}
@@ -318,12 +322,16 @@ export default function Index() {
                                     </span>
 
                                     <div className="flex gap-2 items-center">
-                                        <button onClick={() => openEdit(t)}>
-                                            <Pencil className="size-4"/>
-                                        </button>
-                                        <button onClick={() => confirmDelete(t)}>
-                                            <Trash2 className="size-4 text-red-500"/>
-                                        </button>
+                                        {can('finance.update') && (
+                                            <button onClick={() => openEdit(t)}>
+                                                <Pencil className="size-4"/>
+                                            </button>
+                                        )}
+                                        {can('finance.delete') && (
+                                            <button onClick={() => confirmDelete(t)}>
+                                                <Trash2 className="size-4 text-red-500"/>
+                                            </button>
+                                        )}
                                     </div>
 
                                 </div>

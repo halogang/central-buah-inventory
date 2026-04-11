@@ -8,7 +8,7 @@ const points = [
 ];
 
 const AboutSection = ({websiteInfo} : any) => (
-    <section id="about" className="py-20 md:py-28 bg-muted/50 transition-all">
+    <section id="tentang" className="py-20 md:py-28 bg-muted/50 transition-all">
         <div className="container mx-auto px-4 max-w-6xl">
             <div className="flex flex-col md:flex-row items-center gap-12">
 

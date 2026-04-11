@@ -1,5 +1,6 @@
 import { KeyRound, Mail, Phone, SquarePen, Trash2, User } from "lucide-react"
 import type { UserData } from "../types"
+import { useCan } from "@/utils/permissions"
 
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function UserCard({ user, onEdit, onPassword, onDelete }: Props) {
+    const can = useCan();
 
     const getInitials = (name: string) => {
         return name
@@ -97,13 +99,17 @@ export default function UserCard({ user, onEdit, onPassword, onDelete }: Props) 
             </div>
 
             <div className="flex items-center gap-2 justify-end pt-2 border-t border-sidebar-border/50">
-                <button onClick={onEdit}>
-                    <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
-                </button>
-                <button onClick={onPassword}>
-                    <KeyRound className="size-4 text-muted-foreground hover:text-yellow-600" />
-                </button>
-                {!isOwnerUser && (
+                {can('user.update') && (
+                    <>
+                    <button onClick={onEdit}>
+                        <SquarePen className="size-4 text-muted-foreground hover:text-primary transition-colors" />
+                    </button>
+                    <button onClick={onPassword}>
+                        <KeyRound className="size-4 text-muted-foreground hover:text-yellow-600" />
+                    </button>
+                    </>
+                )}
+                {!isOwnerUser && can('user.delete') && (
                     <button onClick={onDelete}>
                     <Trash2 className="size-4 text-muted-foreground hover:text-red-600 transition-colors" />
                 </button>

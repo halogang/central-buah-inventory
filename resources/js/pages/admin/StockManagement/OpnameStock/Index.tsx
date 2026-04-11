@@ -9,6 +9,7 @@ import AppLayout from '@/layouts/app-layout'
 import { notify } from '@/lib/notify'
 import { destroy, show } from '@/routes/stok/stok-opname'
 import Form from './components/Form'
+import { useCan } from '@/utils/permissions'
 
 interface Opname {
     id:number
@@ -49,6 +50,7 @@ function formatDate(date:string){
 }
 
 export default function StockOpnames(){
+    const can = useCan();
 
     const { opnames, warehouses, items, users, roleName, authUser } = usePage<{
         opnames:Opname[]
@@ -132,10 +134,12 @@ export default function StockOpnames(){
                     onChange={(e)=>setSearch(e.target.value)}
                 />
 
-                <Button onClick={()=>openForm()}>
-                    <Plus/>
-                    Tambah
-                </Button>
+                {can('stock_opname.create') && (
+                    <Button onClick={()=>openForm()}>
+                        <Plus/>
+                        Tambah
+                    </Button>
+                )}
 
             </div>
 
@@ -184,13 +188,17 @@ export default function StockOpnames(){
                             <Link href={show(op.id)}>
                                 <Eye className="size-4 text-muted-foreground hover:text-primary"/>
                             </Link>
-                            <button onClick={()=>openForm(op)}>
-                                <SquarePen className="size-4 text-muted-foreground hover:text-primary"/>
-                            </button>
+                            {can('stock_opname.update') && (
+                                <button onClick={()=>openForm(op)}>
+                                    <SquarePen className="size-4 text-muted-foreground hover:text-primary"/>
+                                </button>
+                            )}
 
-                            <button onClick={()=>confirmDelete(op)}>
-                                <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
-                            </button>
+                            {can('stock_opname.delete') && (
+                                <button onClick={()=>confirmDelete(op)}>
+                                    <Trash2 className="size-4 text-muted-foreground hover:text-red-600"/>
+                                </button>
+                            )}
 
                         </div>
 

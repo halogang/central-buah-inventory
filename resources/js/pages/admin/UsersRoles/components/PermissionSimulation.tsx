@@ -4,11 +4,15 @@ import type { RoleData, Permission } from "../types"
 interface Props {
     simulatedRole: RoleData | null
     permissions: Permission[]
+    groupPermissions: (perms: Permission[]) => Record<string, Permission[]>
+    formatModuleName: (name: string) => string
 }
 
 export default function PermissionSimulation({
     simulatedRole,
-    permissions
+    permissions,
+    groupPermissions,
+    formatModuleName
 }: Props) {
 
     const formatRoleName = (name: string) => {
@@ -24,6 +28,7 @@ export default function PermissionSimulation({
     };
 
     if (!simulatedRole) return null
+    const grouped = groupPermissions(permissions);
 
     return (
         <div className="mb-4 p-4 rounded-lg border border-primary/50 bg-primary/5">
@@ -45,23 +50,31 @@ export default function PermissionSimulation({
                 )}
             </div>
 
-            <div className="flex gap-2">
-                {permissions.map((perm) => {
-                    const hasPermission = simulatedRole.permissions.some(
-                        (p) => p.id === perm.id
-                    );
+            <div className="flex flex-wrap gap-2">
+                {Object.entries(grouped).map(([module, perms]) => {
+
+                    const hasAll = perms.every((perm) =>
+                        simulatedRole.permissions.some(p => p.id === perm.id)
+                    )
+
+                    const hasSome = perms.some((perm) =>
+                        simulatedRole.permissions.some(p => p.id === perm.id)
+                    )
+
                     return (
                         <div
-                            key={perm.id}
-                            className={`w-fit flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${
-                                hasPermission
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                            key={module}
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                hasAll
+                                    ? 'bg-green-100 text-green-700'
+                                    : hasSome
+                                    ? 'bg-yellow-100 text-yellow-700'
                                     : 'bg-muted text-muted-foreground line-through'
                             }`}
                         >
-                            {perm.name}
+                            {formatModuleName(module)}
                         </div>
-                    );
+                    )
                 })}
             </div>
         </div>

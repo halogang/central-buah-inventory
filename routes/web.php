@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\CartController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -7,7 +11,20 @@ use App\Http\Controllers\HomeController;
 use \App\Http\Controllers\Admin\DeliveryOrderController;
 use App\Http\Controllers\Admin\DeliveryScheduleController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\OpnameStockController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\PaymentMethodController;
+use App\Http\Controllers\Admin\PettyCashTransactionController;
+use App\Http\Controllers\Admin\POSController;
+use App\Http\Controllers\Admin\RealTimeStockController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\StockMovementController;
+use App\Http\Controllers\Admin\SupplierController;
+use App\Http\Controllers\Admin\UnitController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\WebsiteInfoController;
 
 Route::inertia('/', 'Home', [
@@ -18,72 +35,99 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:Dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
 
-    Route::get('/test-permission', function () {
-        return 'ok';
-    })->middleware('permission:Dashboard');
 
-    Route::prefix('master')
-        ->name('master.')
-        ->middleware('permission:Master Data')
-        ->group(function () {
+    Route::prefix('master')->name('master.')->group(function () {
 
-            Route::get('website-info', [WebsiteInfoController::class, 'index'])
-                ->name('website-info.index');
+    Route::get('website-info', [WebsiteInfoController::class, 'index'])
+        ->middleware('permission:info_website.index')
+        ->name('website-info.index');
 
-            Route::put('website-info/{websiteInfo}', [WebsiteInfoController::class, 'update'])
-                ->name('website-info.update');
+    Route::put('website-info/{websiteInfo}', [WebsiteInfoController::class, 'update'])
+        ->middleware('permission:info_website.update')
+        ->name('website-info.update');
 
-            Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
-            Route::resource('branches', \App\Http\Controllers\Admin\BranchController::class);
-            Route::resource('suppliers', \App\Http\Controllers\Admin\SupplierController::class);
-            Route::resource('customers', \App\Http\Controllers\Admin\CustomerController::class);
-            Route::resource('payment-methods', \App\Http\Controllers\Admin\PaymentMethodController::class);
-            Route::resource('items', \App\Http\Controllers\Admin\ItemController::class);
-            Route::resource('units', \App\Http\Controllers\Admin\UnitController::class);
-            Route::resource('carts', \App\Http\Controllers\Admin\CartController::class);
+    Route::resource('categories', CategoryController::class)
+        ->middleware('permission:kategori.index|kategori.create|kategori.update|kategori.delete');
 
-            // Gudang requires explicit Gudang permission
-            Route::resource('warehouses', \App\Http\Controllers\Admin\WarehouseController::class)
-                ->middleware('permission:Gudang');
+    Route::resource('branches', BranchController::class)
+        ->middleware('permission:branch.index|branch.create|branch.update|branch.delete');
 
-            // Users and Roles require Pengguna & Role permission
-            Route::resource('users', \App\Http\Controllers\Admin\UserController::class)
-                ->middleware('permission:Pengguna & Role');
-            Route::put('users/{user}/password', [\App\Http\Controllers\Admin\UserController::class, 'updatePassword'])
-                ->name('users.password.update')
-                ->middleware('permission:Pengguna & Role');
+    Route::resource('suppliers', SupplierController::class)
+        ->middleware('permission:supplier.index|supplier.create|supplier.update|supplier.delete');
 
-            Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)
-                ->middleware('permission:Pengguna & Role');
-        });
+    Route::resource('customers', CustomerController::class)
+        ->middleware('permission:pelanggan.index|pelanggan.create|pelanggan.update|pelanggan.delete');
 
-    Route::prefix('stok')
-        ->name('stok.')
-        ->middleware('permission:Manajemen Stok')
-        ->group(function () {
-            Route::resource('realtime', \App\Http\Controllers\Admin\RealTimeStockController::class);
-            Route::resource('masuk', \App\Http\Controllers\Admin\StockInController::class);
-            Route::resource('keluar', \App\Http\Controllers\Admin\StockOutController::class);
-            Route::resource('stok-opname', \App\Http\Controllers\Admin\OpnameStockController::class);
-            Route::resource('movement', \App\Http\Controllers\Admin\StockMovementController::class);
-        });
+    Route::resource('payment-methods', PaymentMethodController::class)
+        ->middleware('permission:payment_method.index|payment_method.create|payment_method.update|payment_method.delete');
+
+    Route::resource('items', ItemController::class)
+        ->middleware('permission:barang.index|barang.create|barang.update|barang.delete');
+
+    Route::resource('units', UnitController::class)
+        ->middleware('permission:unit.index|unit.create|unit.update|unit.delete');
+
+    Route::resource('carts', CartController::class)
+        ->middleware('permission:keranjang.index|keranjang.create|keranjang.update|keranjang.delete');
+
+    Route::resource('warehouses', WarehouseController::class)
+        ->middleware('permission:gudang.index|gudang.create|gudang.update|gudang.delete');
+
+    Route::resource('users', UserController::class)
+        ->middleware('permission:user.index|user.create|user.update|user.delete');
+
+    Route::put('users/{user}/password', [UserController::class, 'updatePassword'])
+        ->middleware('permission:user.update')
+        ->name('users.password.update');
+
+    Route::resource('roles', RoleController::class)
+            ->middleware('permission:role.index|role.create|role.update|role.delete');
+
+    });
+
+
+    Route::prefix('stok')->name('stok.')->group(function () {
+
+        Route::resource('realtime', RealTimeStockController::class)
+            ->middleware('permission:stock_realtime.index');
+
+        Route::resource('stok-opname', OpnameStockController::class)
+            ->middleware('permission:stock_opname.index|stock_opname.create|stock_opname.update|stock_opname.delete');
+
+        Route::resource('movement', StockMovementController::class)
+            ->middleware('permission:stock_movement.index|stock_movement.create|stock_movement.update|stock_movement.delete');
+
+    });
+    
 
     Route::resource('surat-jalan', DeliveryOrderController::class)
-        ->middleware('permission:Surat Jalan')
+        ->middleware('permission:delivery_order.index|delivery_order.create|delivery_order.update|delivery_order.delete')
         ->parameters([
             'surat-jalan' => 'deliveryOrder'
         ]);;
 
     Route::get('/surat-jalan/{surat_jalan}/print', 
-        [DeliveryOrderController::class, 'print']
-    )->name('surat-jalan.print');
+            [DeliveryOrderController::class, 'print']
+        )->middleware('permission:delivery_order.index')
+        ->name('surat-jalan.print');
+
+    Route::resource('delivery-schedules', DeliveryScheduleController::class)
+        ->middleware('permission:delivery_schedule.index|delivery_schedule.create|delivery_schedule.update|delivery_schedule.delete');
 
     Route::get('/surat-jalan/preview-number/{type}', [DeliveryOrderController::class, 'previewNumber']);
 
     Route::resource('invoice', InvoiceController::class)
-    ->middleware('permission:Invoice');
+        ->middleware('permission:invoice.index|invoice.create|invoice.update|invoice.delete');
+    
+    Route::prefix('transactions')->group(function () {
+
+        Route::post('/payments', [PaymentController::class, 'store'])
+            ->name('transactions.payments.store')
+            ->middleware('permission:finance.create'); // ⬅️ penting
+
+    });
 
     Route::resource('delivery-schedules', DeliveryScheduleController::class);
     
@@ -91,27 +135,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         [InvoiceController::class, 'print']
     )->name('invoice.print');
 
-    Route::prefix('transactions')->group(function () {
-
-        Route::post('/payments', [PaymentController::class, 'store'])
-            ->name('transactions.payments.store');
-
-    });
-
-    Route::resource('keuangan', \App\Http\Controllers\Admin\PettyCashTransactionController::class)
-        ->middleware('permission:Keuangan')
+    Route::resource('keuangan', PettyCashTransactionController::class)
+        ->middleware('permission:finance.index|finance.create|finance.update|finance.delete')
         ->parameters([
             'keuangan' => 'pettyCashTransaction'
         ]);
 
-    Route::resource('laporan', \App\Http\Controllers\Admin\ReportController::class)
-        ->middleware('permission:Laporan');
+    Route::resource('laporan', ReportController::class)
+        ->middleware('permission:report.index');
 
-    Route::resource('pos', \App\Http\Controllers\Admin\POSController::class)
-        ->middleware('permission:POS Kasir');
-
-    Route::resource('stock-movement', \App\Http\Controllers\Admin\StockMovementController::class);
-        // ->middleware('permission:Laporan');
+    Route::resource('pos', POSController::class)
+        ->middleware('permission:pos.index|pos.create');
         
 });
 

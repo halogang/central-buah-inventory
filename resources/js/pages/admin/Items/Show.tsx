@@ -10,6 +10,7 @@ import { notify } from "@/lib/notify";
 import { destroy, index } from "@/routes/master/items";
 import type { BreadcrumbItem } from "@/types";
 import Form from "./components/Form";
+import { useCan } from "@/utils/permissions";
 
 interface Category {
     id: number;
@@ -75,6 +76,8 @@ export default function Show({
     warehouses: Warehouse[];
     units: Unit[];
 }) {
+    const can = useCan();
+
     const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState<Item | null>(null);
     const [search, setSearch] = useState('');
@@ -197,10 +200,12 @@ export default function Show({
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button onClick={openCreate} size="lg" className='w-full sm:w-fit cursor-pointer'>
-                        <Plus />
-                        Tambah
-                    </Button>
+                    {can('barang.create') && (
+                        <Button onClick={openCreate} size="lg" className='w-full sm:w-fit cursor-pointer'>
+                            <Plus />
+                            Tambah
+                        </Button>
+                    )}
                 </div>
 
                 {/* Table */}
@@ -289,18 +294,22 @@ export default function Show({
                                     </td>
 
                                     <td className="p-3 text-center">
-                                        <button
-                                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                                            onClick={() => openEdit(item)}
-                                        >
-                                            <Edit3 className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                                            onClick={() => confirmDelete(item)}
-                                        >
-                                            <Trash2 className="h-4 w-4 text-red-600" />
-                                        </button>
+                                        {can('barang.update') && (
+                                            <button
+                                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                                                onClick={() => openEdit(item)}
+                                            >
+                                                <Edit3 className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                        {can('barang.delete') && (
+                                            <button
+                                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                                                onClick={() => confirmDelete(item)}
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-600" />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

@@ -18,7 +18,7 @@ import { useCan } from '@/utils/permissions';
 export function AppSidebar() {
     const can = useCan();
 
-    const dashboardMenu: NavItem[] = can('Dashboard')
+    const dashboardMenu: NavItem[] = can('dashboard.view')
         ? [
               {
                   title: 'Dashboard',
@@ -28,49 +28,48 @@ export function AppSidebar() {
           ]
         : [];
 
-    const masterItems: Array<{ permission: string; label: string; href: string }> = [
-        { permission: 'Master Data', label: 'Info Website', href: '/master/website-info' },
-        { permission: 'Master Data', label: 'Barang', href: '/master/items' },
-        { permission: 'Master Data', label: 'Unit', href: '/master/units' },
-        { permission: 'Master Data', label: 'Cabang', href: '/master/branches' },
-        { permission: 'Master Data', label: 'Keranjang', href: '/master/carts' },
-        { permission: 'Gudang', label: 'Gudang', href: '/master/warehouses' },
-        { permission: 'Master Data', label: 'Kategori', href: '/master/categories' },
-        { permission: 'Master Data', label: 'Supplier', href: '/master/suppliers' },
-        { permission: 'Master Data', label: 'Pelanggan', href: '/master/customers' },
-        { permission: 'Pengguna & Role', label: 'Pengguna & Role', href: '/master/users' },
-        { permission: 'Master Data', label: 'Metode Pembayaran', href: '/master/payment-methods' },
+    const masterItems = [
+        { permission: 'info_website.index', label: 'Info Website', href: '/master/website-info' },
+        { permission: 'barang.index', label: 'Barang', href: '/master/items' },
+        { permission: 'unit.index', label: 'Unit', href: '/master/units' },
+        { permission: 'branch.index', label: 'Cabang', href: '/master/branches' },
+        { permission: 'keranjang.index', label: 'Keranjang', href: '/master/carts' },
+        { permission: 'gudang.index', label: 'Gudang', href: '/master/warehouses' },
+        { permission: 'kategori.index', label: 'Kategori', href: '/master/categories' },
+        { permission: 'supplier.index', label: 'Supplier', href: '/master/suppliers' },
+        { permission: 'pelanggan.index', label: 'Pelanggan', href: '/master/customers' },
+        { permission: 'user.index', label: 'Pengguna', href: '/master/users' },
+        { permission: 'payment_method.index', label: 'Metode Pembayaran', href: '/master/payment-methods' },
     ];
-
     const masterLinks: { label: string; href: string }[] = masterItems
         .filter((item) => can(item.permission))
         .map(({ label, href }) => ({ label, href }));
-
-    const showMasterDropdown = can('Master Data') || can('Gudang') || can('Pengguna & Role');
+    const showMasterDropdown = masterLinks.length > 0;
 
     const stockItems = [
-        { permission: 'Manajemen Stok', label: 'Stok Realtime', href: '/stok/realtime' },
-        { permission: 'Manajemen Stok', label: 'Stok Opname', href: '/stok/stok-opname' },
-        { permission: 'Manajemen Stok', label: 'Stok Movement', href: '/stok/movement' },
+        { permission: 'stock_realtime.index', label: 'Stok Realtime', href: '/stok/realtime' },
+        { permission: 'stock_opname.index', label: 'Stok Opname', href: '/stok/stok-opname' },
+        { permission: 'stock_movement.index', label: 'Stok Movement', href: '/stok/movement' },
     ];
     const stockLinks = stockItems
         .filter((item) => can(item.permission))
         .map(({ label, href }) => ({ label, href }));   
 
     const invoiceItems = [
-        { permission: 'Surat Jalan', label: 'Jadwal Surat Jalan', href: '/delivery-schedules' },
-        { permission: 'Surat Jalan', label: 'Surat Jalan', href: '/surat-jalan' },
-        { permission: 'Invoice', label: 'Invoice', href: '/invoice' },
+        { permission: 'delivery_schedule.index', label: 'Jadwal Surat Jalan', href: '/delivery-schedules' },
+        { permission: 'delivery_order.index', label: 'Surat Jalan', href: '/surat-jalan' },
+        { permission: 'invoice.index', label: 'Invoice', href: '/invoice' },
     ];
     const invoiceLinks = invoiceItems
         .filter((item) => can(item.permission))
         .map(({ label, href }) => ({ label, href }));
 
     const navItemsRaw = [
-        { permission: 'Keuangan', title: 'Keuangan', href: '/keuangan', icon: Wallet },
-        { permission: 'POS Kasir', title: 'POS Kasir', href: '/pos', icon: ShoppingCart },
-        { permission: 'Laporan', title: 'Laporan', href: '/laporan', icon: ChartColumn },
+        { permission: 'finance.index', title: 'Keuangan', href: '/keuangan', icon: Wallet },
+        { permission: 'pos.index', title: 'POS Kasir', href: '/pos', icon: ShoppingCart },
+        { permission: 'report.index', title: 'Laporan', href: '/laporan', icon: ChartColumn },
     ];
+
     const navItems: NavItem[] = navItemsRaw
         .filter((item) => can(item.permission))
         .map(({ title, href, icon }) => ({ title, href, icon }));

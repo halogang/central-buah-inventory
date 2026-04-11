@@ -94,6 +94,15 @@ export default function RoleFormModal({
 
     }
 
+    const groupedPermissions = permissions.reduce((acc, perm) => {
+        const group = perm.name.split('.')[0]
+
+        if (!acc[group]) acc[group] = []
+        acc[group].push(perm)
+
+        return acc
+    }, {} as Record<string, Permission[]>)
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
@@ -174,35 +183,44 @@ export default function RoleFormModal({
 
                         <div className="grid md:grid-cols-3 gap-3">
 
-                            {permissions.map((perm) => {
+                            {Object.entries(groupedPermissions).map(([group, perms]) => (
+                                <div key={group} className="border rounded-xl p-3">
 
-                                const checked = form.permission_ids.includes(perm.id)
+                                    <div className="font-semibold mb-2 capitalize">
+                                        {group.replace('_', ' ')}
+                                    </div>
 
-                                return (
-                                    <div
-                                        key={perm.id}
-                                        onClick={() => togglePermission(perm.id)}
-                                        className={`cursor-pointer border rounded-lg px-3 py-2 text-sm flex items-center justify-between
-                                        ${checked
-                                                ? "border-primary bg-primary/5"
-                                                : "border-sidebar-border"
-                                            }`}
-                                    >
+                                    <div className="grid gap-2">
 
-                                        <span>
-                                            {perm.name}
-                                        </span>
+                                        {perms.map((perm) => {
 
-                                        <input
-                                            type="checkbox"
-                                            checked={checked}
-                                            readOnly
-                                        />
+                                            const checked = form.permission_ids.includes(perm.id)
+
+                                            return (
+                                                <div
+                                                    key={perm.id}
+                                                    onClick={() => togglePermission(perm.id)}
+                                                    className={`cursor-pointer border rounded-lg px-3 py-2 text-sm flex items-center justify-between
+                                                    ${checked
+                                                            ? "border-primary bg-primary/5"
+                                                            : "border-sidebar-border"
+                                                        }`}
+                                                >
+                                                    <span>{perm.name.split('.')[1]} {perm.name.split('.')[2]}</span>
+
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checked}
+                                                        readOnly
+                                                    />
+                                                </div>
+                                            )
+                                        })}
 
                                     </div>
-                                )
 
-                            })}
+                                </div>
+                            ))}
 
                         </div>
 

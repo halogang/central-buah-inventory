@@ -34,7 +34,10 @@ export function usePermissions(): string[] {
  * if (can('Master Data')) { ... }
  * ```
  */
-export function useCan() {
-    const permissions = usePermissions();
-    return (permission: string) => permissions.includes(permission);
+export const useCan = () => {
+    const permissions = usePermissions()
+
+    return (permission: string) => {
+        return permissions.includes(permission)
+    }
 }
