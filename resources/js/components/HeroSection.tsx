@@ -44,7 +44,7 @@ const HeroSection = ({websiteInfo} : any) => {
                     style={{
                         animationDelay: "0.3s"
                     }}>
-                        <a href="#products">
+                        <a href="#katalog">
                             <Button 
                                 className="text-md sm:text-lg px-8 py-6 rounded-full text-muted border-2 bg-transparent border-muted hover:bg-muted hover:border-muted hover:text-primary cursor-pointer">
                                 Lihat Katalog
