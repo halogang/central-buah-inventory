@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -142,3 +144,24 @@ class FortifyServiceProvider extends ServiceProvider
         });
     }
 }
+
+Fortify::authenticateUsing(function (Request $request) {
+
+    $user = User::where('username', $request->username)->first();
+
+    // ❌ username tidak ditemukan
+    if (!$user) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'username' => 'Username tidak ditemukan.',
+        ]);
+    }
+
+    // ❌ password salah
+    if (!Hash::check($request->password, $user->password)) {
+        throw \Illuminate\Validation\ValidationException::withMessages([
+            'password' => 'Password salah.',
+        ]);
+    }
+
+    return $user;
+});
