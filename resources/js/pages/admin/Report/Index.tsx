@@ -36,7 +36,11 @@ const TABS = [
 
 type PageProps = {
   keuangan: any;
-  stok: any[];
+  stok: {
+    summary: any;
+    table: any[];
+    chart: any[];
+    };
   penjualan: any;
   pengeluaran: any;
   labaRugi: any;
@@ -59,9 +63,13 @@ export default function LaporanPage() {
         setMonth(newMonth);
         setYear(newYear);
 
+        // Convert "All" values to current month/year for backend compatibility
+        const monthToSend = newMonth === -1 ? new Date().getMonth() : newMonth;
+        const yearToSend = newYear === 0 ? new Date().getFullYear() : newYear;
+
         router.get(route("laporan.index"), {
-            month: newMonth,
-            year: newYear,
+            month: monthToSend,
+            year: yearToSend,
         }, {
             preserveState: true,
             replace: true,

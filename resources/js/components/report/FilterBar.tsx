@@ -21,6 +21,7 @@ export function FilterBar({ month, year, onMonthChange, onYearChange }: FilterBa
           onChange={(e) => onMonthChange(Number(e.target.value))}
           className="appearance-none rounded-lg border border-border bg-card px-4 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
+          <option value={-1}>Semua Bulan</option>
           {MONTHS.map((m, i) => (
             <option key={i} value={i}>{m}</option>
           ))}
@@ -33,6 +34,7 @@ export function FilterBar({ month, year, onMonthChange, onYearChange }: FilterBa
           onChange={(e) => onYearChange(Number(e.target.value))}
           className="appearance-none rounded-lg border border-border bg-card px-4 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
+          <option value={0}>Semua Tahun</option>
           {[2024, 2025, 2026].map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}

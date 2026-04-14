@@ -4,6 +4,7 @@ import { ArrowDownRight, ArrowUpRight, Plus, Wallet, Pencil, Trash2, X } from 'l
 import { useState } from 'react';
 import Pagination from '@/components/Pagination';
 import { SearchInput } from '@/components/search-input';
+import { FilterBar } from '@/components/report/FilterBar';
 import { formatCurrency } from '@/helpers/format';
 import { usePagination } from '@/hooks/use-pagination';
 import AppLayout from "@/layouts/app-layout";
@@ -38,20 +39,22 @@ interface Category {
 interface PageProps extends InertiaPageProps {
     pettyCashTransactions: Transaction[]
     categories: Category[]
-    balance: any
+    // balance: any
     isAdmin: boolean
 }
 
 export default function Index() {
     const can = useCan();
     
-    const { pettyCashTransactions, balance, categories, isAdmin } = usePage<PageProps>().props
+    const { pettyCashTransactions, categories, isAdmin } = usePage<PageProps>().props
 
     const [showModal, setShowModal] = useState(false)
     const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income')
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
 
     const [search, setSearch] = useState('')
+    const [month, setMonth] = useState<number>(-1)
+    const [year, setYear] = useState<number>(0)
 
     const [dateFrom, setDateFrom] = useState("")
     const [dateTo, setDateTo] = useState("")
@@ -97,6 +100,17 @@ export default function Index() {
     }
 
     // 🔥 FILTER
+    const matchesMonthYear = (dateString: string, selectedMonth: number, selectedYear: number) => {
+        const date = new Date(dateString)
+        const dateMonth = date.getMonth()
+        const dateYear = date.getFullYear()
+        
+        const monthMatch = selectedMonth === -1 || dateMonth === selectedMonth
+        const yearMatch = selectedYear === 0 || dateYear === selectedYear
+        
+        return monthMatch && yearMatch
+    }
+
     const filtered = pettyCashTransactions.filter((t) => {
         const matchesSearch = t.description
             .toLowerCase()
@@ -112,7 +126,9 @@ export default function Index() {
             ? transactionDate <= new Date(dateTo)
             : true
 
-        return matchesSearch && matchesFrom && matchesTo
+        const matchesMonthYearFilter = matchesMonthYear(t.date, month, year)
+
+        return matchesSearch && matchesFrom && matchesTo && matchesMonthYearFilter
     })
 
     // 🔥 SUMMARY DINAMIS
@@ -124,7 +140,7 @@ export default function Index() {
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount || 0), 0)
 
-    // const balance = totalIncome - totalExpense
+    const balance = totalIncome - totalExpense
 
     // 🔥 PAGINATION
     const {
@@ -147,6 +163,13 @@ export default function Index() {
             </Head>
 
             <div className="p-4 sm:p-6 flex flex-col gap-6">
+                {/* FILTER BAR */}
+                <FilterBar
+                    month={month}
+                    year={year}
+                    onMonthChange={setMonth}
+                    onYearChange={setYear}
+                />
 
                 {/* SUMMARY */}
                 <div className="rounded-2xl bg-linear-to-r from-green-700 via-green-800 to-orange-500 p-6 flex flex-col gap-4 text-white">
@@ -215,41 +238,15 @@ export default function Index() {
                         Riwayat Transaksi
                     </h3>
 
-                    <div className="flex flex-col sm:flex-row gap-2 items-center">
+                    <div className="flex flex-col gap-3">
 
-                        <SearchInput
-                            placeholder="Cari transaksi..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
+                        <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
 
-                        <div className="flex items-center gap-2">
-
-                            <input
-                                type="date"
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                className="border rounded-md px-2 py-1 text-sm"
+                            <SearchInput
+                                placeholder="Cari transaksi..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
                             />
-
-                            <span className="text-sm text-muted-foreground">-</span>
-
-                            <input
-                                type="date"
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                className="border rounded-md px-2 py-1 text-sm"
-                            />
-
-                            <button
-                                onClick={() => {
-                                    setDateFrom("")
-                                    setDateTo("")
-                                }}
-                                className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/70 cursor-pointer"
-                            >
-                                Semua
-                            </button>
 
                         </div>
 

@@ -52,7 +52,17 @@ export default function PosDetailModal({data, onClose} : {
                     </div>
                     <div>
                         <span className="text-xs">Tanggal:</span>
-                        <div className="font-bold">{new Date(data.created_at).toLocaleString("id-ID")}</div>
+                        <div className="font-bold">
+                            {
+                                new Date(data.created_at).toLocaleString("id-ID", {
+                                    day: "numeric",
+                                    month: "long",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                })
+                            }
+                        </div>
                     </div>
                     <div>
                         <span className="text-xs">Metode:</span>

@@ -19,11 +19,7 @@ return new class extends Migration
             $table->enum('type', ['income', 'expense']);
 
             $table->decimal('amount', 15, 2);
-
-            // $table->foreignId('expense_category_id')
-            //     ->nullable()
-            //     ->constrained()
-            //     ->nullOnDelete();
+            
             $table->string('expense_category')->nullable();
                 
             $table->string('evidence')->nullable();

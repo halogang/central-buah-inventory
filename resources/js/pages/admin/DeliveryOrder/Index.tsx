@@ -20,6 +20,7 @@ import { usePagination } from "@/hooks/use-pagination"
 import AppLayout from "@/layouts/app-layout"
 import { notify } from "@/lib/notify"
 import { destroy } from "@/routes/surat-jalan"
+import { FilterBar } from "@/components/report/FilterBar"
 
 import type { BreadcrumbItem } from "@/types"
 
@@ -99,6 +100,8 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
 
     const [activeTab, setActiveTab] = useState<"in" | "out">(isStaffAntar ? "out" : "in")
     const [search, setSearch] = useState("")
+    const [month, setMonth] = useState<number>(-1)
+    const [year, setYear] = useState<number>(0)
 
     const [openForm, setOpenForm] = useState(false)
     const [selectedData, setSelectedData] = useState<DeliveryOrder | null>(null)
@@ -175,12 +178,25 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
         setOpenShow(true)
     }
 
+    // Helper function to check if date matches selected month and year
+    const matchesMonthYear = (dateString: string, selectedMonth: number, selectedYear: number) => {
+        const date = new Date(dateString)
+        const dateMonth = date.getMonth()
+        const dateYear = date.getFullYear()
+        
+        const monthMatch = selectedMonth === -1 || dateMonth === selectedMonth
+        const yearMatch = selectedYear === 0 || dateYear === selectedYear
+        
+        return monthMatch && yearMatch
+    }
+
     // filter data
     const filteredData = deliveryOrders
     .filter((d) => d.type === activeTab)
     .filter((d) =>
         d.do_number.toLowerCase().includes(search.toLowerCase())
     )
+    .filter((d) => matchesMonthYear(d.date, month, year))
 
     const {
         currentPage,
@@ -289,20 +305,30 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                 </div>
 
                 {/* SEARCH */}
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2">
 
-                    <SearchInput
-                        placeholder="Cari Surat Jalan..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                    <div className="flex gap-2">
+                        <SearchInput
+                            placeholder="Cari Surat Jalan..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+
+                        {!isStaffAntar && can('delivery_order.create') && (
+                            <Button onClick={openCreate}>
+                                <Plus />
+                                Buat
+                            </Button>
+                        )}
+                    </div>
+
+                    {/* FILTER BAR */}
+                    <FilterBar
+                        month={month}
+                        year={year}
+                        onMonthChange={setMonth}
+                        onYearChange={setYear}
                     />
-
-                    {!isStaffAntar && can('delivery_order.create') && (
-                        <Button onClick={openCreate}>
-                            <Plus />
-                            Buat
-                        </Button>
-                    )}
 
                 </div>
 

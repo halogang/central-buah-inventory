@@ -29,9 +29,9 @@ interface Breakdown {
 
 interface Data {
   summary: {
-    total: string
-    stok: string
-    operasional: string
+    total: number
+    stok: number
+    operasional: number
   };
   breakdown: Breakdown[]
 }
@@ -42,9 +42,9 @@ export function TabPengeluaran({ data }: { data: Data }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <SummaryCard title="Total Pengeluaran" value={data.summary.total} subtitle="▼ -3.2% vs lalu" subtitleColor="destructive" icon={TrendingDown} />
-        <SummaryCard title="Pembelian Stok" value={data.summary.stok} subtitle="▲ 65% Total" subtitleColor="success" icon={ShoppingCart} />
-        <SummaryCard title="Beban Operasional" value={data.summary.operasional} subtitle="▲ 35% Total" subtitleColor="destructive" icon={Settings} />
+        <SummaryCard title="Total Pengeluaran" value={String(data.summary.total)} subtitle="▼ -3.2% vs lalu" subtitleColor="destructive" icon={TrendingDown} />
+        <SummaryCard title="Pembelian Stok" value={String(data.summary.stok)} subtitle="▲ 65% Total" subtitleColor="success" icon={ShoppingCart} />
+        <SummaryCard title="Beban Operasional" value={String(data.summary.operasional)} subtitle="▲ 35% Total" subtitleColor="destructive" icon={Settings} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -56,7 +56,7 @@ export function TabPengeluaran({ data }: { data: Data }) {
               <div key={item.category} className="space-y-1.5">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-foreground font-medium">{item.category}</span>
-                  <span className="text-muted-foreground">{formatRp(item.amount)} ({item.persen})</span>
+                  <span className="text-muted-foreground">{formatRp(item.amount)} ({item.persen}%)</span>
                 </div>
                 <div className="h-2.5 w-full rounded-full bg-muted">
                   <div

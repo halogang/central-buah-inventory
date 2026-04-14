@@ -122,13 +122,10 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
     const isEdit = !!form.id;
 
     const handleSuccess = (page: any) => {
-      
       const createdId = page.props?.flash?.data?.id;
-      console.log("CREATED ID:", createdId);
 
-      // ✅ AUTO FLOW
+      // ✅ AUTO FLOW (tetap sama)
       if (!isEdit && form.type === "out" && !form.meta?.isAutoFlow) {
-
         const outDate = new Date(form.date);
         const today = new Date();
 
@@ -145,7 +142,6 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
           newDate.setDate(outDate.getDate() - 7);
         }
 
-        // 🔥 penting: trigger remount modal
         setShowForm(false);
 
         setTimeout(() => {
@@ -167,7 +163,14 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
         return;
       }
 
-      // ✅ FINAL SUCCESS
+      // ✅ FINAL SUCCESS (INI YANG DIUBAH)
+
+      // 1. Tutup modal dulu
+      setShowForm(false);
+      setEditingOrder(null);
+      setAutoFlowData(null);
+
+      // 2. Notify langsung muncul
       notify.success(
         form.meta?.isAutoFlow
           ? "Surat Jalan masuk & keluar berhasil dibuat"
@@ -176,9 +179,8 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
           : "Surat Jalan berhasil disimpan"
       );
 
-      setTimeout(() => {
-        router.get(index());
-      }, 1500);
+      // 3. Refresh TANPA delay
+      router.get(index());
     };
 
     const handleError = (errors: any) => {
