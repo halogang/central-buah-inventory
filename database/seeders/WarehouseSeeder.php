@@ -14,7 +14,7 @@ class WarehouseSeeder extends Seeder
             [
                 'name' => 'Gudang Pusat Jakarta',
                 'address' => 'Jl. Industri No. 123, Jakarta',
-                'branch_id' => 1,
+                'branch_id' => 2,
                 'user_id' => '',
                 'status' => 'active'
             ],

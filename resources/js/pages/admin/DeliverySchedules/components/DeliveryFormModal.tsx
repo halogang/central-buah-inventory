@@ -17,11 +17,11 @@ interface Props {
   suppliers: Supplier[];
   customers: Customer[];
   stafAntar: User[];
-
+  isAutoFlow?: boolean;
 }
 
-const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, products, carts, suppliers, customers, stafAntar }: Props) => {
-  const isEdit = !!order;
+const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, products, carts, suppliers, customers, stafAntar, isAutoFlow }: Props) => {
+  const isEdit = !!order && !isAutoFlow;
 
   const generateDoNumber = (
     type: DeliveryType,
@@ -150,6 +150,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
   const handleSubmit = () => {
     const payload = {
       id: order?.id,
+      linked_delivery_order_id: order?.linked_delivery_order_id ?? null, // ✅ FIX
       type,
       date,
       do_number: null,
@@ -163,6 +164,8 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
       note,
       items,
     };
+
+    console.log("LINKED ID:", order?.linked_delivery_order_id);
 
     onSave(payload);
   };
@@ -195,7 +198,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                     label="Tanggal"
                     type="date"
                     value={date}
-                    // disabled={disabled}
+                    disabled={isAutoFlow}
                     onChange={(e) => setDate(e.target.value)}
                     required
                 />
@@ -212,19 +215,24 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
 
           {/* Type */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Type</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Tipe</label>
             <div className="flex gap-2">
               {(["in", "out"] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
+                  disabled={isAutoFlow && t === "out"}
                   className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors border ${
                     type === t
                       ? t === "in"
                         ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                         : "bg-blue-100 text-blue-800 border-blue-300"
                       : "bg-secondary text-muted-foreground border-border hover:bg-accent/10"
-                  }`}
+                  }
+                    ${isAutoFlow && t === "out" ? "cursor-not-allowed" : "cursor-pointer"}
+                  
+                  `
+                }
                 >
                   {t === "in" ? "IN - Pembelian" : "OUT - Pengiriman"}
                 </button>
@@ -322,9 +330,11 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                     </div>
                   </div>
 
-                  <button onClick={() => removeItem(index)}>
-                    <Trash2 className="size-4 text-red-500" />
-                  </button>
+                  {!isAutoFlow && (
+                    <button onClick={() => removeItem(index)}>
+                      <Trash2 className="size-4 text-red-500" />
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
@@ -332,6 +342,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                   <FormInput
                     label="Jumlah"
                     type="number"
+                    disabled={isAutoFlow}
                     placeholder="Qty"
                     value={item.quantity}
                     onChange={(e) => updateItem(index, "quantity", Number(e.target.value))}
@@ -340,6 +351,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                   <FormInput
                     label="Bad Stock"
                     type="number"
+                    disabled={isAutoFlow}
                     placeholder="Bad"
                     value={item.bad_stock}
                     onChange={(e) => updateItem(index, "bad_stock", Number(e.target.value))}
@@ -348,6 +360,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                   <FormInput
                     label="Harga"
                     type="number"
+                    disabled={isAutoFlow}
                     placeholder="Harga"
                     value={item.price}
                     onChange={(e) => updateItem(index, "price", Number(e.target.value))}
@@ -355,6 +368,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
 
                   <FormSelect
                     label="Pilih Keranjang"
+                    disabled={isAutoFlow}
                     value={item.cart_id ?? ""}
                     onChange={(e) => updateItem(index, "cart_id", e.target.value)}
                     options={
@@ -376,6 +390,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                   <FormInput
                     label="Jml Keranjang" 
                     type="number"
+                    disabled={isAutoFlow}
                     placeholder="Qty Keranjang"
                     value={item.cart_qty}
                     onChange={(e) => updateItem(index, "cart_qty", e.target.value)}
@@ -384,6 +399,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
                   <FormInput
                     label="Berat/Keranjang" 
                     type="number"
+                    disabled={isAutoFlow}
                     placeholder="Berat"
                     value={item.cart_weight}
                     onChange={(e) => updateItem(index, "cart_weight", e.target.value)}
@@ -401,7 +417,7 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
               </div>
             ))}
 
-            {!selectingItem && (
+            {!selectingItem && !isAutoFlow && (
               <button
                   type="button"
                   onClick={() => setSelectingItem(true)}

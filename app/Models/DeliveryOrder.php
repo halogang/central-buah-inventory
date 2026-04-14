@@ -15,6 +15,7 @@ class DeliveryOrder extends Model
         'type',
         'supplier_id',
         'customer_id',
+        'linked_delivery_order_id',
         'sender_name',
         'receiver_name',
         'evidence',

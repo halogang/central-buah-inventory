@@ -105,6 +105,10 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
       payload.append("sender_id", form.sender_id || "");
     }
 
+    if (form.linked_delivery_order_id) {
+      payload.append("linked_delivery_order_id", String(form.linked_delivery_order_id));
+    }
+
     form.items.forEach((item, index) => {
       payload.append(`items[${index}][item_id]`, item.item_id);
       payload.append(`items[${index}][quantity]`, String(item.quantity || 0));
@@ -117,7 +121,10 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
 
     const isEdit = !!form.id;
 
-    const handleSuccess = () => {
+    const handleSuccess = (page: any) => {
+      
+      const createdId = page.props?.flash?.data?.id;
+      console.log("CREATED ID:", createdId);
 
       // ✅ AUTO FLOW
       if (!isEdit && form.type === "out" && !form.meta?.isAutoFlow) {
@@ -149,6 +156,7 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
             date: newDate.toISOString().split("T")[0],
             supplier_id: null,
             customer_id: null,
+            linked_delivery_order_id: createdId,
             meta: { isAutoFlow: true }
           });
 
@@ -284,6 +292,7 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
               `${order?.date ?? "no-date"}-${order?.type ?? "no-type"}`
             }
             order={autoFlowData ?? editingOrder}
+            isAutoFlow={!!autoFlowData}
             products={items}
             carts={carts}
             suppliers={suppliers}

@@ -8,6 +8,7 @@ import CartPanel from "./components/CartPanel";
 import PaymentModal, { SuccessModal } from "./components/PaymentModal";
 import ProductGrid from "./components/ProductGrid";
 import { ShoppingCart } from "lucide-react";
+import PosHistory from "./components/PosHistory";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
   const Index = () => {
-  const { productData } = usePage().props as any;
+  const { productData, posData } = usePage().props as any;
   const products: Product[] = productData.map((item: any) => ({
     id: String(item.id),
     name: item.name,
@@ -28,6 +29,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     image_url: item.image_url ?? null,
   }));
 
+  console.log("POS Data:", posData);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("tunai");
@@ -35,6 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0 });
   const [showCartMobile, setShowCartMobile] = useState(false);
+  const [activeTab, setActiveTab] = useState<"pos" | "riwayat">("pos");
 
   const addToCart = useCallback((product: Product) => {
     let shouldNotify = false;
@@ -150,8 +154,35 @@ const breadcrumbs: BreadcrumbItem[] = [
           <meta name="robots" content="noindex" />
         </Head>
         <div className="p-4">
+          <div className="flex justify-between items-center mb-4 gap-2">
+            <button
+                type="button"
+                onClick={() => setActiveTab('pos')}
+                className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    activeTab === 'pos'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+            >
+                {/* <Tag className="size-4" /> */}
+                POS
+            </button>
+            <button
+                type="button"
+                onClick={() => setActiveTab('riwayat')}
+                className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    activeTab === 'riwayat'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+            >
+                {/* <Wallet className="size-4" /> */}
+                Riwayat
+            </button>
+          </div>
+          {activeTab === 'pos' ? (
             <div className="flex md:flex-row flex-col flex-1">
-                <ProductGrid
+              <ProductGrid
                 products={products}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -203,29 +234,32 @@ const breadcrumbs: BreadcrumbItem[] = [
                   </div>
                 )}
             </div>
+          ) : (
+            <PosHistory data={posData} />
+          )}
 
-            {showPayment && (
-                <PaymentModal
-                cart={cart}
-                paymentMethod={paymentMethod}
-                onPaymentMethodChange={setPaymentMethod}
-                onClose={() => setShowPayment(false)}
-                onSuccess={handlePaySuccess}
-                />
-            )}
+          {showPayment && (
+              <PaymentModal
+              cart={cart}
+              paymentMethod={paymentMethod}
+              onPaymentMethodChange={setPaymentMethod}
+              onClose={() => setShowPayment(false)}
+              onSuccess={handlePaySuccess}
+              />
+          )}
 
-            {showSuccess && (
-                <SuccessModal
-                total={lastTransaction.total}
-                cashReceived={lastTransaction.cashReceived}
-                change={lastTransaction.change}
-                paymentMethod={paymentMethod}
-                cart={cart}
-                onNewTransaction={handleNewTransaction}
-                onPrintReceipt={handlePrintReceipt}
-                />
-            )}
-            </div>
+          {showSuccess && (
+              <SuccessModal
+              total={lastTransaction.total}
+              cashReceived={lastTransaction.cashReceived}
+              change={lastTransaction.change}
+              paymentMethod={paymentMethod}
+              cart={cart}
+              onNewTransaction={handleNewTransaction}
+              onPrintReceipt={handlePrintReceipt}
+              />
+          )}
+        </div>
     </AppLayout>
   );
 };

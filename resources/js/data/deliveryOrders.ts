@@ -5,6 +5,7 @@ export type DeliveryStatus = "draft" | "sent" | "done";
 
 export interface DeliveryFormPayload {
   id?: string;
+  linked_delivery_order_id: string | null;
   type: DeliveryType;
   date: string;
   do_number: string | null;
@@ -41,6 +42,7 @@ export interface DeliveryItem {
 
 export interface DeliveryOrder {
   id: string;
+  linked_delivery_order_id: string | null;
   do_number: string;
   date: string; // YYYY-MM-DD
   type: DeliveryType;

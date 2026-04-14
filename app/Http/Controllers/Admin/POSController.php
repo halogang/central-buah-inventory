@@ -33,8 +33,11 @@ class POSController extends Controller
             ];
         });
 
+        $posData = Pos::with('posItems')->latest()->get();
+
         return Inertia::render('admin/POS/Index', [
-            'productData' => $productData
+            'productData' => $productData,
+            'posData' => $posData
         ]);
     }
 

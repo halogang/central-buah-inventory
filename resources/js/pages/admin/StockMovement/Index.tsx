@@ -136,7 +136,13 @@ export default function Index() {
                                     <tr key={m.id} className="border-t hover:bg-muted/30">
 
                                         <td className="p-3">
-                                            {new Date(m.created_at).toLocaleDateString("id-ID")}
+                                            {new Date(m.created_at).toLocaleString("id-ID", {
+                                                day: "numeric",
+                                                month: "long",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
                                         </td>
 
                                         <td className="p-3 font-semibold">
@@ -229,7 +235,13 @@ export default function Index() {
 
                                     <Info
                                         label="Tanggal"
-                                        value={new Date(m.created_at).toLocaleDateString("id-ID")}
+                                        value=  {new Date(m.created_at).toLocaleString("id-ID", {
+                                                    day: "numeric",
+                                                    month: "long",
+                                                    year: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
                                     />
 
                                 </div>

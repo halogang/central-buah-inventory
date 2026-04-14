@@ -8,6 +8,7 @@ use App\Models\Item;
 use App\Models\StockMovement;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 
 class DeliveryorderService {
 
@@ -134,5 +135,61 @@ class DeliveryorderService {
         $sequence = str_pad($nextSequence, 3, '0', STR_PAD_LEFT);
 
         return "{$prefix}/{$doDate}/{$sequence}";
+    }
+
+    public function deleteDeliveryOrder($deliveryOrder)
+    {
+        /**
+         * 🔥 1. ROLLBACK STOCK (JIKA DONE)
+         */
+        if ($deliveryOrder->status === 'done') {
+            $this->rollbackStock($deliveryOrder);
+        }
+
+        /**
+         * 🔥 2. HAPUS EVIDENCE FILE
+         */
+        if ($deliveryOrder->evidence) {
+
+            $paths = is_array($deliveryOrder->evidence)
+                ? $deliveryOrder->evidence
+                : json_decode($deliveryOrder->evidence, true);
+
+            if (is_array($paths)) {
+                foreach ($paths as $path) {
+                    $fullPath = public_path($path);
+
+                    if (File::exists($fullPath)) {
+                        File::delete($fullPath);
+                    }
+                }
+            }
+        }
+
+        /**
+         * 🔥 3. HAPUS SIGNATURE
+         */
+        if ($deliveryOrder->sender_signature && File::exists(public_path($deliveryOrder->sender_signature))) {
+            File::delete(public_path($deliveryOrder->sender_signature));
+        }
+
+        if ($deliveryOrder->receiver_signature && File::exists(public_path($deliveryOrder->receiver_signature))) {
+            File::delete(public_path($deliveryOrder->receiver_signature));
+        }
+
+        /**
+         * 🔥 4. HAPUS ITEMS
+         */
+        $deliveryOrder->items()->delete();
+
+        /**
+         * 🔥 5. HAPUS INVOICE
+         */
+        $deliveryOrder->invoice()->delete();
+
+        /**
+         * 🔥 6. HAPUS DO
+         */
+        $deliveryOrder->delete();
     }
 }

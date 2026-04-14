@@ -77,21 +77,24 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
         {cells.map((cell, i) => {
           const events = cell.dateStr ? ordersByDate[cell.dateStr] || [] : [];
           const isToday = cell.dateStr === todayStr;
+          const canAction = cell.dateStr >= todayStr;
           const maxShow = 2;
 
           return (
             <div
               key={i}
-              onClick={() => {can('delivery_schedule.create') && (cell.day && onDateClick(cell.dateStr))}}
-              className={`min-h-27.5 border-t border-r border-border p-1.5 cursor-pointer transition-colors hover:bg-accent/5 ${
+              onClick={() => {can('delivery_schedule.create') && canAction && (cell.day && onDateClick(cell.dateStr))}}
+              className={`min-h-27.5 border-t border-r border-border p-1.5 transition-colors ${
                 !cell.day ? "bg-muted/30" : ""
-              } ${i % 7 === 0 ? "border-l-0" : ""}`}
+              } ${i % 7 === 0 ? "border-l-0" : ""}
+              ${canAction && cell.day ? " cursor-pointer hover:bg-accent " : "bg-muted/50 "}
+              `}
             >
               {cell.day && (
                 <>
                   <div className={`text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                    isToday ? "bg-primary text-primary-foreground" : "text-foreground"
-                  }`}>
+                    isToday ? "bg-primary text-primary-foreground " : "text-foreground "}
+                  `}>
                     {cell.day}
                   </div>
                   <div className="space-y-1">

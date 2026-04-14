@@ -28,6 +28,11 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
+            
+            $table->foreignId('linked_delivery_order_id')
+                ->nullable()
+                ->constrained('delivery_orders')
+                ->nullOnDelete();
 
             $table->string('sender_name')->nullable();
             $table->string('receiver_name')->nullable();
