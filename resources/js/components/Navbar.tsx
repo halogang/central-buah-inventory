@@ -48,7 +48,7 @@ const Navbar = ({ websiteInfo }: NavbarProps) => {
           <div className="flex aspect-square size-9 sm:size-10 items-center justify-center rounded-md">
               <AppLogoIcon />
           </div>
-          <span className="text-[16px] sm:text-xl">{websiteInfo.nama_usaha}</span>
+          <h1 className="text-[16px] sm:text-xl">{websiteInfo.nama_usaha}</h1>
         </a>
 
         {/* Desktop */}
