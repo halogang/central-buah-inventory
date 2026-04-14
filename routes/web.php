@@ -113,6 +113,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         )->middleware('permission:delivery_order.index')
         ->name('surat-jalan.print');
 
+    Route::patch('/surat-jalan/{surat_jalan}/update-status', 
+            [DeliveryOrderController::class, 'updateStatus']
+        )->middleware('permission:delivery_order.update')
+        ->name('surat-jalan.update-status');
+
     Route::resource('delivery-schedules', DeliveryScheduleController::class)
         ->middleware('permission:delivery_schedule.index|delivery_schedule.create|delivery_schedule.update|delivery_schedule.delete');
 

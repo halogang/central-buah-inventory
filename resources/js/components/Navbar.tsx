@@ -57,7 +57,7 @@ const Navbar = ({ websiteInfo }: NavbarProps) => {
             <a
               key={link.id}
               href={link.href}
-              className="text-sm font-medium text-muted hover:text-primary transition-colors"
+              className="text-sm font-regular text-muted hover:font-extrabold transition-colors"
             >
               {link.label}
             </a>

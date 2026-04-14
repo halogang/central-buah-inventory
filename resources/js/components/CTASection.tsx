@@ -6,7 +6,7 @@ const CTASection = ({websiteInfo} : any) => {
   const sendWhatsApp = () => {
     
         const message = `
-    Halo, saya tertarik untuk memesan buah dari Toko Buah Terdekat di Cilacap. Bisa tolong bantu saya dengan informasi lebih lanjut tentang produk dan cara pemesanannya? Terima kasih!    `.trim()
+    Halo, saya tertarik untuk memesan buah dari Toko Central Buah Sutomo. Bisa tolong bantu saya dengan informasi lebih lanjut tentang produk dan cara pemesanannya? Terima kasih!    `.trim()
     
         const url = `https://wa.me/${contactNumber}?text=${encodeURIComponent(message)}`
         window.open(url, '_blank')

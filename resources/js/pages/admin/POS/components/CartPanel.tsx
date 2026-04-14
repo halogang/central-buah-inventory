@@ -57,7 +57,7 @@ const CartPanel = ({
   ];
 
   return (
-    <div className="w-120 min-w-95 bg-card border rounded-xl flex flex-col">
+    <div className="w-full md:w-120 md:min-w-95 bg-card border md:rounded-xl rounded-none flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex items-center gap-2">

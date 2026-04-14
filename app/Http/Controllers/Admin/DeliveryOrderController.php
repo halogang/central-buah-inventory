@@ -606,4 +606,19 @@ class DeliveryOrderController extends Controller
 
         return $pdf->stream($fileName.'.pdf');
     }
+
+    public function updateStatus(Request $request, DeliveryOrder $surat_jalan)
+    {
+        $status = $request->status;
+
+        if (!in_array($status, ['draft', 'sent', 'done'])) {
+            return back()->with('error', 'Status tidak valid');
+        }
+
+        $surat_jalan->update([
+            'status' => $status
+        ]);
+
+        return back()->with('success', 'Status berhasil diperbarui');
+    }
 }

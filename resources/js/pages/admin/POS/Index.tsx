@@ -7,6 +7,7 @@ import type { BreadcrumbItem } from '@/types';
 import CartPanel from "./components/CartPanel";
 import PaymentModal, { SuccessModal } from "./components/PaymentModal";
 import ProductGrid from "./components/ProductGrid";
+import { ShoppingCart } from "lucide-react";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,6 +34,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   const [showPayment, setShowPayment] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0 });
+  const [showCartMobile, setShowCartMobile] = useState(false);
 
   const addToCart = useCallback((product: Product) => {
     let shouldNotify = false;
@@ -148,22 +150,58 @@ const breadcrumbs: BreadcrumbItem[] = [
           <meta name="robots" content="noindex" />
         </Head>
         <div className="p-4">
-            <div className="flex flex-1">
+            <div className="flex md:flex-row flex-col flex-1">
                 <ProductGrid
                 products={products}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 onProductClick={addToCart}
                 />
-                <CartPanel
-                cart={cart}
-                paymentMethod={paymentMethod}
-                onPaymentMethodChange={setPaymentMethod}
-                onQtyChange={changeQty}
-                onRemove={removeFromCart}
-                onCustomPrice={setCustomPrice}
-                onPay={() => setShowPayment(true)}
-                />
+                <div className="hidden md:block">
+                  <CartPanel
+                    cart={cart}
+                    paymentMethod={paymentMethod}
+                    onPaymentMethodChange={setPaymentMethod}
+                    onQtyChange={changeQty}
+                    onRemove={removeFromCart}
+                    onCustomPrice={setCustomPrice}
+                    onPay={() => setShowPayment(true)}
+                  />
+                </div>
+                {cart.length > 0 && (
+                  <button
+                    onClick={() => setShowCartMobile(true)}
+                    className="fixed bottom-4 right-4 z-50 md:hidden bg-primary text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2"
+                  >
+                    <ShoppingCart className="size-4"/> {cart.length}
+                  </button>
+                )}
+
+                {showCartMobile && (
+                  <div className="fixed inset-0 z-999 md:hidden">
+                    {/* overlay */}
+                    <div
+                      className="absolute inset-0 bg-black/40"
+                      onClick={() => setShowCartMobile(false)}
+                    />
+
+                    {/* drawer */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-card rounded-t-xl h-[85vh] overflow-hidden animate-in slide-in-from-bottom">
+                      <CartPanel
+                        cart={cart}
+                        paymentMethod={paymentMethod}
+                        onPaymentMethodChange={setPaymentMethod}
+                        onQtyChange={changeQty}
+                        onRemove={removeFromCart}
+                        onCustomPrice={setCustomPrice}
+                        onPay={() => {
+                          setShowCartMobile(false);
+                          setShowPayment(true);
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
             </div>
 
             {showPayment && (

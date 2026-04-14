@@ -56,7 +56,8 @@ export default function Form({
     type,
     carts,
     stafAntar,
-    onClose
+    onClose,
+    newStatus
 }: any) {
     
     const [selectingItem, setSelectingItem] = useState(false)
@@ -86,6 +87,7 @@ export default function Form({
         data
             ? { 
                 ...data, 
+                status: newStatus || data.status,
                 items: data.items ?? [],
                 evidence: {
                     existing: Array.isArray(data.evidence)

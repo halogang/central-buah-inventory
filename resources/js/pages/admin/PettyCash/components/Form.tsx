@@ -5,6 +5,7 @@ import { FormImageUpload, FormInput, FormSelect } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notify";
 import { store, update } from "@/routes/keuangan";
+import { formatCurrency } from "@/helpers/format";
 
 interface Category {
     id: number
@@ -16,6 +17,7 @@ interface Props {
     transactionType: 'income' | 'expense'
     categories?: Category[]
     onClose: () => void
+    balance?: number
 }
 
 export default function Form({
@@ -23,6 +25,7 @@ export default function Form({
     transactionType,
     categories,
     onClose,
+    balance
 }: Props) {
 
 
@@ -39,6 +42,8 @@ export default function Form({
         pettyCashTransaction?.evidence ? pettyCashTransaction.evidence : undefined
     )
 
+    const [amountError, setAmountError] = useState<string | null>(null);
+
     const [form, setForm] = useState(
         pettyCashTransaction ? {
             evidence: null as File | null,
@@ -52,6 +57,11 @@ export default function Form({
 
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (amountError) {
+            notify.error('Periksa jumlah terlebih dahulu');
+            return;
+        }
 
         const payload = new FormData();
 
@@ -107,6 +117,15 @@ export default function Form({
                     <X className="h-5 w-5 cursor-pointer" onClick={onClose} />
                 </div>
                 <form onSubmit={submitForm} className="space-y-4 px-6">
+                    {
+                        transactionType === 'expense' && (
+                            <div className="bg-primary/10 border border-primary text-primary rounded-lg px-4 py-2">
+                                <p className="font-regular text-xs">Saldo Tersedia:</p>
+                                <p className="font-bold text-lg">{formatCurrency(balance)}</p>
+                            </div>
+                        )
+                    }
+
                     <FormInput
                         label="Tanggal"
                         type="date"
@@ -120,10 +139,31 @@ export default function Form({
                         label="Jumlah"
                         type="number"
                         value={form.amount}
-                        onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                        min={0}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            const numericValue = Number(value);
+
+                            setForm({ ...form, amount: numericValue });
+                            
+                            if (transactionType === 'expense' && balance !== undefined) {
+                                if (numericValue > balance) {
+                                    setAmountError('Jumlah tidak boleh melebihi saldo tersedia');
+                                } else if (numericValue <= 0) {
+                                    setAmountError('Jumlah harus lebih dari 0');
+                                } else {
+                                    setAmountError(null);
+                                }
+                            } else {
+                                setAmountError(null);
+                            }
+                        }}
                         required
                         placeholder="0"
                     />
+                    {amountError && (
+                        <p className="text-xs text-destructive -mt-2">{amountError}</p>
+                    )}
                     {
                         transactionType === 'expense' && (
                             <FormSelect
@@ -179,7 +219,7 @@ export default function Form({
                         >
                             Batal
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" disabled={amountError !== null || (transactionType === 'expense' && balance !== undefined && form.amount > balance)}>
                             Simpan
                         </Button>
                     </div>

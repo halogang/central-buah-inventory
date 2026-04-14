@@ -197,7 +197,7 @@ export default function Index() {
                         </button>
                     )}
 
-                    {can('finance.create.expense') && (
+                    {can('finance.create.expense') && balance != 0 && (
                         <button
                             onClick={openCreateExpense}
                             className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium bg-orange-500 text-white"
@@ -382,6 +382,7 @@ export default function Index() {
                     pettyCashTransaction={selectedTransaction}
                     transactionType={transactionType}
                     categories={categories}
+                    balance={balance}
                     onClose={() => setShowModal(false)}
                 />
             )}

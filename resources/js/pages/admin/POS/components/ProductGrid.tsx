@@ -24,14 +24,14 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
   } = usePagination(filtered, 12);
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 pr-0 md:pr-6">
       {/* Header */}
-      <div className="pr-6">
+      <div className="pb-6">
         <h1 className="text-xl font-bold text-foreground">POS Kasir</h1>
       </div>
 
       {/* Search */}
-      <div className="pr-6 pb-4">
+      <div className="pb-4">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
@@ -44,9 +44,39 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
         </div>
       </div>
 
+      {/* MOBILE LIST */}
+      <div className="flex flex-col gap-2 sm:hidden">
+        {paginatedData.map((product) => (
+          <button
+            key={product.id}
+            onClick={() => onProductClick(product)}
+            className="flex items-center gap-3 border rounded-lg bg-card active:scale-[0.98] pr-3"
+          >
+            <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center overflow-hidden">
+              {product.image ? (
+                <img src={product.image} className="w-full h-full object-cover" />
+              ) : (
+                <Image className="w-6 h-6 text-muted-foreground" />
+              )}
+            </div>
+
+            <div className="flex-1 text-left">
+              <div className="font-semibold text-sm">{product.name}</div>
+              <div className="text-xs text-muted-foreground">
+                {product.stock} {product.unit}
+              </div>
+            </div>
+
+            <div className="font-bold text-sm text-orange-400">
+              {formatCurrency(product.price)}
+            </div>
+          </button>
+        ))}
+      </div>
+
       {/* Grid */}
-      <div className="flex-1 overflow-y-auto pr-6 pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      <div className="flex-1 overflow-y-auto pb-6">
+        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {paginatedData.map((product) => (
             <button
               key={product.id}

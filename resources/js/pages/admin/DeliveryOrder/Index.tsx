@@ -9,7 +9,8 @@ import {
     Printer,
     Truck,
     Edit3,
-    Trash2
+    Trash2,
+    Check
 } from "lucide-react"
 import { useState } from "react"
 import Pagination from "@/components/Pagination"
@@ -25,6 +26,7 @@ import type { BreadcrumbItem } from "@/types"
 import Form from "./components/Form"
 import Show from "./components/Show"
 import { useCan } from "@/utils/permissions"
+import { FormSelect } from "@/components/admin"
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -100,6 +102,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
 
     const [openForm, setOpenForm] = useState(false)
     const [selectedData, setSelectedData] = useState<DeliveryOrder | null>(null)
+    const [newStatus, setNewStatus] = useState<string | null>(null)
 
     const [openShow, setOpenShow] = useState(false)
     const [selected, setSelected] = useState(null)
@@ -125,6 +128,45 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                 notify.error(`Gagal menghapus ${delivery.do_number}`)
             },
         })
+    }
+
+    const confirmUpdateStatus = (delivery: DeliveryOrder) => {
+        notify.confirm({
+            message: `Ubah status ${delivery.do_number} menjadi ${
+                delivery.status === "draft" ? "sent" : "done"
+            }?`,
+            onConfirm: () => performUpdateStatus(delivery),
+            onCancel: () => { },
+            confirmText: "Ya, ubah",
+            cancelText: "Tidak",
+        })
+    }
+    const performUpdateStatus = (delivery: DeliveryOrder) => {
+        const loading = notify.loading("Mengubah status surat jalan...")
+
+        const newStatus =
+            delivery.status === "draft"
+                ? "sent"
+                : delivery.status === "sent"
+                ? "done"
+                : "done"
+
+        if (newStatus !== "done") {
+            router.patch(`/surat-jalan/${delivery.id}/update-status`, { status: newStatus }, {
+                onSuccess: () => {
+                    notify.dismiss(loading)
+                    notify.success(`Status ${delivery.do_number} berhasil diubah`)
+                },
+                onError: () => {
+                    notify.dismiss(loading)
+                    notify.error(`Gagal mengubah status ${delivery.do_number}`)
+                },
+            })
+        } else {
+            notify.dismiss(loading)
+            notify.info(`Lengkapi surat jalan ${delivery.do_number} untuk menyelesaikan`)
+            openEdit(delivery, newStatus)
+        }
     }
     
 
@@ -158,18 +200,19 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
         setOpenForm(true)
     }
 
-    const openEdit = (data: DeliveryOrder) => {
+    const openEdit = (data: DeliveryOrder, status: string | null) => {
         setSelectedData(data)
         setOpenForm(true)
+        setNewStatus(status)
     }
 
     const statusStyle = (status: string) => {
 
         if (status === "done")
-            return "bg-green-500/10 text-green-600"
+            return "bg-primary/10 text-primary"
 
         if (status === "sent")
-            return "bg-yellow-500/10 text-yellow-600"
+            return "bg-yellow-500/10 text-yellow-500"
 
         return "bg-muted text-muted-foreground"
     }
@@ -337,7 +380,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                                     <Button
                                         variant="secondary"
                                         className="w-full"
-                                        onClick={() => openEdit(delivery)}
+                                        onClick={() => openEdit(delivery, null)}
                                     >
                                         <Edit3 className="size-4" />
                                         Edit
@@ -352,6 +395,31 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                                     <Printer className="size-4" />
                                     Cetak
                                 </Button>
+
+                                {delivery.status !== "done" && can('delivery_order.update') && (
+                                    <Button
+                                        variant="secondary"
+                                        className={`w-full ${delivery.status === "sent" ? "bg-primary text-white hover:bg-green-700" : "bg-yellow-500 text-white hover:bg-yellow-600"}`}
+                                        onClick={() => confirmUpdateStatus(delivery) }
+                                    >
+                                        {delivery.status === "draft" ? (
+                                            <>
+                                                <ArrowUpToLine className="size-4" />
+                                                Kirim
+                                            </>
+                                        ) : delivery.status === "sent" ? (
+                                            <>
+                                                <Check className="size-4" />
+                                                Selesai
+                                            </>
+                                        ) : (
+                                            <>
+                                                
+                                                Draft
+                                            </>
+                                        )}
+                                    </Button>
+                                )}
 
                             </div>
 
@@ -387,6 +455,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                     customers={customers}
                     stafAntar={stafAntar}
                     carts={carts}
+                    newStatus={newStatus}
                     type={activeTab}
                     onClose={() => setOpenForm(false)}
                 />

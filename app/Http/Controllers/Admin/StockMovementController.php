@@ -15,7 +15,7 @@ class StockMovementController extends Controller
      */
     public function index()
     {
-        $stockMovements = StockMovement::with('warehouse', 'item', 'user')->get();
+        $stockMovements = StockMovement::with('warehouse', 'item', 'user')->latest()->get();
 
         $user = Auth::user();
         $roleName = $user->roles->first()->name;

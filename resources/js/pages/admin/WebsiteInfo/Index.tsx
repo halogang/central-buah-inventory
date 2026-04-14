@@ -23,7 +23,7 @@ export default function WebsiteInfoIndex({ info }: any) {
     const can = useCan();
 
     const [is24Hours, setIs24Hours] = useState(
-        info?.jam_operasional === '24 jam'
+        info?.jam_operasional === '24 Jam'
     )
 
     const [openTime, setOpenTime] = useState(
@@ -302,7 +302,10 @@ export default function WebsiteInfoIndex({ info }: any) {
                                     setForm({ ...form, about_content: e.target.value })
                                 }
                                 rows={4}
-                                required
+                                placeholder={"Central Buah Sutomo adalah toko buah terdekat di Cilacap yang menyediakan berb" +
+                                    "agai macam buah segar berkualitas tinggi. Kami berkomitmen untuk memberikan pe" +
+                                    "layanan terbaik dan memastikan setiap pelanggan mendapatkan produk yang memuas" +
+                                    "kan."}
                             />
 
                         </div>

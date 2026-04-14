@@ -71,17 +71,38 @@ class WebsiteInfoController extends Controller
 
             $image = $request->file('hero_image');
 
-            $fileName = 'hero-' . Str::uuid() . '.webp';
+            // ambil nama asli tanpa ekstensi
+            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+
+            // format nama: lowercase + spasi jadi -
+            $baseName = Str::slug($originalName);
+
+            // default nama file
+            $fileName = $baseName . '.webp';
+
+            $fullPath = $destination . '/' . $fileName;
+
+            // 🔁 handle jika file sudah ada
+            $counter = 1;
+            while (File::exists($fullPath)) {
+                $fileName = $baseName . " ($counter).webp";
+                $fullPath = $destination . '/' . $fileName;
+                $counter++;
+            }
+
+            // pastikan folder ada
             if (!File::exists($destination)) {
                 File::makeDirectory($destination, 0755, true);
             }
 
+            // proses image
             $manager = new ImageManager(new Driver());
             $img = $manager->read($image->getRealPath());
 
             $img->scale(width: 1200);
-            $img->toWebp(80)->save($destination . '/' . $fileName);
+            $img->toWebp(80)->save($fullPath);
 
+            // simpan path
             $data['hero_image'] = $savePath . '/' . $fileName;
         }
 
@@ -96,21 +117,49 @@ class WebsiteInfoController extends Controller
 
             $image = $request->file('about_image');
 
-            $fileName = 'about-' . Str::uuid() . '.webp';
+            // ambil nama asli tanpa ekstensi
+            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+
+            // format nama: lowercase + spasi jadi -
+            $baseName = Str::slug($originalName);
+
+            // default nama file
+            $fileName = $baseName . '.webp';
+
+            $fullPath = $destination . '/' . $fileName;
+
+            // 🔁 handle jika file sudah ada
+            $counter = 1;
+            while (File::exists($fullPath)) {
+                $fileName = $baseName . " ($counter).webp";
+                $fullPath = $destination . '/' . $fileName;
+                $counter++;
+            }
+
+            // pastikan folder ada
             if (!File::exists($destination)) {
                 File::makeDirectory($destination, 0755, true);
             }
 
+            // proses image
             $manager = new ImageManager(new Driver());
             $img = $manager->read($image->getRealPath());
 
             $img->scale(width: 1200);
-            $img->toWebp(80)->save($destination . '/' . $fileName);
+            $img->toWebp(80)->save($fullPath);
 
+            // simpan path
             $data['about_image'] = $savePath . '/' . $fileName;
         }
 
 
+        function generateFileName($file, $prefix = '')
+        {
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeName = Str::slug($originalName);
+
+            return ($prefix ? $prefix . '-' : '') . $safeName . '-' . time() . '.webp';
+        }
 
         $websiteInfo->update($data);
 
