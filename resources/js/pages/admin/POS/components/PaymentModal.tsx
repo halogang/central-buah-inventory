@@ -11,7 +11,7 @@ interface PaymentModalProps {
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (m: PaymentMethod) => void;
   onClose: () => void;
-  onSuccess: (cashReceived: number, change: number, finalTotal: number) => void;
+  onSuccess: (cashReceived: number, change: number, charger: number, finalTotal: number) => void;
 }
 
 const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onSuccess }: PaymentModalProps) => {
@@ -89,7 +89,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
 
     router.post(store(), payload, {
       onSuccess: () => {
-        onSuccess(paid, changeAmount, finalTotal);
+        onSuccess(paid, changeAmount, charge, finalTotal);
       },
       onError: (errors) => {
         console.error(errors);

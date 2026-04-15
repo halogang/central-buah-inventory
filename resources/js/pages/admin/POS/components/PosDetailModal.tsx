@@ -1,4 +1,5 @@
-import {X} from "lucide-react";
+import {formatCurrency} from "@/helpers/format";
+import {Printer, X} from "lucide-react";
 
 interface PosItem {
     id: number;
@@ -28,6 +29,129 @@ export default function PosDetailModal({data, onClose} : {
     data: Pos;
     onClose: () => void;
 }) {
+    const printReceipt = (pos : Pos) => {
+        const receiptWindow = window.open("", "_blank", "width=400,height=600");
+        if (!receiptWindow) 
+            return;
+        
+        const itemsHtml = pos
+            .pos_items
+            .map(
+                (item) => `
+                <div class="item">
+                    <div>${item.item_name} x${item.quantity}</div>
+                    <div>${item.total.toLocaleString("id-ID")}</div>
+                </div>
+            `
+            )
+            .join("");
+
+        receiptWindow
+            .document
+            .write(
+                `
+        <html>
+            <head>
+            <title>Struk</title>
+            <style>
+                body {
+                font-family: monospace;
+                width: 280px;
+                margin: 0 auto;
+                padding: 10px;
+                font-size: 14px;
+                }
+
+                .center {
+                text-align: center;
+                }
+
+                .logo {
+                width: 50px;
+                margin: 0 auto 8px;
+                }
+
+                .divider {
+                border-top: 1px dashed #000;
+                margin: 8px 0;
+                }
+
+                .item {
+                display: flex;
+                justify-content: space-between;
+                margin: 4px 0;
+                }
+
+                .total {
+                font-weight: bold;
+                font-size: 16px;
+                }
+
+                .meta {
+                display: flex;
+                justify-content: space-between;
+                font-size: 12px;
+                margin-top: 6px;
+                }
+            </style>
+            </head>
+
+            <body>
+            <div class="center">
+                <div class="logo">
+                <img src="/logo.png" width="50"/>
+                </div>
+                <div><strong>Central Buah</strong></div>
+                <div>POS Kasir</div>
+            </div>
+
+            <div class="meta">
+                <div>${new Date(pos.created_at).toLocaleString("id-ID")}</div>
+                <div>${pos.pos_number}</div>
+            </div>
+
+            <div class="divider"></div>
+
+            ${itemsHtml}
+
+            <div class="divider"></div>
+            <div class="item">
+                <div>biaya tambahan</div>
+                <div>${formatCurrency(pos.charge)}</div>
+            </div>
+            <div class="divider"></div>
+
+            <div class="item total">
+                <div>Total</div>
+                <div>${formatCurrency(pos.total)}</div>
+            </div>
+
+            <div class="item">
+                <div>${pos.payment_method}</div>
+                <div>${formatCurrency(pos.paid_amount)}</div>
+            </div>
+
+            <div class="item">
+                <div>Kembali</div>
+                <div>${formatCurrency(pos.change_amount)}</div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="center">
+                Terima Kasih 🙏
+            </div>
+            </body>
+        </html>
+        `
+            );
+
+        receiptWindow
+            .document
+            .close();
+        receiptWindow.focus();
+        receiptWindow.print();
+    };
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
 
@@ -126,7 +250,7 @@ export default function PosDetailModal({data, onClose} : {
                         data.subtotal && (
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Subtotal</span>
-                                <span>Rp {Number(data.subtotal).toLocaleString("id-ID")}</span>
+                                <span>{formatCurrency(data.subtotal)}</span>
                             </div>
                         )
                     }
@@ -136,55 +260,47 @@ export default function PosDetailModal({data, onClose} : {
                         data.discount && (
                             <div className="flex justify-between text-red-500">
                                 <span>Diskon</span>
-                                <span>- Rp {Number(data.discount).toLocaleString("id-ID")}</span>
+                                <span>{formatCurrency(data.discount)}</span>
                             </div>
                         )
                     }
 
                     {/* Charge */}
                     {
-                        data.charge && (
-                            <div className="flex justify-between">
+                        <div className="flex justify-between">
                                 <span className="text-muted-foreground">Biaya Tambahan</span>
-                                <span>Rp {Number(data.charge).toLocaleString("id-ID")}</span>
+                                <span>{formatCurrency(data.charge)}</span>
                             </div>
-                        )
                     }
 
                     {/* Divider */}
                     <div className="border-t my-2"/> {/* Total */}
                     <div className="flex justify-between font-semibold text-base">
                         <span>Total</span>
-                        <span>Rp {
-                                data
-                                    .total
-                                    .toLocaleString("id-ID")
-                            }</span>
+                        <span>{formatCurrency(data.total)}</span>
                     </div>
 
                     {/* Payment */}
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Bayar</span>
-                        <span>Rp {
-                                data
-                                    .paid_amount
-                                    .toLocaleString("id-ID")
-                            }</span>
+                        <span>{formatCurrency(data.paid_amount)}</span>
                     </div>
 
                     {/* Change */}
                     <div className="flex justify-between font-semibold">
                         <span>Kembalian</span>
                         <span className="text-green-600">
-                            Rp {
-                                data
-                                    .change_amount
-                                    .toLocaleString("id-ID")
-                            }
+                            {formatCurrency(data.change_amount)}
                         </span>
                     </div>
 
                 </div>
+                <button
+                    onClick={() => printReceipt(data)}
+                    className="mt-6 w-full h-11 rounded-xl bg-accent text-accent-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all cursor-pointer">
+                    <Printer size={15}/>
+                    Cetak Struk
+                </button>
 
             </div>
         </div>

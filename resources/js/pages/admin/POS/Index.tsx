@@ -9,6 +9,8 @@ import PaymentModal, { SuccessModal } from "./components/PaymentModal";
 import ProductGrid from "./components/ProductGrid";
 import { ShoppingCart } from "lucide-react";
 import PosHistory from "./components/PosHistory";
+import AppLogoIcon from "@/components/app-logo-icon";
+import { formatCurrency } from "@/helpers/format";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,7 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("tunai");
   const [showPayment, setShowPayment] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0 });
+  const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0, charge: 0 });
   const [showCartMobile, setShowCartMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<"pos" | "riwayat">("pos");
 
@@ -102,8 +104,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     );
   }, []);
 
-  const handlePaySuccess = (cashReceived: number, change: number, finalTotal: number) => {
-    setLastTransaction({ total: finalTotal, cashReceived, change });
+  const handlePaySuccess = (cashReceived: number, change: number, charge: number, finalTotal: number) => {
+    setLastTransaction({ total: finalTotal, cashReceived, change, charge });
     setShowPayment(false);
     setShowSuccess(true);
   };
@@ -115,35 +117,140 @@ const breadcrumbs: BreadcrumbItem[] = [
   };
 
   const handlePrintReceipt = () => {
-    const lines = [
-      "================================",
-      "        Central Buah",
-      "        POS Kasir",
-      "================================",
-      "",
-      ...cart.map(
-        (item) =>
-          `${item.product.name} x${item.qty}    ${((item.customPrice ?? item.product.price) * item.qty).toLocaleString("id-ID")}`
-      ),
-      "",
-      "--------------------------------",
-      `Total      ${lastTransaction.total.toLocaleString("id-ID")}`,
-      `${paymentMethod === "tunai" ? "Tunai" : paymentMethod === "transfer" ? "Transfer" : "QRIS"}      ${lastTransaction.cashReceived.toLocaleString("id-ID")}`,
-      `Kembalian   ${lastTransaction.change.toLocaleString("id-ID")}`,
-      "--------------------------------",
-      "",
-      "       Terima Kasih",
-      "================================",
-    ];
+    const receiptWindow = window.open("", "_blank", "width=400,height=600");
 
-    const receiptWindow = window.open("", "_blank", "width=300,height=500");
-    if (receiptWindow) {
-      receiptWindow.document.write(
-        `<html><head><title>Struk</title><style>body{font-family:monospace;white-space:pre;font-size:12px;padding:20px;}</style></head><body>${lines.join("\n")}</body></html>`
-      );
-      receiptWindow.document.close();
-      receiptWindow.print();
-    }
+    const now = new Date();
+
+    const posNumber = `POS-${
+      now.getFullYear() +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      String(now.getDate()).padStart(2, "0") +
+      String(now.getHours()).padStart(2, "0") +
+      String(now.getMinutes()).padStart(2, "0") +
+      String(now.getSeconds()).padStart(2, "0")
+    }`;
+
+    if (!receiptWindow) return;
+
+    const itemsHtml = cart
+      .map((item) => {
+        const price = item.customPrice ?? item.product.price;
+        return `
+          <div class="item">
+            <div>${item.product.name} x${item.qty}</div>
+            <div>${(price * item.qty).toLocaleString("id-ID")}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    receiptWindow.document.write(`
+      <html>
+        <head>
+          <title>Struk</title>
+          <style>
+            body {
+              font-family: monospace;
+              width: 280px;
+              margin: 0 auto;
+              padding: 10px;
+              font-size: 14px;
+            }
+
+            .center {
+              text-align: center;
+            }
+
+            .logo {
+              width: 50px;
+              margin: 0 auto 8px;
+            }
+
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 8px 0;
+            }
+
+            .item {
+              display: flex;
+              justify-content: space-between;
+              margin: 4px 0;
+            }
+
+            .total {
+              font-weight: bold;
+              font-size: 16px;
+            }
+
+            .meta {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12px;
+              margin-top: 6px;
+            }
+
+            @media print {
+              body {
+                width: 280px;
+              }
+            }
+          </style>
+        </head>
+
+        <body>
+          <div class="center">
+            <div class="logo">
+              <img src="/logo.png" width="50"/>
+            </div>
+            <div><strong>Central Buah</strong></div>
+            <div>POS Kasir</div>
+          </div>
+
+          <div class="meta">
+            <div>${new Date().toLocaleString("id-ID")}</div>
+            <div>${posNumber}</div>
+          </div>
+
+          <div class="divider"></div>
+
+          ${itemsHtml}
+
+          <div class="divider"></div>
+
+          <div class="item">
+            <div>biaya tambahan</div>
+            <div>${formatCurrency(lastTransaction.charge)}</div>
+          </div>
+          
+          <div class="divider"></div>
+
+          <div class="item total">
+            <div>Total</div>
+            <div>${formatCurrency(lastTransaction.total)}</div>
+          </div>
+
+          <div class="item">
+            <div>${paymentMethod}</div>
+            <div>${formatCurrency(lastTransaction.cashReceived)}</div>
+          </div>
+
+          <div class="item">
+            <div>Kembali</div>
+            <div>${formatCurrency(lastTransaction.change)}</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="center">
+            Terima Kasih 🙏
+          </div>
+        </body>
+      </html>
+    `);
+
+    receiptWindow.document.close();
+    receiptWindow.focus();
+    receiptWindow.print();
 
     handleNewTransaction();
   };
@@ -235,7 +342,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                 )}
             </div>
           ) : (
-            <PosHistory data={posData} />
+            <PosHistory
+              data={posData}
+
+            />
           )}
 
           {showPayment && (

@@ -95,6 +95,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
     const [search, setSearch] = useState("")
 
     const [openPayment, setOpenPayment] = useState(false)
+    const [filteredStatus, setFilteredStatus] = useState("all")
 
     const [openShow, setOpenShow] = useState(false)
     const [selected, setSelected] = useState(null)
@@ -111,6 +112,10 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
 
     const filteredInvoices = invoices
         .filter((invoice) => invoice.type === activeTab)
+        .filter((invoice) => {
+            if (!filteredStatus || filteredStatus === "all") return true
+            return invoice.status === filteredStatus
+        })
         .filter((invoice) =>
             invoice.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
             invoice.customer.toLowerCase().includes(search.toLowerCase())
@@ -192,22 +197,30 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                 </div>
 
                 <div className="flex gap-2 item-center mb-4">
-                    <span
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium">
+                    <button onClick={() => setFilteredStatus("all")}
+                        className={`cursor-pointer px-4 py-2 rounded-full text-sm font-medium ${
+                            filteredStatus === "all" ? 'bg-primary text-primary-foreground ' : 'bg-muted text-muted-foreground'
+                        }`}>
                         Semua
-                    </span>
-                    <span
-                        className="px-4 py-2 bg-muted text-muted-foreground rounded-full text-sm font-medium">
+                    </button>
+                    <button onClick={() => setFilteredStatus("unpaid")}
+                        className={`cursor-pointer px-4 py-2 rounded-full text-sm font-medium ${
+                            filteredStatus === "unpaid" ? 'bg-primary text-primary-foreground ' : 'bg-muted text-muted-foreground'
+                        }`}>
                         Belum Lunas
-                    </span>
-                    <span
-                        className="px-4 py-2 bg-muted text-muted-foreground rounded-full text-sm font-medium">
+                    </button>
+                    <button onClick={() => setFilteredStatus("partial")}
+                        className={`cursor-pointer px-4 py-2 rounded-full text-sm font-medium ${
+                            filteredStatus === "partial" ? 'bg-primary text-primary-foreground ' : 'bg-muted text-muted-foreground'
+                        }`}>
                         Sebagian
-                    </span>
-                    <span
-                        className="px-4 py-2 bg-muted text-muted-foreground rounded-full text-sm font-medium">
+                    </button>
+                    <button onClick={() => setFilteredStatus("paid")}
+                        className={`cursor-pointer px-4 py-2 rounded-full text-sm font-medium ${
+                            filteredStatus === "paid" ? 'bg-primary text-primary-foreground ' : 'bg-muted text-muted-foreground'
+                        }`}>
                         Lunas
-                    </span>
+                    </button>
                 </div>
 
                 <div className="mb-4">
@@ -310,7 +323,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                                             Cetak
                                         </Button>
 
-                                        {invoice.remaining > 0 && can('invoice_payment') && (
+                                        {invoice.remaining > 0 && can('invoice.payment') && (
                                             <Button variant="default" className="w-full" onClick={() => openPayModal(invoice)}>
                                                 <CreditCard className="size-4"/>
                                                 Bayar

@@ -3,6 +3,7 @@ import {SearchInput} from "@/components/search-input";
 import {usePagination} from "@/hooks/use-pagination";
 import Pagination from "@/components/Pagination";
 import PosDetailModal from "./PosDetailModal";
+import { formatCurrency } from "@/helpers/format";
 
 interface PosItem {
     id: number;
@@ -95,27 +96,15 @@ export default function PosHistory({data} : {
                                     </td>
 
                                     <td className="p-3 text-right">
-                                        Rp {
-                                            p
-                                                .total
-                                                .toLocaleString("id-ID")
-                                        }
+                                        {formatCurrency(p.total)}
                                     </td>
 
                                     <td className="p-3 text-right">
-                                        Rp {
-                                            p
-                                                .paid_amount
-                                                .toLocaleString("id-ID")
-                                        }
+                                        {formatCurrency(p.paid_amount)}
                                     </td>
 
                                     <td className="p-3 text-right">
-                                        Rp {
-                                            p
-                                                .change_amount
-                                                .toLocaleString("id-ID")
-                                        }
+                                        {formatCurrency(p.change_amount)}
                                     </td>
 
                                 </tr>
@@ -147,21 +136,9 @@ export default function PosHistory({data} : {
                             </div>
 
                             <div className="text-sm mt-2 space-y-1">
-                                <div>Total: Rp {
-                                        p
-                                            .total
-                                            .toLocaleString("id-ID")
-                                    }</div>
-                                <div>Bayar: Rp {
-                                        p
-                                            .paid_amount
-                                            .toLocaleString("id-ID")
-                                    }</div>
-                                <div>Kembalian: Rp {
-                                        p
-                                            .change_amount
-                                            .toLocaleString("id-ID")
-                                    }</div>
+                                <div>Total: {formatCurrency(p.total)}</div>
+                                <div>Bayar: {formatCurrency(p.paid_amount)}</div>
+                                <div>Kembalian: {formatCurrency(p.change_amount)}</div>
                                 <div className="text-xs text-muted-foreground">
                                     {
                                         new Date(p.created_at).toLocaleString("id-ID", {
