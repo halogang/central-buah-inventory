@@ -85,12 +85,12 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .title {
-                        font-size: 34px;
+                        font-size: 50px;
                         font-weight: bold;
                     }
 
                     .subtitle {
-                        font-size: 28px;
+                        font-size: 44px;
                     }
 
                     .divider {
@@ -101,17 +101,17 @@ export default function PosDetailModal({data, onClose} : {
                     .item {
                         display: flex;
                         justify-content: space-between;
-                        font-size: 22px; /* 🔥 NAIKKAN */
+                        font-size: 38px; /* 🔥 NAIKKAN */
                         margin: 6px 0;
                     }
 
                     .total {
                         font-weight: bold;
-                        font-size: 24px;
+                        font-size: 40px;
                     }
 
                     .meta {
-                        font-size: 22px;
+                        font-size: 38px;
                         margin-top: 20px;
                         display: flex;
                         justify-content: space-between;
@@ -162,7 +162,7 @@ export default function PosDetailModal({data, onClose} : {
 
                     <div class="divider"></div>
 
-                    <div class="center meta">
+                    <div class="center" style="font-size: 38px">
                         Terima Kasih 🙏
                     </div>
                 </div>

@@ -180,12 +180,12 @@ const breadcrumbs: BreadcrumbItem[] = [
               }
 
               .title {
-                  font-size: 34px;
+                  font-size: 50px;
                   font-weight: bold;
               }
 
               .subtitle {
-                  font-size: 28px;
+                  font-size: 44px;
               }
 
               .divider {
@@ -196,17 +196,17 @@ const breadcrumbs: BreadcrumbItem[] = [
               .item {
                   display: flex;
                   justify-content: space-between;
-                  font-size: 22px; /* 🔥 NAIKKAN */
+                  font-size: 38px; /* 🔥 NAIKKAN */
                   margin: 6px 0;
               }
 
               .total {
                   font-weight: bold;
-                  font-size: 24px;
+                  font-size: 40px;
               }
 
               .meta {
-                  font-size: 22px;
+                  font-size: 38px;
                   margin-top: 20px;
                   display: flex;
                   justify-content: space-between;
@@ -259,7 +259,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                 <div class="divider"></div>
 
-                <div class="center">
+                <div class="center" style="font-size: 22px">
                     Terima Kasih 🙏
                 </div>
             </div>
