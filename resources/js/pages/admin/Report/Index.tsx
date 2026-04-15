@@ -9,6 +9,7 @@ import {TabLabaRugi} from "./components/LabaRugiTab";
 import {TabPengeluaran} from "./components/PengeluaranTab";
 import {TabPenjualan} from "./components/PenjualanTab";
 import {TabStok} from "./components/StokTab";
+import { index } from "@/routes/laporan";
 
 const TABS = [
     {
@@ -60,14 +61,14 @@ export default function LaporanPage() {
     const [year, setYear] = useState<number>(filters.year);
 
     const handleFilterChange = (newMonth: number, newYear: number) => {
+        
         setMonth(newMonth);
         setYear(newYear);
 
-        // Convert "All" values to current month/year for backend compatibility
-        const monthToSend = newMonth === -1 ? new Date().getMonth() : newMonth;
-        const yearToSend = newYear === 0 ? new Date().getFullYear() : newYear;
+        const monthToSend = newMonth === -1 ? 'all' : newMonth;
+        const yearToSend = newYear === 0 ? 'all' : newYear;
 
-        router.get(route("laporan.index"), {
+        router.get(index(), {
             month: monthToSend,
             year: yearToSend,
         }, {

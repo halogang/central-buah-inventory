@@ -22,7 +22,7 @@ class PettyCashTransactionController extends Controller
      */
     public function index()
     {
-        $pettyCashTransactions = PettyCashTransaction::latest()->get();
+        $pettyCashTransactions = PettyCashTransaction::orderBy('date', 'desc')->get();
 
         $totalIncome = $pettyCashTransactions
             ->where('type', 'income')

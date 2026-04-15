@@ -35,6 +35,7 @@ type Props = {
 }
 
 export function TabKeuangan({ data }: Props) {
+
   const pettyCashColumns = [
     { key: "tanggal", label: "Tanggal" },
     { key: "keterangan", label: "Keterangan" },
@@ -87,7 +88,7 @@ export function TabKeuangan({ data }: Props) {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <SummaryCard title="Total Pendapatan" value={formatCurrency(data.summary.income)} subtitleColor="success" icon={TrendingUp} />
+        <SummaryCard title="Total Modal" value={formatCurrency(data.summary.income)} subtitleColor="success" icon={TrendingUp} />
         <SummaryCard title="Total Pengeluaran" value={formatCurrency(data.summary.expense)} subtitleColor="destructive" icon={TrendingDown} />
         <SummaryCard title="Kas Bersih" value={formatCurrency(data.summary.net)}  subtitleColor="success" icon={DollarSign} />
         {/* <SummaryCard title="Piutang" value="Rp 12.7 Jt" subtitle="▲ 8 Piutang" subtitleColor="muted" icon={Wallet} /> */}
@@ -95,7 +96,7 @@ export function TabKeuangan({ data }: Props) {
 
       {/* Cashflow Chart */}
       <ChartCashflow
-        title="📊 Grafik Arus Kas Tahunan 2026"
+        title="📊 Grafik Arus Kas"
         data={data.cashflow}
         lines={[
           { dataKey: "pendapatan", color: "#10B981", name: "Pendapatan" },
@@ -111,7 +112,7 @@ export function TabKeuangan({ data }: Props) {
         footer={
           <div className="flex justify-between px-6 py-4">
             <span className="text-sm font-semibold">Sisa Petty Cash</span>
-            <span className="text-sm font-bold text-primary">Rp 11.000.000</span>
+            <span className="text-sm font-bold text-primary">{formatCurrency(data.summary.net)}</span>
           </div>
         }
       />
@@ -124,7 +125,7 @@ export function TabKeuangan({ data }: Props) {
         footer={
           <div className="grid grid-cols-3 gap-4 px-4 py-4">
             <div className="rounded-xl bg-primary/5 p-4 text-center">
-              <p className="text-xs text-muted-foreground">🔥 Total Pendapatan</p>
+              <p className="text-xs text-muted-foreground">🔥 Total Modal</p>
               <p className="text-lg font-bold text-primary">{formatCurrency(data.summary.income)}</p>
             </div>
             <div className="rounded-xl bg-destructive/5 p-4 text-center">

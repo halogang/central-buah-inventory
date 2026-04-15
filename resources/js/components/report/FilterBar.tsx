@@ -21,9 +21,9 @@ export function FilterBar({ month, year, onMonthChange, onYearChange }: FilterBa
           onChange={(e) => onMonthChange(Number(e.target.value))}
           className="appearance-none rounded-lg border border-border bg-card px-4 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
-          <option value={-1}>Semua Bulan</option>
+          <option value={0}>Semua Bulan</option>
           {MONTHS.map((m, i) => (
-            <option key={i} value={i}>{m}</option>
+            <option key={i} value={i+1}>{m}</option>
           ))}
         </select>
         <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
