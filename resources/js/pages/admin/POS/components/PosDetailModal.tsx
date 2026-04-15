@@ -52,103 +52,112 @@ export default function PosDetailModal({data, onClose} : {
                 `
         <html>
             <head>
-            <title>Struk</title>
-            <style>
-                @media print {
-                    @page {
-                        size: 58mm auto;
-                        margin: 0;
+                <title>Struk</title>
+                <style>
+                    @media print {
+                        @page {
+                            size: A4;
+                            margin: 0;
+                        }
+
+                        body {
+                            margin: 0;
+                            padding: 0;
+                        }
                     }
+
                     body {
                         font-family: monospace;
-                        width: 58mm;
-                        margin: 0;
-                        padding: 8px;
+                        background: white;
+                    }
+
+                    .container {
+                        margin: 0 auto;
+                        padding: 20px 12px 10px; /* 🔥 tambah atas */
+                    }
+
+                    .center {
+                        text-align: center;
+                    }
+
+                    .logo {
+                        width: 40px;
+                        margin: 0 auto 6px;
+                    }
+
+                    .divider {
+                        border-top: 1px dashed #000;
+                        margin: 6px 0;
+                    }
+
+                    .item {
+                        display: flex;
+                        justify-content: space-between;
                         font-size: 12px;
+                        margin: 2px 0;
                     }
-                    container {
-                        width: 100%;
+
+                    .total {
+                        font-weight: bold;
+                        font-size: 14px;
                     }
-                }
 
-                .center {
-                text-align: center;
-                }
-
-                .logo {
-                width: 40px;
-                margin: 0 auto 6px;
-                }
-
-                .divider {
-                border-top: 1px dashed #000;
-                margin: 6px 0;
-                }
-
-                .item {
-                display: flex;
-                justify-content: space-between;
-                font-size: 12px;
-                margin: 2px 0;
-                }
-
-                .total {
-                font-weight: bold;
-                font-size: 14px;
-                }
-
-                .meta {
-                font-size: 10px;
-                margin-top: 4px;
-                }
-            </style>
+                    .meta {
+                        font-size: 10px;
+                        margin-top: 4px;
+                    }
+                </style>
             </head>
 
             <body>
-            <div class="center">
-                <div class="logo">
-                <img src="/logo.png" width="50"/>
+                <div class="container">
+                    <div class="center">
+                        <div class="logo">
+                            <img src="/logo.png" width="50"/>
+                        </div>
+                        <div>
+                            <strong>Central Buah</strong>
+                        </div>
+                        <div>POS Kasir</div>
+                    </div>
+
+                    <div class="meta">
+                        <div>${new Date(pos.created_at).toLocaleString("id-ID")}</div>
+                        <div>${pos.pos_number}</div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    ${itemsHtml}
+
+                    <div class="divider"></div>
+                    <div class="item">
+                        <div>biaya tambahan</div>
+                        <div>${formatCurrency(pos.charge)}</div>
+                    </div>
+                    <div class="divider"></div>
+
+                    <div class="item total">
+                        <div>Total</div>
+                        <div>${formatCurrency(pos.total)}</div>
+                    </div>
+
+                    <div class="item">
+                        <div>${pos.payment_method}</div>
+                        <div>${formatCurrency(pos.paid_amount)}</div>
+                    </div>
+
+                    <div class="item">
+                        <div>Kembali</div>
+                        <div>${formatCurrency(pos.change_amount)}</div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="center">
+                        Terima Kasih 🙏
+                    </div>
                 </div>
-                <div><strong>Central Buah</strong></div>
-                <div>POS Kasir</div>
-            </div>
-
-            <div class="meta">
-                <div>${new Date(pos.created_at).toLocaleString("id-ID")}</div>
-                <div>${pos.pos_number}</div>
-            </div>
-
-            <div class="divider"></div>
-
-            ${itemsHtml}
-
-            <div class="divider"></div>
-            <div class="item">
-                <div>biaya tambahan</div>
-                <div>${formatCurrency(pos.charge)}</div>
-            </div>
-            <div class="divider"></div>
-
-            <div class="item total">
-                <div>Total</div>
-                <div>${formatCurrency(pos.total)}</div>
-            </div>
-
-            <div class="item">
-                <div>${pos.payment_method}</div>
-                <div>${formatCurrency(pos.paid_amount)}</div>
-            </div>
-
-            <div class="item">
-                <div>Kembali</div>
-                <div>${formatCurrency(pos.change_amount)}</div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="center">
-                Terima Kasih 🙏
-            </div>
             </body>
         </html>
         `

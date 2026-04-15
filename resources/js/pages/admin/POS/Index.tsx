@@ -147,107 +147,118 @@ const breadcrumbs: BreadcrumbItem[] = [
     receiptWindow.document.write(`
       <html>
         <head>
-          <title>Struk</title>
-          <style>
-            @media print {
-              @page {
-                size: 58mm auto;
-                margin: 0;
-              }
-              body {
-                font-family: monospace;
-                width: 58mm;
-                margin: 0;
-                padding: 8px;
-                font-size: 12px;
-              }
-              container {
-                width: 100%;
-              }
-            }
+            <title>Struk</title>
+            <style>
+                @media print {
+                    @page {
+                        size: A4;
+                        margin: 0;
+                    }
 
-            .center {
-              text-align: center;
-            }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
 
-            .logo {
-              width: 40px;
-              margin: 0 auto 6px;
-            }
+                body {
+                    font-family: monospace;
+                    background: white;
+                }
 
-            .divider {
-              border-top: 1px dashed #000;
-              margin: 6px 0;
-            }
+                .container {
+                    /* lebar struk */
+                    margin: 0 12px;
+                    /* 🔥 CENTER */
+                    padding: 20px 12px 10px; /* 🔥 tambah atas */
+                }
 
-            .item {
-              display: flex;
-              justify-content: space-between;
-              font-size: 12px;
-              margin: 2px 0;
-            }
+                .center {
+                    text-align: center;
+                }
 
-            .total {
-              font-weight: bold;
-              font-size: 14px;
-            }
+                .logo {
+                    width: 40px;
+                    margin: 0 auto 6px;
+                }
 
-            .meta {
-              font-size: 10px;
-              margin-top: 4px;
-            }
-          </style>
+                .divider {
+                    border-top: 1px dashed #000;
+                    margin: 6px 0;
+                }
+
+                .item {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 12px;
+                    margin: 2px 0;
+                }
+
+                .total {
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+
+                .meta {
+                    font-size: 10px;
+                    margin-top: 4px;
+                }
+            </style>
         </head>
 
         <body class="container">
-          <div class="center">
-            <div class="logo">
-              <img src="/logo.png" width="50"/>
+            <div class="container">
+                <div class="center">
+                    <div class="logo">
+                        <img src="/logo.png" width="50"/>
+                    </div>
+                    <div>
+                        <strong>Central Buah</strong>
+                    </div>
+                    <div>POS Kasir</div>
+                </div>
+
+                <div class="meta">
+                    <div>${new Date().toLocaleString("id-ID")}</div>
+                    <div>${posNumber}</div>
+                </div>
+
+                <div class="divider"></div>
+
+                ${itemsHtml}
+
+                <div class="divider"></div>
+
+                <div class="item">
+                    <div>biaya tambahan</div>
+                    <div>${formatCurrency(lastTransaction.charge)}</div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="item total">
+                    <div>Total</div>
+                    <div>${formatCurrency(lastTransaction.total)}</div>
+                </div>
+
+                <div class="item">
+                    <div>${paymentMethod}</div>
+                    <div>${formatCurrency(lastTransaction.cashReceived)}</div>
+                </div>
+
+                <div class="item">
+                    <div>Kembali</div>
+                    <div>${formatCurrency(lastTransaction.change)}</div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="center">
+                    Terima Kasih 🙏
+                </div>
             </div>
-            <div><strong>Central Buah</strong></div>
-            <div>POS Kasir</div>
-          </div>
-
-          <div class="meta">
-            <div>${new Date().toLocaleString("id-ID")}</div>
-            <div>${posNumber}</div>
-          </div>
-
-          <div class="divider"></div>
-
-          ${itemsHtml}
-
-          <div class="divider"></div>
-
-          <div class="item">
-            <div>biaya tambahan</div>
-            <div>${formatCurrency(lastTransaction.charge)}</div>
-          </div>
-          
-          <div class="divider"></div>
-
-          <div class="item total">
-            <div>Total</div>
-            <div>${formatCurrency(lastTransaction.total)}</div>
-          </div>
-
-          <div class="item">
-            <div>${paymentMethod}</div>
-            <div>${formatCurrency(lastTransaction.cashReceived)}</div>
-          </div>
-
-          <div class="item">
-            <div>Kembali</div>
-            <div>${formatCurrency(lastTransaction.change)}</div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="center">
-            Terima Kasih 🙏
-          </div>
         </body>
-      </html>
+    </html>
     `);
 
     receiptWindow.document.close();
