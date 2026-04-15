@@ -117,7 +117,10 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
                         <div className="truncate">
                           {ev.type === "in" ? ev.supplier_name : ev.customer_name}
                         </div>
-                        <div className="text-[9px] opacity-70">{calcTotalWeight(ev.items)} kg</div>
+                        <div className="flex gap-1">
+                          <div className="text-[9px] opacity-70">{ev.items.length} buah</div>
+                          <div className="text-[9px] opacity-70">{calcTotalWeight(ev.items)} kg</div>
+                        </div>
                       </button>
                     ))}
                     {events.length > maxShow && (
