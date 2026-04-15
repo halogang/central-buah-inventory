@@ -128,7 +128,7 @@ export default function PosHistory({data} : {
             <div className="grid gap-3 md:hidden">
                 {
                     filtered.map((p) => (
-                        <div key={p.id} className="border rounded-xl p-3 bg-background shadow-sm">
+                        <button onClick={() => setSelected(p)} key={p.id} className="border rounded-xl p-3 bg-background shadow-sm">
 
                             <div className="flex justify-between">
                                 <div className="font-semibold">{p.pos_number}</div>
@@ -171,7 +171,7 @@ export default function PosHistory({data} : {
                                 }
                             </div>
 
-                        </div>
+                        </button>
                     ))
                 }
             </div>
