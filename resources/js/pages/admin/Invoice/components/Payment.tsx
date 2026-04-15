@@ -36,9 +36,11 @@ export default function Payment({ invoice, paymentMethods, onClose, onSuccess, e
         e.preventDefault()
 
         const route = isEditing ? update(editingPayment.id) : store()
-        const method = isEditing ? 'put' : 'post'
 
-        router[method](route, form, {
+        router.post(route, isEditing ? {
+            ...form,
+            _method: 'put'
+        } : form, {
             forceFormData: true,
             onSuccess: (page) => {
 
