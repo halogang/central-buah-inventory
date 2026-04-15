@@ -461,22 +461,34 @@ class ReportController extends Controller
         $year  = $request->year === 'all' ? null : (int) $request->year;
         // dd($month, $year);
 
-        ['start' => $start, 'end' => $end, 'groupBy' => $groupBy, 'monthFilter' => $monthFilter]
-            = $this->getDateRange($month, $year);
-
-        return Inertia::render('admin/Report/Index', [
-            'filters' => [
-                'month' => $month ?? -1,
-                'year' => $year ?? 0,
-            ],
+        try {
+            ['start' => $start, 'end' => $end, 'groupBy' => $groupBy, 'monthFilter' => $monthFilter]
+                = $this->getDateRange($month, $year);
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
 
 
-            'keuangan' => $this->getKeuanganData($start, $end, $groupBy, $monthFilter),
-            'stok' => $this->getStokData(),
-            'penjualan' => $this->getPenjualanData($start, $end, $monthFilter),
-            'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter),
-            'labaRugi' => $this->getLabaRugiData($start, $end, $groupBy, $monthFilter),
-        ]);
+        // dd($this->getDateRange($month, $year));
+
+        
+        try {
+            return Inertia::render('admin/Report/Index', [
+                'filters' => [
+                    'month' => $month ?? -1,
+                    'year' => $year ?? 0,
+                ],
+    
+    
+                'keuangan' => $this->getKeuanganData($start, $end, $groupBy, $monthFilter),
+                'stok' => $this->getStokData(),
+                'penjualan' => $this->getPenjualanData($start, $end, $monthFilter),
+                'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter),
+                'labaRugi' => $this->getLabaRugiData($start, $end, $groupBy, $monthFilter),
+            ]);
+        } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
+        }
     }
 
     private function getDateRange($month, $year)
@@ -544,9 +556,17 @@ class ReportController extends Controller
         $minDate = collect([$invoiceMin, $posMin, $pettyMin])->filter()->min();
         $maxDate = collect([$invoiceMax, $posMax, $pettyMax])->filter()->max();
 
+        // 🔥 FIX: kalau tidak ada data sama sekali
+        if (!$minDate || !$maxDate) {
+            return [
+                'min' => now()->subYears(2)->startOfYear(),
+                'max' => now()->endOfYear(),
+            ];
+        }
+
         return [
-            'min' => $minDate ? Carbon::parse($minDate) : now()->subYears(2),
-            'max' => $maxDate ? Carbon::parse($maxDate) : now(),
+            'min' => Carbon::parse($minDate),
+            'max' => Carbon::parse($maxDate),
         ];
     }
 
@@ -579,12 +599,13 @@ class ReportController extends Controller
 
     private function dateFilter($query, $start, $end, $month = null)
     {
-        if ($start && $end) {
-            $query->whereBetween('date', [$start, $end]);
+        // 🔥 PRIORITAS monthFilter dulu
+        if ($month) {
+            return $query->whereMonth('date', $month);
         }
 
-        if ($month) {
-            $query->whereMonth('date', $month); // 🔥 ini kunci
+        if ($start && $end) {
+            return $query->whereBetween('date', [$start, $end]);
         }
 
         return $query;
@@ -597,12 +618,16 @@ class ReportController extends Controller
     */
     private function getKeuanganData($start, $end, $groupBy, $monthFilter)
     {
+        // dd($start, $end, $monthFilter);
+
         // ✅ SUMMARY (FULL CASHFLOW)
         $income =
-            $this->dateFilter(PettyCashTransaction::where('type', 'income'), $start, $end, $monthFilter)->sum('amount');
+            $this->dateFilter(PettyCashTransaction::where('type', 'income'), $start, $end, $monthFilter)->sum('amount') ?? 0;
 
         $expense =
-            $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end, $monthFilter)->sum('amount');
+            $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end, $monthFilter)->sum('amount') ?? 0;
+
+        
 
         // ✅ CASHFLOW (DYNAMIC)
         $cashflow = $this->generateCashflow($start, $end, $groupBy, $monthFilter);
@@ -672,32 +697,52 @@ class ReportController extends Controller
         if (!$start || !$end) {
             return collect([]);
         }
+        // dd($start, $end, $groupBy, $monthFilter);
+
+        // dd($this->calculateCash($start, $end, 'test', $monthFilter), $groupBy);
+        // dd($this->generateTimeSeriesData($start, $end, $groupBy, fn ($start, $end, $label) => $this->calculateCash($start, $end, $label, $monthFilter)));
 
         return $this->generateTimeSeriesData($start, $end, $groupBy, fn ($start, $end, $label) => $this->calculateCash($start, $end, $label, $monthFilter));
     }
 
     private function generateTimeSeriesData($start, $end, $mode, $calculator)
     {
+        if (!$start || !$end || $start->gt($end)) {
+            return collect([]);
+        }
+
         return $this->getTimeSeriesBuckets($start, $end, $mode)
             ->map(fn ($bucket) => $calculator($bucket['start'], $bucket['end'], $bucket['name']));
     }
 
     private function getTimeSeriesBuckets($start, $end, $mode)
     {
-        $current = $start->copy();
         $buckets = collect();
 
         if ($mode === 'yearly') {
-            while ($current->year <= $end->year) {
-                $buckets->push([
-                    'name' => $current->format('Y'),
-                    'start' => $current->copy()->startOfYear(),
-                    'end' => $current->copy()->endOfYear(),
-                ]);
+            // 🎯 ambil tahun akhir
+            $endYear = $end->year;
 
-                $current->addYear();
+            $minYears = 3;
+            $startYear = min($start->year, $endYear - ($minYears - 1));
+
+            for ($year = $startYear; $year <= $endYear; $year++) {
+                $date = Carbon::create($year);
+
+                $buckets->push([
+                    'name' => (string) $year,
+                    'start' => $date->copy()->startOfYear(),
+                    'end' => $date->copy()->endOfYear(),
+                ]);
             }
+
+            return $buckets;
         }
+
+        // =========================
+        // DEFAULT (monthly & daily)
+        // =========================
+        $current = $start->copy();
 
         if ($mode === 'monthly') {
             while ($current <= $end) {
@@ -707,7 +752,7 @@ class ReportController extends Controller
                     'end' => $current->copy()->endOfMonth(),
                 ]);
 
-                $current->addMonth();
+                $current = $current->addMonth();
             }
         }
 
@@ -719,7 +764,7 @@ class ReportController extends Controller
                     'end' => $current->copy(),
                 ]);
 
-                $current->addDay();
+                $current = $current->addDay();
             }
         }
 
@@ -728,16 +773,22 @@ class ReportController extends Controller
 
     private function calculateCash($start, $end, $label, $monthFilter)
     {
+        $queryIncome = PettyCashTransaction::where('type', 'income')
+            ->whereBetween('date', [$start, $end]);
+
+        $queryExpense = PettyCashTransaction::where('type', 'expense')
+            ->whereBetween('date', [$start, $end]);
+
+        // 🔥 hanya apply monthFilter kalau perlu
+        if ($monthFilter) {
+            $queryIncome->whereMonth('date', $monthFilter);
+            $queryExpense->whereMonth('date', $monthFilter);
+        }
+
         return [
             'name' => $label,
-            'pendapatan' =>
-                // $this->dateFilter(Invoice::where('type', 'out'), $start, $end, $monthFilter)->sum('total') +
-                // $this->dateFilter(Pos::query(), $start, $end, $monthFilter)->sum('total') +
-                $this->dateFilter(PettyCashTransaction::where('type', 'income'), $start, $end, $monthFilter)->sum('amount'),
-
-            'pengeluaran' =>
-                // $this->dateFilter(Invoice::where('type', 'in'), $start, $end, $monthFilter)->sum('total') +
-                $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end, $monthFilter)->sum('amount'),
+            'pendapatan' => (int) $queryIncome->sum('amount'),
+            'pengeluaran' => (int) $queryExpense->sum('amount'),
         ];
     }
 
@@ -799,7 +850,7 @@ class ReportController extends Controller
 
         foreach ($invoice as $i) {
             $merged->push([
-                'name' => $i->item->name,
+                'name' => $i->item?->name ?? 'Unknown',
                 'qty' => $i->quantity,
                 'revenue' => $i->total,
             ]);
@@ -857,7 +908,8 @@ class ReportController extends Controller
         $petty = $this->dateFilter(
             PettyCashTransaction::where('type', 'expense'),
             $start,
-            $end
+            $end,
+            $monthFilter
         )->get();
 
         $grouped = $petty->groupBy('expense_category')
