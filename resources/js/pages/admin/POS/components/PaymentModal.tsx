@@ -15,15 +15,52 @@ interface PaymentModalProps {
 }
 
 const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onSuccess }: PaymentModalProps) => {
+  
+
   const [purchaseType, setPurchaseType] = useState<"self-buying" | "delivery">("self-buying");
   const [charge, setCharge] = useState<number>(10000);
+  const [chargeInput, setChargeInput] = useState("10.000");
+
+  const handleChargeChange = (value: string) => {
+    const raw = value.replace(/\D/g, "");
+
+    if (!raw) {
+      setCharge(0);
+      setChargeInput("");
+      return;
+    }
+
+    const numberValue = Number(raw);
+
+    setCharge(numberValue);
+    setChargeInput(numberValue.toLocaleString("id-ID"));
+  };
 
   const total = cart.reduce(
     (sum, item) => sum + (item.customPrice ?? item.product.price) * item.qty,
     0
   );
   const [cashReceived, setCashReceived] = useState<number | "">("");
+  const [cashInput, setCashInput] = useState("");
   const [error, setError] = useState("");
+
+  const handleCashChange = (value: string) => {
+    // ambil angka saja
+    const raw = value.replace(/\D/g, "");
+
+    if (!raw) {
+      setCashReceived("");
+      setCashInput("");
+      return;
+    }
+
+    const numberValue = Number(raw);
+
+    setCashReceived(numberValue);
+    setCashInput(numberValue.toLocaleString("id-ID"));
+  };
+
+  
 
   const finalTotal = total + (purchaseType === "delivery" ? charge : 0);
 
@@ -184,13 +221,19 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
             {/* Charge input kalau delivery */}
             {purchaseType === "delivery" && (
               <div className="mt-3">
-                <FormInput
-                  label="Biaya Antar"
-                  type="number"
-                  value={charge}
-                  onChange={(e) => setCharge(Number(e.target.value))}
-                  placeholder="Masukkan biaya antar..."
-                />
+                <div className="relative mt-1">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    Rp
+                  </span>
+
+                  <input
+                    type="text"
+                    value={chargeInput}
+                    onChange={(e) => handleChargeChange(e.target.value)}
+                    placeholder="Masukkan biaya antar..."
+                    className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-background text-foreground text-sm font-semibold tabular-nums placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -199,19 +242,32 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
           {paymentMethod === "tunai" && (
             <div>
               <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Jumlah Uang Diterima</div>
-              <input
-                type="number"
-                placeholder="Masukkan nominal..."
-                value={cashReceived}
-                onChange={(e) => { setCashReceived(e.target.value === "" ? "" : Number(e.target.value)); setError(""); }}
-                className="w-full h-12 px-4 rounded-xl border border-border bg-background text-foreground text-lg font-semibold tabular-nums placeholder:text-muted-foreground placeholder:text-base placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
-              />
+              <div className="relative mt-1">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  Rp
+                </span>
+
+                <input
+                  type="text"
+                  value={cashInput}
+                  onChange={(e) => {
+                  handleCashChange(e.target.value);
+                    setError("");
+                  }}
+                  placeholder="Masukkan nominal..."
+                  className="w-full h-12 pl-10 pr-4 rounded-xl border border-border bg-background text-foreground text-lg font-semibold tabular-nums placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-all"
+                />
+              </div>
               {error && <div className="text-sm text-destructive font-medium mt-1">{error}</div>}
               <div className="flex flex-wrap gap-2 mt-2">
                 {quickAmounts.map((amount) => (
                   <button
                     key={amount}
-                    onClick={() => { setCashReceived(amount); setError(""); }}
+                    onClick={() => {
+                      setCashReceived(amount);
+                      setCashInput(amount.toLocaleString("id-ID")); // 🔥 ini penting
+                      setError("");
+                    }}
                     className="px-3 h-8 rounded-lg border border-border text-xs font-medium text-foreground bg-background hover:bg-muted transition-colors tabular-nums"
                   >
                     {formatRupiah(amount)}
