@@ -1,1 +1,0 @@
-import{c as t,j as s}from"./app-CPILZBC4.js";function r(){const e=t.c(1);let o;return e[0]===Symbol.for("react.memo_cache_sentinel")?(o=s.jsx("img",{src:"/logo.png",alt:"Logo",className:""}),e[0]=o):o=e[0],o}export{r as A};

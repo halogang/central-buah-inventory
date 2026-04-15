@@ -66,7 +66,7 @@ export default function Payment({ invoice, paymentMethods, onClose, onSuccess, e
                 {/* HEADER */}
                 <div className="flex items-center justify-between p-4 border-b shrink-0">
                     <h2 className="font-semibold text-lg">
-                        {isEditing ? 'Edit Pembayaran' : 'Input Pembayaran'} - {invoice.invoiceNumber}
+                        {isEditing ? 'Edit Pembayaran Test' : 'Input Pembayaran'} - {invoice.invoiceNumber}
                     </h2>
                     <button onClick={onClose}>
                         <X className="w-5 h-5 cursor-pointer" />
