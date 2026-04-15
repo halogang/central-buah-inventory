@@ -72,7 +72,7 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .container {
-                        padding: 40px 30px;
+                        padding: 60px 40px;
                         margin: 0 auto;   /* 🔥 center di A4 */
                     }
 
@@ -81,16 +81,16 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .logo img {
-                        width: 80px; /* 🔥 BESARKAN LOGO */
+                        width: 120px; /* 🔥 BESARKAN LOGO */
                     }
 
                     .title {
-                        font-size: 30px;
+                        font-size: 32px;
                         font-weight: bold;
                     }
 
                     .subtitle {
-                        font-size: 24px;
+                        font-size: 26px;
                     }
 
                     .divider {
@@ -101,17 +101,17 @@ export default function PosDetailModal({data, onClose} : {
                     .item {
                         display: flex;
                         justify-content: space-between;
-                        font-size: 18px; /* 🔥 NAIKKAN */
+                        font-size: 20px; /* 🔥 NAIKKAN */
                         margin: 6px 0;
                     }
 
                     .total {
                         font-weight: bold;
-                        font-size: 20px;
+                        font-size: 22px;
                     }
 
                     .meta {
-                        font-size: 18px;
+                        font-size: 20px;
                         margin-top: 10px;
                         display: flex;
                         justify-content: space-between;

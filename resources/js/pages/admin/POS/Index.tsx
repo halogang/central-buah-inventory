@@ -167,7 +167,7 @@ const breadcrumbs: BreadcrumbItem[] = [
               }
 
               .container {
-                  padding: 40px 30px;
+                  padding: 60px 40px;
                   margin: 0 auto;   /* 🔥 center di A4 */
               }
 
@@ -176,16 +176,16 @@ const breadcrumbs: BreadcrumbItem[] = [
               }
 
               .logo img {
-                  width: 80px; /* 🔥 BESARKAN LOGO */
+                  width: 120px; /* 🔥 BESARKAN LOGO */
               }
 
               .title {
-                  font-size: 18px;
+                  font-size: 32px;
                   font-weight: bold;
               }
 
               .subtitle {
-                  font-size: 14px;
+                  font-size: 26px;
               }
 
               .divider {
@@ -196,17 +196,17 @@ const breadcrumbs: BreadcrumbItem[] = [
               .item {
                   display: flex;
                   justify-content: space-between;
-                  font-size: 14px; /* 🔥 NAIKKAN */
+                  font-size: 20px; /* 🔥 NAIKKAN */
                   margin: 6px 0;
               }
 
               .total {
                   font-weight: bold;
-                  font-size: 16px;
+                  font-size: 22px;
               }
 
               .meta {
-                  font-size: 12px;
+                  font-size: 20px;
                   margin-top: 10px;
                   display: flex;
                   justify-content: space-between;
