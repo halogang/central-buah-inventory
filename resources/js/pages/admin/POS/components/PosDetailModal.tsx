@@ -72,7 +72,7 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .container {
-                        padding: 60px 40px;
+                        padding: 50px 30px;
                         margin: 0 auto;   /* 🔥 center di A4 */
                     }
 
@@ -81,16 +81,16 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .logo img {
-                        width: 120px; /* 🔥 BESARKAN LOGO */
+                        width: 132px; /* 🔥 BESARKAN LOGO */
                     }
 
                     .title {
-                        font-size: 32px;
+                        font-size: 34px;
                         font-weight: bold;
                     }
 
                     .subtitle {
-                        font-size: 26px;
+                        font-size: 28px;
                     }
 
                     .divider {
@@ -101,18 +101,18 @@ export default function PosDetailModal({data, onClose} : {
                     .item {
                         display: flex;
                         justify-content: space-between;
-                        font-size: 20px; /* 🔥 NAIKKAN */
+                        font-size: 22px; /* 🔥 NAIKKAN */
                         margin: 6px 0;
                     }
 
                     .total {
                         font-weight: bold;
-                        font-size: 22px;
+                        font-size: 24px;
                     }
 
                     .meta {
-                        font-size: 20px;
-                        margin-top: 10px;
+                        font-size: 22px;
+                        margin-top: 20px;
                         display: flex;
                         justify-content: space-between;
                     }
@@ -162,7 +162,7 @@ export default function PosDetailModal({data, onClose} : {
 
                     <div class="divider"></div>
 
-                    <div class="center">
+                    <div class="center meta">
                         Terima Kasih 🙏
                     </div>
                 </div>
