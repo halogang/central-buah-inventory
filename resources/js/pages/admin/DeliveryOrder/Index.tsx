@@ -100,7 +100,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
 
     const [activeTab, setActiveTab] = useState<"in" | "out">(isStaffAntar ? "out" : "in")
     const [search, setSearch] = useState("")
-    const [month, setMonth] = useState<number>(-1)
+    const [month, setMonth] = useState<number>(0)
     const [year, setYear] = useState<number>(0)
 
     const [openForm, setOpenForm] = useState(false)
@@ -181,10 +181,10 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
     // Helper function to check if date matches selected month and year
     const matchesMonthYear = (dateString: string, selectedMonth: number, selectedYear: number) => {
         const date = new Date(dateString)
-        const dateMonth = date.getMonth()
+        const dateMonth = date.getMonth() + 1
         const dateYear = date.getFullYear()
         
-        const monthMatch = selectedMonth === -1 || dateMonth === selectedMonth
+        const monthMatch = selectedMonth === 0 || dateMonth === selectedMonth
         const yearMatch = selectedYear === 0 || dateYear === selectedYear
         
         return monthMatch && yearMatch

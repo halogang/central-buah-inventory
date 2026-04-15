@@ -53,7 +53,7 @@ export default function Index() {
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
 
     const [search, setSearch] = useState('')
-    const [month, setMonth] = useState<number>(-1)
+    const [month, setMonth] = useState<number>(0)
     const [year, setYear] = useState<number>(0)
 
     const [dateFrom, setDateFrom] = useState("")
@@ -102,10 +102,10 @@ export default function Index() {
     // 🔥 FILTER
     const matchesMonthYear = (dateString: string, selectedMonth: number, selectedYear: number) => {
         const date = new Date(dateString)
-        const dateMonth = date.getMonth()
+        const dateMonth = date.getMonth() + 1 // ✅ FIX
         const dateYear = date.getFullYear()
         
-        const monthMatch = selectedMonth === -1 || dateMonth === selectedMonth
+        const monthMatch = selectedMonth === 0 || dateMonth === selectedMonth
         const yearMatch = selectedYear === 0 || dateYear === selectedYear
         
         return monthMatch && yearMatch
@@ -319,12 +319,12 @@ export default function Index() {
                                     </span>
 
                                     <div className="flex gap-2 items-center">
-                                        {can('finance.update') && (
+                                        {can('finance.update') && (t.type === 'expense' || can('finance.create.income')) && (
                                             <button onClick={() => openEdit(t)}>
                                                 <Pencil className="size-4"/>
                                             </button>
                                         )}
-                                        {can('finance.delete') && (
+                                        {can('finance.delete') && (t.type === 'expense' || can('finance.create.income')) && (
                                             <button onClick={() => confirmDelete(t)}>
                                                 <Trash2 className="size-4 text-red-500"/>
                                             </button>

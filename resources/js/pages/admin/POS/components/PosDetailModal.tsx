@@ -54,12 +54,21 @@ export default function PosDetailModal({data, onClose} : {
             <head>
             <title>Struk</title>
             <style>
-                body {
-                font-family: monospace;
-                width: 280px;
-                margin: 0 auto;
-                padding: 10px;
-                font-size: 14px;
+                @media print {
+                    @page {
+                        size: 58mm auto;
+                        margin: 0;
+                    }
+                    body {
+                        font-family: monospace;
+                        width: 58mm;
+                        margin: 0;
+                        padding: 8px;
+                        font-size: 12px;
+                    }
+                    container {
+                        width: 100%;
+                    }
                 }
 
                 .center {
@@ -67,31 +76,30 @@ export default function PosDetailModal({data, onClose} : {
                 }
 
                 .logo {
-                width: 50px;
-                margin: 0 auto 8px;
+                width: 40px;
+                margin: 0 auto 6px;
                 }
 
                 .divider {
                 border-top: 1px dashed #000;
-                margin: 8px 0;
+                margin: 6px 0;
                 }
 
                 .item {
                 display: flex;
                 justify-content: space-between;
-                margin: 4px 0;
+                font-size: 12px;
+                margin: 2px 0;
                 }
 
                 .total {
                 font-weight: bold;
-                font-size: 16px;
+                font-size: 14px;
                 }
 
                 .meta {
-                display: flex;
-                justify-content: space-between;
-                font-size: 12px;
-                margin-top: 6px;
+                font-size: 10px;
+                margin-top: 4px;
                 }
             </style>
             </head>
