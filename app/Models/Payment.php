@@ -15,6 +15,8 @@ class Payment extends Model
         'date'
     ];
 
+    protected $appends = ['evidence_url'];
+
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);

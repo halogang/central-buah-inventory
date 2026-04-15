@@ -6,27 +6,43 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatCurrency, formatNumber } from "@/helpers/format"
 import { notify } from "@/lib/notify"
-import { store } from "@/routes/transactions/payments"
+import { store, update } from "@/routes/transactions/payments"
 
-export default function Payment({ invoice, paymentMethods, onClose, onSuccess }: any) {
+export default function Payment({ invoice, paymentMethods, onClose, onSuccess, editingPayment }: any) {
 
-    const [form, setForm] = useState({
-        invoice_id: invoice.id,
-        amount: "",
+    const isEditing = !!editingPayment
+
+    const emptyForm = {
+        invoice_id: '',
+        amount: null,
         payment_method_id: "",
         note: "",
         evidence: null as File | null,
         evidence_url: null as File | null,
-    })
+    };
+
+    const [form, setForm] = useState(
+        invoice && editingPayment ? {
+            invoice_id: invoice.id,
+            amount: editingPayment.amount.toString(),
+            payment_method_id: editingPayment.payment_method_id.toString(),
+            note: editingPayment.note || "",
+            evidence: null as File | null, // 🔥 penting
+            evidence_url: editingPayment.evidence_url, // simpan url lama
+        } : emptyForm
+    )
 
     const submitForm = (e: React.FormEvent) => {
         e.preventDefault()
 
-        router.post(store(), form, {
+        const route = isEditing ? update(editingPayment.id) : store()
+        const method = isEditing ? 'put' : 'post'
+
+        router[method](route, form, {
             forceFormData: true,
             onSuccess: (page) => {
 
-                notify.success("Pembayaran berhasil")
+                notify.success(isEditing ? "Pembayaran berhasil diupdate" : "Pembayaran berhasil")
 
                 const updatedInvoice = page.props.invoice
 
@@ -50,7 +66,7 @@ export default function Payment({ invoice, paymentMethods, onClose, onSuccess }:
                 {/* HEADER */}
                 <div className="flex items-center justify-between p-4 border-b shrink-0">
                     <h2 className="font-semibold text-lg">
-                        {invoice.invoiceNumber}
+                        {isEditing ? 'Edit Pembayaran' : 'Input Pembayaran'} - {invoice.invoiceNumber}
                     </h2>
                     <button onClick={onClose}>
                         <X className="w-5 h-5 cursor-pointer" />
@@ -117,7 +133,7 @@ export default function Payment({ invoice, paymentMethods, onClose, onSuccess }:
                                     }
                                     className={`
                                         flex items-center gap-2 border rounded-lg p-3 transition cursor-pointer
-                                        ${form.payment_method_id === method.id
+                                        ${String(form.payment_method_id) === String(method.id)
                                             ? "bg-primary/10 border-primary"
                                             : "hover:bg-primary/10"}
                                     `}
@@ -164,9 +180,17 @@ export default function Payment({ invoice, paymentMethods, onClose, onSuccess }:
                             label=""
                             title="Tap untuk upload"
                             icon="camera"
-                            preview={form.evidence ? URL.createObjectURL(form.evidence) : undefined}
+                            preview={
+                                form.evidence
+                                    ? URL.createObjectURL(form.evidence) // 🔥 preview file baru
+                                    : form.evidence_url // fallback ke lama
+                            }
                             onChange={(file) =>
-                                setForm({ ...form, evidence: file })
+                                setForm({ 
+                                    ...form, 
+                                    evidence: file,
+                                    evidence_url: null // 🔥 reset url lama biar gak bentrok
+                                })
                             }
                             hint="maksimal 2MB"
                         />
@@ -188,7 +212,7 @@ export default function Payment({ invoice, paymentMethods, onClose, onSuccess }:
                             type="submit"
                             className="w-full cursor-pointer"
                         >
-                            Simpan Pembayaran
+                            {isEditing ? 'Update Pembayaran' : 'Simpan Pembayaran'}
                         </Button>
 
                     </div>

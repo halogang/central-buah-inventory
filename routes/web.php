@@ -131,6 +131,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/payments', [PaymentController::class, 'store'])
             ->name('transactions.payments.store')
             ->middleware('permission:invoice.payment'); // ⬅️ penting
+            
+        Route::put('/payments/{payment}', [PaymentController::class, 'update'])
+            ->name('transactions.payments.update');
 
     });
 

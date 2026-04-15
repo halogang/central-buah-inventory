@@ -40,7 +40,7 @@ export default function PosDetailModal({data, onClose} : {
                 (item) => `
                 <div class="item">
                     <div>${item.item_name} x${item.quantity}</div>
-                    <div>${item.total.toLocaleString("id-ID")}</div>
+                    <div>${formatCurrency(item.total)}</div>
                 </div>
             `
             )

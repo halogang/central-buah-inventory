@@ -53,6 +53,7 @@ interface InvoicePayment {
     paymentMethod?: PaymentMethod
     note: string
     evidence?: string
+    evidence_url?: string
     date: string
 }
 
@@ -99,6 +100,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
 
     const [openShow, setOpenShow] = useState(false)
     const [selected, setSelected] = useState(null)
+    const [editingPayment, setEditingPayment] = useState(null)
 
     const openDetail = (data : any) => {
         setSelected(data)
@@ -353,6 +355,12 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                     paymentMethods={paymentMethods} 
                     data={selected} 
                     onClose={() => setOpenShow(false)}
+                    setOpenPayment={() => {
+                        setOpenShow(false)
+                        setOpenPayment(true)
+                    }}
+                    editingPayment={editingPayment}
+                    setEditingPayment={setEditingPayment}
                 />
             )}
 
@@ -360,7 +368,14 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                 <Payment 
                     invoice={selected} 
                     paymentMethods={paymentMethods}
-                    onClose={() => setOpenPayment(false)}
+                    onClose={() => {
+                        setOpenPayment(false)
+                        setEditingPayment(null)
+                    }}
+                    onSuccess={(updatedInvoice: any) => {
+                        setSelected(updatedInvoice)
+                    }}
+                    editingPayment={editingPayment}
                 />
             )}
 

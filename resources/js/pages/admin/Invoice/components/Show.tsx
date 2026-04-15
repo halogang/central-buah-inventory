@@ -1,22 +1,21 @@
-import { CircleCheck, CreditCard, Image, Printer, X } from "lucide-react"
+import { CircleCheck, CreditCard, Image, PenBox, Printer, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/helpers/format"
-import Payment from "./Payment"
 import { useCan } from "@/utils/permissions"
 
 
-export default function Show({data, paymentMethods, onClose}: any) {
+export default function Show({data, setOpenPayment, onClose, editingPayment, setEditingPayment}: any) {
     const can = useCan();
 
     const [invoice, setInvoice] = useState(data)
     
-    const [openPayment, setOpenPayment] = useState(false)
     const [openEvidence, setOpenEvidence] = useState(false)
     const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null)
 
-    const openPayModal = () => {
-        setOpenPayment(true)
+    const handleEditPayment = (payment: any) => {
+        setEditingPayment(payment)
+        setOpenPayment()
     }
 
     return (
@@ -182,7 +181,11 @@ export default function Show({data, paymentMethods, onClose}: any) {
                                     )}
 
                                     <CircleCheck className="size-5 text-primary" />
-
+                                    <button
+                                        onClick={() => handleEditPayment(payment)}
+                                    >
+                                        <PenBox className="size-5 text-yellow-500 ml-2" />
+                                    </button>
                                 </div>
 
                             </div>
@@ -219,7 +222,7 @@ export default function Show({data, paymentMethods, onClose}: any) {
                         <Button
                             variant="default"
                             className="w-full cursor-pointer"
-                            onClick={() => openPayModal()}
+                            onClick={setOpenPayment}
                         >
                             <CreditCard className="size-4" />
                             Input Pembayaran
@@ -230,14 +233,6 @@ export default function Show({data, paymentMethods, onClose}: any) {
             </div>
         </div>
 
-        {openPayment && (
-            <Payment
-                invoice={invoice}
-                paymentMethods={paymentMethods}
-                onClose={() => setOpenPayment(false)}
-                onSuccess={(updatedInvoice: any) => setInvoice(updatedInvoice)}
-            />
-        )}
         {openEvidence && selectedEvidence && (
             <div
                 className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-6"

@@ -138,7 +138,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         return `
           <div class="item">
             <div>${item.product.name} x${item.qty}</div>
-            <div>${(price * item.qty).toLocaleString("id-ID")}</div>
+            <div>${formatCurrency(price * item.qty)}</div>
           </div>
         `;
       })
