@@ -149,73 +149,79 @@ const breadcrumbs: BreadcrumbItem[] = [
         <head>
             <title>Struk</title>
             <style>
-                @media print {
-                    @page {
-                        size: A4;
-                        margin: 0;
-                    }
+              @media print {
+                  @page {
+                      size: A4;
+                      margin: 0;
+                  }
 
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-                }
+                  body {
+                      margin: 0;
+                      padding: 0;
+                  }
+              }
 
-                body {
-                    font-family: monospace;
-                    background: white;
-                }
+              body {
+                  font-family: monospace;
+                  background: white;
+              }
 
-                .container {
-                    /* lebar struk */
-                    margin: 0 12px;
-                    /* 🔥 CENTER */
-                    padding: 20px 12px 10px; /* 🔥 tambah atas */
-                }
+              .container {
+                  padding: 40px 30px;
+                  margin: 0 auto;   /* 🔥 center di A4 */
+              }
 
-                .center {
-                    text-align: center;
-                }
+              .center {
+                  text-align: center;
+              }
 
-                .logo {
-                    width: 40px;
-                    margin: 0 auto 6px;
-                }
+              .logo img {
+                  width: 80px; /* 🔥 BESARKAN LOGO */
+              }
 
-                .divider {
-                    border-top: 1px dashed #000;
-                    margin: 6px 0;
-                }
+              .title {
+                  font-size: 18px;
+                  font-weight: bold;
+              }
 
-                .item {
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 12px;
-                    margin: 2px 0;
-                }
+              .subtitle {
+                  font-size: 14px;
+              }
 
-                .total {
-                    font-weight: bold;
-                    font-size: 14px;
-                }
+              .divider {
+                  border-top: 2px dashed #000;
+                  margin: 10px 0;
+              }
 
-                .meta {
-                    font-size: 10px;
-                    margin-top: 4px;
-                }
-            </style>
+              .item {
+                  display: flex;
+                  justify-content: space-between;
+                  font-size: 14px; /* 🔥 NAIKKAN */
+                  margin: 6px 0;
+              }
+
+              .total {
+                  font-weight: bold;
+                  font-size: 16px;
+              }
+
+              .meta {
+                  font-size: 12px;
+                  margin-top: 10px;
+                  display: flex;
+                  justify-content: space-between;
+              }
+          </style>
         </head>
 
         <body class="container">
             <div class="container">
                 <div class="center">
                     <div class="logo">
-                        <img src="/logo.png" width="50"/>
+                        <img src="/logo.png" />
                     </div>
-                    <div>
-                        <strong>Central Buah</strong>
-                    </div>
-                    <div>POS Kasir</div>
+                    <div class="title">Central Buah</div>
+                    <div class="subtitle">POS Kasir</div>
                 </div>
 
                 <div class="meta">

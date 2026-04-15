@@ -72,39 +72,49 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .container {
-                        margin: 0 auto;
-                        padding: 20px 12px 10px; /* 🔥 tambah atas */
+                        padding: 40px 30px;
+                        margin: 0 auto;   /* 🔥 center di A4 */
                     }
 
                     .center {
                         text-align: center;
                     }
 
-                    .logo {
-                        width: 40px;
-                        margin: 0 auto 6px;
+                    .logo img {
+                        width: 80px; /* 🔥 BESARKAN LOGO */
+                    }
+
+                    .title {
+                        font-size: 18px;
+                        font-weight: bold;
+                    }
+
+                    .subtitle {
+                        font-size: 14px;
                     }
 
                     .divider {
-                        border-top: 1px dashed #000;
-                        margin: 6px 0;
+                        border-top: 2px dashed #000;
+                        margin: 10px 0;
                     }
 
                     .item {
                         display: flex;
                         justify-content: space-between;
-                        font-size: 12px;
-                        margin: 2px 0;
+                        font-size: 14px; /* 🔥 NAIKKAN */
+                        margin: 6px 0;
                     }
 
                     .total {
                         font-weight: bold;
-                        font-size: 14px;
+                        font-size: 16px;
                     }
 
                     .meta {
-                        font-size: 10px;
-                        margin-top: 4px;
+                        font-size: 12px;
+                        margin-top: 10px;
+                        display: flex;
+                        justify-content: space-between;
                     }
                 </style>
             </head>
@@ -113,12 +123,10 @@ export default function PosDetailModal({data, onClose} : {
                 <div class="container">
                     <div class="center">
                         <div class="logo">
-                            <img src="/logo.png" width="50"/>
+                            <img src="/logo.png" />
                         </div>
-                        <div>
-                            <strong>Central Buah</strong>
-                        </div>
-                        <div>POS Kasir</div>
+                        <div class="title">Central Buah</div>
+                        <div class="subtitle">POS Kasir</div>
                     </div>
 
                     <div class="meta">
