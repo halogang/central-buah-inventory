@@ -85,12 +85,12 @@ export default function PosDetailModal({data, onClose} : {
                     }
 
                     .title {
-                        font-size: 18px;
+                        font-size: 30px;
                         font-weight: bold;
                     }
 
                     .subtitle {
-                        font-size: 14px;
+                        font-size: 24px;
                     }
 
                     .divider {
@@ -101,17 +101,17 @@ export default function PosDetailModal({data, onClose} : {
                     .item {
                         display: flex;
                         justify-content: space-between;
-                        font-size: 14px; /* 🔥 NAIKKAN */
+                        font-size: 18px; /* 🔥 NAIKKAN */
                         margin: 6px 0;
                     }
 
                     .total {
                         font-weight: bold;
-                        font-size: 16px;
+                        font-size: 20px;
                     }
 
                     .meta {
-                        font-size: 12px;
+                        font-size: 18px;
                         margin-top: 10px;
                         display: flex;
                         justify-content: space-between;
