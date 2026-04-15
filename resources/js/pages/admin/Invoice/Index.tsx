@@ -1,4 +1,4 @@
-import {Head} from "@inertiajs/react";
+import {Head, router} from "@inertiajs/react";
 import {
     ArrowDownLeft,
     ArrowUpRight,
@@ -20,6 +20,8 @@ import type {BreadcrumbItem} from '@/types';
 import Payment from "./components/Payment";
 import Show from "./components/Show";
 import { useCan } from "@/utils/permissions";
+import { notify } from "@/lib/notify";
+import { destroy } from "@/routes/transactions/payments";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -122,6 +124,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
             invoice.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
             invoice.customer.toLowerCase().includes(search.toLowerCase())
     )
+    
 
     const {
         currentPage,
@@ -129,6 +132,28 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
         paginatedData,
         goTo,
     } = usePagination(filteredInvoices, 6)
+
+    const handleDeletePayment = (payment: any) => {
+        // ✅ CLOSE MODAL
+        setOpenShow(false)
+        
+        const loading = notify.loading("Menghapus pembayaran...")
+
+        router.delete(destroy(payment.id), {
+            onSuccess: () => {
+                notify.dismiss(loading)
+                notify.success("Pembayaran berhasil dihapus")
+
+
+                // optional: reset selected
+                setSelected(null)
+            },
+            onError: () => {
+                notify.dismiss(loading)
+                notify.error("Gagal menghapus pembayaran")
+            },
+        })
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -361,6 +386,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                     }}
                     editingPayment={editingPayment}
                     setEditingPayment={setEditingPayment}
+                    onDeletePayment={handleDeletePayment}
                 />
             )}
 

@@ -1,11 +1,20 @@
-import { CircleCheck, CreditCard, Image, PenBox, Printer, X } from "lucide-react"
+import { CircleCheck, CreditCard, Image, PenBox, Printer, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/helpers/format"
 import { useCan } from "@/utils/permissions"
+import { router } from "@inertiajs/react"
+import { notify } from "@/lib/notify"
 
 
-export default function Show({data, setOpenPayment, onClose, editingPayment, setEditingPayment}: any) {
+export default function Show({
+    data,
+    setOpenPayment,
+    onClose,
+    editingPayment,
+    setEditingPayment,
+    onDeletePayment = () => {}
+} : any) {
     const can = useCan();
 
     const [invoice, setInvoice] = useState(data)
@@ -17,6 +26,46 @@ export default function Show({data, setOpenPayment, onClose, editingPayment, set
         setEditingPayment(payment)
         setOpenPayment()
     }
+
+    // const handleDeletePayment = (payment: any) => {
+    //     if (!confirm("Yakin ingin menghapus pembayaran ini?")) return
+
+    //     router.delete(route('payments.destroy', payment.id), {
+    //         onSuccess: (page) => {
+    //             const updatedInvoice = page.props.invoice
+    //             if (updatedInvoice) {
+    //                 setInvoice(updatedInvoice)
+    //             }
+    //         }
+    //     })
+    // }
+
+    const confirmDelete = (payment: any) => {
+        notify.confirmDelete({
+            message: `Hapus pembayaran ini?`,
+            onConfirm: () => {
+                if (typeof onDeletePayment !== "function") {
+                    console.error("onDeletePayment is not a function", onDeletePayment)
+                    return
+                }
+                onDeletePayment(payment)
+            },
+        })
+    }
+    // const performDelete = (payment: any) => {
+    //     const loading = notify.loading("Menghapus pembayaran...")
+
+    //     router.delete(destroy(payment.id), {
+    //         onSuccess: () => {
+    //             notify.dismiss(loading)
+    //             notify.success(`Pembayaran berhasil dihapus`)
+    //         },
+    //         onError: () => {
+    //             notify.dismiss(loading)
+    //             notify.error(`Gagal menghapus pembayaran`)
+    //         },
+    //     })
+    // }
 
     return (
         <>
@@ -185,6 +234,11 @@ export default function Show({data, setOpenPayment, onClose, editingPayment, set
                                         onClick={() => handleEditPayment(payment)}
                                     >
                                         <PenBox className="size-5 text-yellow-500 ml-2" />
+                                    </button>
+                                    <button
+                                        onClick={() => confirmDelete(payment)}
+                                    >
+                                        <Trash2 className="size-5 text-red-500" />
                                     </button>
                                 </div>
 

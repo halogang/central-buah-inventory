@@ -126,14 +126,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('invoice', InvoiceController::class)
         ->middleware('permission:invoice.index|invoice.create|invoice.update|invoice.delete');
     
-    Route::prefix('transactions')->group(function () {
+    Route::prefix('transactions')->name('transactions.')->group(function () {
 
-        Route::post('/payments', [PaymentController::class, 'store'])
-            ->name('transactions.payments.store')
-            ->middleware('permission:invoice.payment'); // ⬅️ penting
-            
-        Route::put('/payments/{payment}', [PaymentController::class, 'update'])
-            ->name('transactions.payments.update');
+        // Route::post('/payments', [PaymentController::class, 'store'])
+        //     ->name('payments.store')
+        //     ->middleware('permission:invoice.payment'); // ⬅️ penting
+
+        // Route::put('/payments/{payment}', [PaymentController::class, 'update'])
+        //     ->name('payments.update');
+
+        // Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])
+        //     ->name('payments.destroy');       
+        
+
+        Route::resource('payments', PaymentController::class);
 
     });
 

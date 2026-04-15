@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatCurrency, formatNumber } from "@/helpers/format"
 import { notify } from "@/lib/notify"
-import { store, update } from "@/routes/transactions/payments"
+import { store, update } from "@/routes/transactions/payments" 
 
 export default function Payment({ invoice, paymentMethods, onClose, onSuccess, editingPayment }: any) {
 
     const isEditing = !!editingPayment
 
     const emptyForm = {
-        invoice_id: '',
+        invoice_id: invoice?.id,
         amount: null,
         payment_method_id: "",
         note: "",

@@ -135,4 +135,42 @@ class PaymentController extends Controller
 
         return back()->with(['success' => 'Pembayaran berhasil diperbarui', 'invoice' => $invoice->fresh(['payments'])]);
     }
+
+    public function destroy(Payment $payment)
+    {
+        $invoice = $payment->invoice;
+
+        DB::transaction(function () use ($payment, $invoice) {
+
+            // 🧹 hapus evidence kalau ada
+            if ($payment->evidence && File::exists(public_path($payment->evidence))) {
+                File::delete(public_path($payment->evidence));
+            }
+
+            // ❌ delete payment
+            $payment->delete();
+
+            // 🔁 hitung ulang invoice
+            $paid = $invoice->payments()->sum('amount');
+            $remaining = $invoice->total - $paid;
+
+            $status = 'unpaid';
+            if ($remaining <= 0) {
+                $status = 'paid';
+            } elseif ($paid > 0) {
+                $status = 'partial';
+            }
+
+            $invoice->update([
+                'paid' => $paid,
+                'remaining' => $remaining,
+                'status' => $status
+            ]);
+        });
+
+        return back()->with([
+            'success' => 'Pembayaran berhasil dihapus',
+            'invoice' => $invoice->fresh(['payments'])
+        ]);
+    }
 }
