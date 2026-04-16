@@ -4,15 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
 use App\Models\Item;
 use App\Models\PettyCashTransaction;
 use App\Models\Pos;
-use App\Models\PosItem;
 use App\Models\StockMovement;
-use App\Models\DeliveryOrderItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ReportController extends Controller
@@ -430,108 +428,185 @@ class ReportController extends Controller
     | PENJUALAN
     |--------------------------------------------------------------------------
     */
+
     private function getPenjualanData($start, $end, $monthFilter)
     {
-        $invoice = InvoiceItem::whereHas('invoice', function ($q) use ($start, $end, $monthFilter) {
-            $q->where('type', 'out');
-            if ($start && $end) $q->whereBetween('date', [$start, $end]);
+        // =========================
+        // 🔥 FILTER FUNCTION
+        // =========================
+        $applyDateFilter = function ($query, $column = 'date') use ($start, $end, $monthFilter) {
             if ($monthFilter) {
-                $q->whereMonth('date', $monthFilter);
+                $query->whereMonth($column, $monthFilter);
+            } elseif ($start && $end) {
+                $query->whereBetween($column, [$start, $end]);
             }
-        })->with('item')->get();
+            return $query;
+        };
 
-        $pos = PosItem::whereHas('pos', function ($q) use ($start, $end, $monthFilter) {
-            if ($start && $end) $q->whereBetween('date', [$start, $end]);
-            if ($monthFilter) {
-                $q->whereMonth('date', $monthFilter);
-            }
-        })->get();
+        // =========================
+        // 🔥 INVOICE (OUT)
+        // =========================
+        $invoiceQuery = DB::table('invoice_items as ii')
+            ->join('invoices as i', 'i.id', '=', 'ii.invoice_id')
+            ->leftJoin('items as it', 'it.id', '=', 'ii.item_id')
+            ->leftJoin('categories as c', 'c.id', '=', 'it.category_id')
+            ->where('i.type', 'out');
 
-        $merged = collect();
+        $invoiceQuery = $applyDateFilter($invoiceQuery, 'i.date');
 
-        foreach ($invoice as $i) {
-            $merged->push([
-                'item_id' => $i->item_id,
-                'name' => $i->item?->name ?? 'Unknown',
-                'qty' => $i->quantity,
-                'revenue' => $i->total,
-                'price' => $i->quantity > 0 ? $i->total / $i->quantity : 0, // 🔥 harga jual
-            ]);
-        }
+        $invoiceQuery = $invoiceQuery->selectRaw("
+            ii.item_id,
+            it.name as name,
+            COALESCE(c.name, 'Lainnya') as category,
+            SUM(ii.quantity) as qty,
+            SUM(ii.total) as revenue,
+            AVG(ii.total / NULLIF(ii.quantity,0)) as avg_price
+        ")
+        ->groupBy('ii.item_id', 'it.name', 'c.name');
 
-        foreach ($pos as $p) {
-            $merged->push([
-                'item_id' => $p->item_id ?? null, // ⚠️ pastikan ada
-                'name' => $p->item_name,
-                'qty' => $p->quantity,
-                'revenue' => $p->total,
-                'price' => $p->quantity > 0 ? $p->total / $p->quantity : 0,
-            ]);
-        }
+        // =========================
+        // 🔥 POS
+        // =========================
+        $posQuery = DB::table('pos_items as pi')
+            ->join('pos as p', 'p.id', '=', 'pi.pos_id')
+            ->leftJoin('items as it', 'it.name', '=', 'pi.item_name') // ⚠️ mapping by name
+            ->leftJoin('categories as c', 'c.id', '=', 'it.category_id');
 
-        $doItems = DeliveryOrderItem::whereHas('deliveryOrder', function ($q) use ($start, $end, $monthFilter) {
-            $q->where('type', 'in'); // 🔥 pembelian
+        $posQuery = $applyDateFilter($posQuery, 'p.date');
 
-            if ($start && $end) {
-                $q->whereBetween('date', [$start, $end]);
-            }
+        $posQuery = $posQuery->selectRaw("
+            it.id as item_id,
+            pi.item_name as name,
+            COALESCE(c.name, 'Lainnya') as category,
+            SUM(pi.quantity) as qty,
+            SUM(pi.total) as revenue,
+            AVG(pi.total / NULLIF(pi.quantity,0)) as avg_price
+        ")
+        ->groupBy('it.id', 'pi.item_name', 'c.name');
 
-            if ($monthFilter) {
-                $q->whereMonth('date', $monthFilter);
-            }
-        })->get()
-        ->groupBy('item_id');
+        // =========================
+        // 🔥 UNION ALL (SUPER PENTING)
+        // =========================
+        $sales = DB::query()
+            ->fromSub(
+                $invoiceQuery->unionAll($posQuery),
+                'sales'
+            )
+            ->selectRaw("
+                item_id,
+                name,
+                category,
+                SUM(qty) as terjual,
+                SUM(revenue) as revenue,
+                AVG(avg_price) as avg_jual
+            ")
+            ->groupBy('item_id', 'name', 'category')
+            ->get();
 
-        $grouped = $merged->groupBy('name')->map(function ($items) use ($doItems) {
+        // =========================
+        // 🔥 HARGA BELI (DO)
+        // =========================
+        $doQuery = DB::table('delivery_order_items as doi')
+            ->join('delivery_orders as d', 'd.id', '=', 'doi.delivery_order_id')
+            ->where('d.type', 'in');
 
-            $itemId = $items->first()['item_id'];
+        $doQuery = $applyDateFilter($doQuery, 'd.date');
 
-            // 🔥 avg harga jual
-            $avgJual = $items->avg('price');
+        $doItems = $doQuery
+            ->selectRaw("
+                doi.item_id,
+                AVG(doi.price) as avg_beli
+            ")
+            ->groupBy('doi.item_id')
+            ->pluck('avg_beli', 'item_id');
 
-            // 🔥 avg harga beli (dari DO)
-            $avgBeli = 0;
+        // =========================
+        // 🔥 FINAL MAP (RINGAN BANGET)
+        // =========================
+        $data = collect($sales)->map(function ($item) use ($doItems) {
 
-            if ($itemId && isset($doItems[$itemId])) {
-                $avgBeli = $doItems[$itemId]->avg('price');
-            }
+            $avgBeli = $doItems[$item->item_id] ?? 0;
+            $laba = $item->avg_jual - $avgBeli;
 
             return [
-                'produk' => $items->first()['name'],
-                'avg_jual' => round($avgJual),
+                'produk' => $item->name,
+                'kategori' => $item->category,
+                'avg_jual' => round($item->avg_jual),
                 'avg_beli' => round($avgBeli),
-                'terjual' => $items->sum('qty'),
-                'revenue' => $items->sum('revenue'),
-                'margin' => $avgJual - $avgBeli,
-                'margin_percent' => $avgBeli > 0 
-                    ? round((($avgJual - $avgBeli) / $avgBeli) * 100, 1) 
+                'terjual' => (int) $item->terjual,
+                'revenue' => (int) $item->revenue,
+                'margin' => $laba,
+                'margin_percent' => $avgBeli > 0
+                    ? round(($laba / $avgBeli) * 100, 1)
                     : 0,
             ];
-        })->values();
+        });
 
-        $totalRevenue = $grouped->sum('revenue');
+        // =========================
+        // 🔥 SUMMARY
+        // =========================
+        $totalRevenue = $data->sum('revenue');
 
         $totalOrder =
-            Invoice::where('type', 'out')->count() +
-            Pos::count();
+            DB::table('invoices')
+                ->where('type', 'out')
+                ->when($start && $end, fn($q) => $q->whereBetween('date', [$start, $end]))
+                ->when($monthFilter, fn($q) => $q->whereMonth('date', $monthFilter))
+                ->count()
+            +
+            DB::table('pos')
+                ->when($start && $end, fn($q) => $q->whereBetween('date', [$start, $end]))
+                ->when($monthFilter, fn($q) => $q->whereMonth('date', $monthFilter))
+                ->count();
+
+        // =========================
+        // 🔥 CHART PRODUK
+        // =========================
+        $chart = $data
+            ->sortByDesc('terjual')
+            ->take(10)
+            ->map(fn ($i) => [
+                'name' => $i['produk'],
+                'value' => $i['terjual'],
+            ])
+            ->values();
+
+        // =========================
+        // 🔥 DONUT KATEGORI
+        // =========================
+        $categories = $data
+            ->groupBy('kategori')
+            ->map(fn ($items) => $items->sum('revenue'))
+            ->map(fn ($value, $name) => [
+                'name' => $name,
+                'value' => $totalRevenue > 0
+                    ? round(($value / $totalRevenue) * 100, 1)
+                    : 0,
+                'amount' => $value,
+            ])
+            ->sortByDesc('value')
+            ->values();
+
+        // =========================
+        // 🔥 TABLE
+        // =========================
+        $table = $data->map(fn ($i) => [
+            ...$i,
+            'persen' => $totalRevenue > 0
+                ? round(($i['revenue'] / $totalRevenue) * 100, 1)
+                : 0,
+        ]);
 
         return [
             'summary' => [
-                'totalTerjual' => $grouped->sum('terjual'),
+                'totalTerjual' => $data->sum('terjual'),
                 'revenue' => $totalRevenue,
-                'badStock' => Item::sum('bad_stock'),
+                'badStock' => DB::table('items')->sum('bad_stock'),
                 'avgOrder' => $totalOrder > 0 ? $totalRevenue / $totalOrder : 0,
             ],
-            'chart' => $grouped->map(fn ($i) => [
-                'name' => $i['produk'],
-                'value' => $i['terjual'],
-            ]),
-            'table' => $grouped->map(fn ($i) => [
-                ...$i,
-                'persen' => $totalRevenue > 0
-                    ? round(($i['revenue'] / $totalRevenue) * 100, 1)
-                    : 0,
-            ]),
+            'chart' => $chart,
+            'categories' => $categories,
+            'table' => $table,
         ];
     }
 

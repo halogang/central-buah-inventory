@@ -5,11 +5,17 @@ import { SummaryCard } from "@/components/report/SummaryCard";
 import { TableLaporan } from "@/components/report/TableLaporan";
 import { formatCurrency } from "@/helpers/format";
 
-const categoryData = [
-  { name: "Buah Lokal", value: 45, color: "#10B981" },
-  { name: "Buah Import", value: 25, color: "#059669" },
-  { name: "Buah Potong", value: 20, color: "#111827" },
-  { name: "Paket Parcel", value: 10, color: "#6B7280" },
+const COLORS = [
+  "#10B981", // green
+  "#059669",
+  "#34D399",
+  "#6B7280", // gray
+  "#9CA3AF",
+  "#111827", // dark
+  "#6366F1", // indigo
+  "#8B5CF6", // purple
+  "#F59E0B", // amber
+  "#EF4444", // red
 ];
 
 const formatRp = (v: number) => `Rp ${v.toLocaleString("id-ID")}`;
@@ -44,6 +50,11 @@ export function TabPenjualan({ data }: { data: any }) {
     },
   ];
 
+  const categoriesWithColor = data.categories.map((item: any, index: number) => ({
+    ...item,
+    color: COLORS[index % COLORS.length],
+  }));
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -62,7 +73,7 @@ export function TabPenjualan({ data }: { data: any }) {
           />
         </div>
         <div className="lg:col-span-2">
-          <ChartDonut title="Penjualan per Kategori" data={categoryData} />
+          <ChartDonut title="Penjualan per Kategori" data={categoriesWithColor} />
         </div>
       </div>
 

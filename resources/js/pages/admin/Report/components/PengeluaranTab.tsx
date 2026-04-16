@@ -10,7 +10,7 @@ const breakdownData = [
   { category: "Transportasi", amount: 3000000, persen: "8%" },
 ];
 
-const trendData = [
+const trendData = [ 
   { name: "Sep", stok: 20000000, operasional: 8000000, gaji: 5000000 },
   { name: "Okt", stok: 22000000, operasional: 7500000, gaji: 5000000 },
   { name: "Nov", stok: 21000000, operasional: 8500000, gaji: 5000000 },
