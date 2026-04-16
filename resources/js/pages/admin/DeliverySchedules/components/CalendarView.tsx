@@ -21,6 +21,8 @@ const statusDot: Record<string, string> = {
 const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props) => {
   const can = useCan();
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
   const [showMoreModal, setShowMoreModal] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<DeliveryOrder[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -78,13 +80,13 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
           const events = cell.dateStr ? ordersByDate[cell.dateStr] || [] : [];
           const isToday = cell.dateStr === todayStr;
           const canAction = cell.dateStr >= todayStr;
-          const maxShow = 2;
+          const maxShow = isMobile ? 1 : 2;
 
           return (
             <div
               key={i}
               onClick={() => {can('delivery_schedule.create') && canAction && (cell.day && onDateClick(cell.dateStr))}}
-              className={`min-h-27.5 border-t border-r border-border p-1.5 transition-colors ${
+              className={`${isMobile ? "min-h-20 p-1" : "min-h-28 p-1.5"} border-t border-r border-border p-1.5 transition-colors ${
                 !cell.day ? "bg-muted/30" : ""
               } ${i % 7 === 0 ? "border-l-0" : ""}
               ${canAction && cell.day ? " cursor-pointer hover:bg-accent " : "bg-muted/50 "}
@@ -102,25 +104,31 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
                       <button
                         key={ev.id}
                         onClick={(e) => { e.stopPropagation(); onEventClick(ev); }}
-                        className={`w-full text-left rounded-md px-1.5 py-1 text-[10px] leading-tight transition-opacity hover:opacity-80 ${
+                        className={`w-full text-left rounded-md px-1 py-0.5 text-[10px] leading-tight transition-opacity hover:opacity-80 ${
                           ev.type === "in"
                             ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                             : "bg-blue-100 text-blue-800 border border-blue-200"
                         }`}
                       >
                         <div className="flex items-center gap-1">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot[ev.status]}`} />
-                          <span className="font-semibold truncate">
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusDot[ev.status]}`} />
+                          <span className="font-semibold">
                             {ev.type === "in" ? "IN" : "OUT"}
                           </span>
                         </div>
-                        <div className="truncate">
-                          {ev.type === "in" ? ev.supplier_name : ev.customer_name}
-                        </div>
-                        <div className="flex gap-1">
-                          <div className="text-[9px] opacity-70">{ev.items.length} buah</div>
-                          <div className="text-[9px] opacity-70">{calcTotalWeight(ev.items)} kg</div>
-                        </div>
+
+                        {/* ❌ Desktop detail */}
+                        {!isMobile && (
+                          <>
+                            <div className="truncate">
+                              {ev.type === "in" ? ev.supplier_name : ev.customer_name}
+                            </div>
+                            <div className="flex gap-1 text-[9px] opacity-70">
+                              <span>{ev.items.length} buah</span>
+                              <span>{calcTotalWeight(ev.items)} kg</span>
+                            </div>
+                          </>
+                        )}
                       </button>
                     ))}
                     {events.length > maxShow && (
@@ -133,7 +141,7 @@ const CalendarView = ({ currentDate, orders, onEventClick, onDateClick }: Props)
                         }}
                         className="text-[10px] text-primary font-medium pl-1 hover:underline"
                       >
-                        +{events.length - maxShow} lainnya
+                        +{events.length - maxShow}
                       </button>
                     )}
                   </div>

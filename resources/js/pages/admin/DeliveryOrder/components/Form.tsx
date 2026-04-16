@@ -201,7 +201,8 @@ export default function Form({
     }, 0)
 
     const totalWeight = (form?.items || []).reduce((sum: number, item: any) => {
-        const qty = Number(item.quantity || 0)
+        // const qty = Number(item.quantity || 0)
+        const qty = Number(getNetQty(item))
         const cartQty = Number(item.cart_qty || 0)
         const cartWeight = Number(item.cart_weight || 0)
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\DeliveryOrderItem;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\PettyCashTransaction;
@@ -812,9 +813,6 @@ class ReportController extends Controller
     {
         if (!$start || !$end) return [];
 
-        // =========================
-        // 🔥 FORMAT GROUPING SQL
-        // =========================
         $format = match ($groupBy) {
             'daily' => '%Y-%m-%d',
             'monthly' => '%Y-%m',
@@ -823,7 +821,7 @@ class ReportController extends Controller
         };
 
         // =========================
-        // 🔥 INVOICE OUT (PENDAPATAN)
+        // 🔥 PENDAPATAN (INVOICE OUT)
         // =========================
         $invoiceOut = Invoice::query()
             ->selectRaw("
@@ -837,7 +835,7 @@ class ReportController extends Controller
             ->pluck('total', 'period');
 
         // =========================
-        // 🔥 POS (PENDAPATAN TAMBAHAN)
+        // 🔥 POS
         // =========================
         $pos = Pos::query()
             ->selectRaw("
@@ -850,21 +848,24 @@ class ReportController extends Controller
             ->pluck('total', 'period');
 
         // =========================
-        // 🔥 INVOICE IN (HPP)
+        // 🔥 HPP (FIXED)
         // =========================
-        $invoiceIn = Invoice::query()
+        $hpp = DeliveryOrderItem::query()
             ->selectRaw("
-                DATE_FORMAT(date, '{$format}') as period,
-                SUM(total) as total
+                DATE_FORMAT(delivery_orders.date, '{$format}') as period,
+                SUM((delivery_order_items.quantity - delivery_order_items.bad_stock) * items.purchase_price) as total
             ")
-            ->where('type', 'in')
-            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
-            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->join('delivery_orders', 'delivery_orders.id', '=', 'delivery_order_items.delivery_order_id')
+            ->join('items', 'items.id', '=', 'delivery_order_items.item_id')
+            ->where('delivery_orders.type', 'out')
+            ->where('delivery_orders.status', 'done')
+            ->when($start && $end, fn ($q) => $q->whereBetween('delivery_orders.date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('delivery_orders.date', $monthFilter))
             ->groupBy('period')
             ->pluck('total', 'period');
 
         // =========================
-        // 🔥 PETTY CASH (BEBAN OPS)
+        // 🔥 BEBAN
         // =========================
         $petty = PettyCashTransaction::query()
             ->selectRaw("
@@ -878,13 +879,13 @@ class ReportController extends Controller
             ->pluck('total', 'period');
 
         // =========================
-        // 🔥 GENERATE PERIOD LIST
+        // 🔥 PERIOD LOOP
         // =========================
         $periods = collect();
         $current = $start->copy();
 
         while ($current <= $end) {
-            $periodKey = match ($groupBy) {
+            $key = match ($groupBy) {
                 'daily' => $current->format('Y-m-d'),
                 'monthly' => $current->format('Y-m'),
                 'yearly' => $current->format('Y'),
@@ -897,7 +898,7 @@ class ReportController extends Controller
             };
 
             $periods->push([
-                'key' => $periodKey,
+                'key' => $key,
                 'label' => $label,
             ]);
 
@@ -909,41 +910,20 @@ class ReportController extends Controller
         }
 
         // =========================
-        // 🔥 BUILD FINAL DATA
+        // 🔥 FINAL DATA
         // =========================
-        $chart = $periods->map(function ($p) use ($invoiceOut, $pos, $invoiceIn, $petty, $groupBy) {
+        $chart = $periods->map(function ($p) use ($invoiceOut, $pos, $hpp, $petty, $groupBy) {
 
             $pendapatan = (int) ($invoiceOut[$p['key']] ?? 0) + (int) ($pos[$p['key']] ?? 0);
-            $hpp = (int) ($invoiceIn[$p['key']] ?? 0);
+            $hppVal = (int) ($hpp[$p['key']] ?? 0);
             $beban = (int) ($petty[$p['key']] ?? 0);
-            $laba = $pendapatan - $hpp - $beban;
-
-            // 🔥 dynamic label
-            $tanggal = null;
-            $bulan = null;
-
-            if ($groupBy === 'daily') {
-                $tanggal = Carbon::parse($p['key'])->format('d M Y'); // 16 Apr 2026
-                $bulan = Carbon::parse($p['key'])->format('M');       // Apr
-            }
-
-            if ($groupBy === 'monthly') {
-                $bulan = Carbon::parse($p['key'])->format('M Y');     // Apr 2026
-            }
-
-            if ($groupBy === 'yearly') {
-                $bulan = $p['key']; // 2026
-            }
+            $laba = $pendapatan - $hppVal - $beban;
 
             return [
-                'name' => $p['label'], // tetap untuk chart
-                'tanggal' => $tanggal,
-                'bulan' => $bulan,
-
+                'name' => $p['label'],
                 'sort_date' => $p['key'],
-
                 'pendapatan' => $pendapatan,
-                'hpp' => $hpp,
+                'hpp' => $hppVal,
                 'bebanOps' => $beban,
                 'labaBersih' => $laba,
                 'margin' => $pendapatan > 0
@@ -952,9 +932,6 @@ class ReportController extends Controller
             ];
         });
 
-        // =========================
-        // 🔥 SUMMARY (DARI CHART)
-        // =========================
         $summary = $chart->reduce(function ($carry, $item) {
             $carry['pendapatan'] += $item['pendapatan'];
             $carry['hpp'] += $item['hpp'];

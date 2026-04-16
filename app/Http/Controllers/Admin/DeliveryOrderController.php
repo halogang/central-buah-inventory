@@ -160,100 +160,6 @@ class DeliveryOrderController extends Controller
         ]);
     }
 
-    // public function store(Request $request, SignatureService $signatureService, DeliveryOrderService $service)
-    // {
-    //     $validated = $this->validateRequest($request);
-    //     // dd($validated);
-
-    //     DB::transaction(function () use ($validated, $signatureService, $service, $request) {
-
-    //         $doNumber = $service->generateDoNumber($validated['type'], $validated['date']);
-    //         $user = Auth::user();
-
-    //         if ($validated['type'] === 'in') {
-    //             $validated['receiver_name'] = $user->name;
-    //             $validated['receiver_signature'] = $user->signature ?? null;
-
-    //             if ($validated['sender_signature'] && str_contains($validated['sender_signature'], 'base64')) {
-
-    //                 $validated['sender_signature'] =
-    //                     $validated['sender_signature'] = $signatureService->saveBase64(
-    //                         $validated['sender_signature'],
-    //                     );
-    //             }
-    //         } else {
-    //             $sender = User::find($validated['sender_id']);
-    //             $validated['sender_name'] = $sender ? $sender->name : $user->name;
-    //             $validated['sender_signature'] = $sender ? $sender->signature ?? null : $user->signature ?? null;
-
-    //             if ($validated['receiver_signature'] && str_contains($validated['receiver_signature'], 'base64')) {
-    
-    //                 $validated['receiver_signature'] =
-    //                     $validated['receiver_signature'] = $signatureService->saveBase64(
-    //                         $validated['receiver_signature'],
-    //                     );
-    //             }
-    //         }
-
-    //         $deliveryOrder = DeliveryOrder::create([
-    //             ...$validated,
-    //             'do_number' => $doNumber,
-    //         ]);
-
-    //         [$totalAmount, $totalWeight] = $service->handleItems($deliveryOrder, $validated['items']);
-
-    //         if ($validated['status'] === 'done') {
-    //             $service->updateStock($deliveryOrder, $validated['items']);
-    //         }
-
-            
-    //         // update total amount
-    //         $deliveryOrder->update([
-    //             'total_amount' => $totalAmount,
-    //             'total_weight' => $totalWeight
-    //         ]);
-
-    //         /**
-    //          * 🔥 HANDLE MULTIPLE EVIDENCE (HANYA SAAT DONE)
-    //          */
-    //         if ($validated['status'] === 'done' && $request->hasFile('evidence')) {
-
-    //             $paths = [];
-    //             $destination = public_path($this->evidenceUploadPath);
-
-    //             if (!File::exists($destination)) {
-    //                 File::makeDirectory($destination, 0755, true);
-    //             }
-
-    //             $manager = new ImageManager(new Driver());
-
-    //             foreach ($request->file('evidence') as $file) {
-    //                 $fileName = Str::uuid() . '.webp';
-                    
-    //                 $img = $manager->read($file->getRealPath());
-    //                 $img->scale(width: 1200);
-    //                 $img->toWebp(80)->save($destination . '/' . $fileName);
-
-    //                 $paths[] = $this->evidenceSavePath . '/' . $fileName;
-    //             }
-
-    //             $deliveryOrder->update([
-    //                 'evidence' => $paths // otomatis ke-cast json
-    //             ]);
-    //         }
-
-    //         // auto create invoice
-    //         $isInvoiceCreated = Invoice::where('delivery_order_id', $deliveryOrder->id)->exists();
-
-    //         if ($validated['status'] === 'done' && !$isInvoiceCreated) {
-    //             $this->createInvoice($deliveryOrder);
-    //         }
-
-    //     });
-
-    //     return back()->with('success', 'Surat jalan berhasil dibuat');
-    // }
-
     public function store (
         Request $request,
         SignatureService $signatureService,
@@ -375,131 +281,131 @@ class DeliveryOrderController extends Controller
         ]);
     }
 
-        public function update(
-            Request $request,
-            DeliveryOrder $deliveryOrder,
-            SignatureService $signatureService,
-            DeliveryOrderService $service,
-            DeliveryOrderSyncService $syncService,
-            PrepareDeliveryOrderData $prepareData,
-            HandleDeliverySignature $signatureAction,
-            HandleDeliveryEvidence $evidenceAction
+    public function update(
+        Request $request,
+        DeliveryOrder $deliveryOrder,
+        SignatureService $signatureService,
+        DeliveryOrderService $service,
+        DeliveryOrderSyncService $syncService,
+        PrepareDeliveryOrderData $prepareData,
+        HandleDeliverySignature $signatureAction,
+        HandleDeliveryEvidence $evidenceAction
+    ) {
+        $validated = $this->validateRequest($request);
+
+        DB::transaction(function () use (
+            &$validated,
+            $request,
+            $deliveryOrder,
+            $signatureService,
+            $service,
+            $syncService,
+            $prepareData,
+            $signatureAction,
+            $evidenceAction
         ) {
-            $validated = $this->validateRequest($request);
 
-            DB::transaction(function () use (
-                &$validated,
-                $request,
-                $deliveryOrder,
+            /**
+             * 🔥 1. PREPARE DATA
+             */
+            $validated = $prepareData->handle($validated);
+
+            /**
+             * 🔥 2. ROLLBACK STOCK (JIKA SEBELUMNYA DONE)
+             * File: app/Services/DeliveryOrderService.php
+             */
+            if ($deliveryOrder->status === 'done') {
+                $service->rollbackStock($deliveryOrder);
+            }
+
+            /**
+             * 🔥 3. HANDLE SIGNATURE (replace lama)
+             */
+            $validated['sender_signature'] = $signatureAction->handle(
                 $signatureService,
-                $service,
-                $syncService,
-                $prepareData,
-                $signatureAction,
-                $evidenceAction
-            ) {
+                $validated['sender_signature'] ?? null,
+                $deliveryOrder->sender_signature
+            );
 
-                /**
-                 * 🔥 1. PREPARE DATA
-                 */
-                $validated = $prepareData->handle($validated);
+            $validated['receiver_signature'] = $signatureAction->handle(
+                $signatureService,
+                $validated['receiver_signature'] ?? null,
+                $deliveryOrder->receiver_signature
+            );
 
-                /**
-                 * 🔥 2. ROLLBACK STOCK (JIKA SEBELUMNYA DONE)
-                 * File: app/Services/DeliveryOrderService.php
-                 */
-                if ($deliveryOrder->status === 'done') {
-                    $service->rollbackStock($deliveryOrder);
-                }
-
-                /**
-                 * 🔥 3. HANDLE SIGNATURE (replace lama)
-                 */
-                $validated['sender_signature'] = $signatureAction->handle(
-                    $signatureService,
-                    $validated['sender_signature'] ?? null,
-                    $deliveryOrder->sender_signature
+            /**
+             * 🔥 4. HANDLE EVIDENCE (merge existing + new + delete)
+             */
+            if ($validated['status'] === 'done') {
+                $validated['evidence'] = $evidenceAction->handle(
+                    $request,
+                    $deliveryOrder->evidence ?? []
                 );
+            }
 
-                $validated['receiver_signature'] = $signatureAction->handle(
-                    $signatureService,
-                    $validated['receiver_signature'] ?? null,
-                    $deliveryOrder->receiver_signature
+            /**
+             * 🔥 5. UPDATE DELIVERY ORDER
+             */
+            $deliveryOrder->update([
+                ...$validated,
+                'evidence' => $validated['evidence'] ?? $deliveryOrder->evidence,
+            ]);
+
+            /**
+             * 🔥 6. RESET ITEMS
+             */
+            $deliveryOrder->items()->delete();
+
+            /**
+             * 🔥 7. HANDLE ITEMS + HITUNG TOTAL
+             */
+            [$totalAmount, $totalWeight] =
+                $service->handleItems($deliveryOrder, $validated['items']);
+
+            /**
+             * 🔥 8. UPDATE STOCK (JIKA DONE)
+             */
+            if ($validated['status'] === 'done') {
+                $service->updateStock($deliveryOrder, $validated['items']);
+            }
+
+            /**
+             * 🔥 9. UPDATE TOTAL
+             */
+            $deliveryOrder->update([
+                'total_amount' => $totalAmount,
+                'total_weight' => $totalWeight
+            ]);
+
+            /**
+             * 🔥 10. SYNC LINKED DO (KHUSUS DO OUT)
+             * File: app/Services/DeliveryOrderSyncService.php
+             */
+            if ($deliveryOrder->type === 'out') {
+                $syncService->syncFromOut(
+                    $deliveryOrder,
+                    $validated,
+                    $service
                 );
+            }
 
-                /**
-                 * 🔥 4. HANDLE EVIDENCE (merge existing + new + delete)
-                 */
-                if ($validated['status'] === 'done') {
-                    $validated['evidence'] = $evidenceAction->handle(
-                        $request,
-                        $deliveryOrder->evidence ?? []
-                    );
+            /**
+             * 🔥 11. HANDLE INVOICE
+             */
+            $invoice = Invoice::where('delivery_order_id', $deliveryOrder->id);
+
+            if ($validated['status'] === 'done') {
+                if (!$invoice->exists()) {
+                    $this->createInvoice($deliveryOrder);
                 }
+            } else {
+                // downgrade dari DONE → hapus invoice
+                $invoice->delete();
+            }
+        });
 
-                /**
-                 * 🔥 5. UPDATE DELIVERY ORDER
-                 */
-                $deliveryOrder->update([
-                    ...$validated,
-                    'evidence' => $validated['evidence'] ?? $deliveryOrder->evidence,
-                ]);
-
-                /**
-                 * 🔥 6. RESET ITEMS
-                 */
-                $deliveryOrder->items()->delete();
-
-                /**
-                 * 🔥 7. HANDLE ITEMS + HITUNG TOTAL
-                 */
-                [$totalAmount, $totalWeight] =
-                    $service->handleItems($deliveryOrder, $validated['items']);
-
-                /**
-                 * 🔥 8. UPDATE STOCK (JIKA DONE)
-                 */
-                if ($validated['status'] === 'done') {
-                    $service->updateStock($deliveryOrder, $validated['items']);
-                }
-
-                /**
-                 * 🔥 9. UPDATE TOTAL
-                 */
-                $deliveryOrder->update([
-                    'total_amount' => $totalAmount,
-                    'total_weight' => $totalWeight
-                ]);
-
-                /**
-                 * 🔥 10. SYNC LINKED DO (KHUSUS DO OUT)
-                 * File: app/Services/DeliveryOrderSyncService.php
-                 */
-                if ($deliveryOrder->type === 'out') {
-                    $syncService->syncFromOut(
-                        $deliveryOrder,
-                        $validated,
-                        $service
-                    );
-                }
-
-                /**
-                 * 🔥 11. HANDLE INVOICE
-                 */
-                $invoice = Invoice::where('delivery_order_id', $deliveryOrder->id);
-
-                if ($validated['status'] === 'done') {
-                    if (!$invoice->exists()) {
-                        $this->createInvoice($deliveryOrder);
-                    }
-                } else {
-                    // downgrade dari DONE → hapus invoice
-                    $invoice->delete();
-                }
-            });
-
-            return back()->with('success', 'Surat jalan berhasil diperbarui');
-        }
+        return back()->with('success', 'Surat jalan berhasil diperbarui');
+    }
 
     private function generateInvoiceNumber()
     {

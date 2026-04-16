@@ -28,7 +28,14 @@ export default function Show({ data, onClose }: Props) {
             return sum + (cartQty * cartWeight)
         }, 0)
     }
-    const totalWeight = getTotalItemWeight() + getCartWeight()
+    // const totalWeight = getTotalItemWeight() + getCartWeight()
+    const totalWeight = (data?.items || []).reduce((sum: number, item: any) => {
+        const net = Number(getNet(item)) // ✅ pakai net
+        const cartQty = Number(item.cart_qty || 0)
+        const cartWeight = Number(item.cart_weight || 0)
+
+        return sum + net + (cartQty * cartWeight)
+    }, 0)
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
@@ -181,7 +188,7 @@ export default function Show({ data, onClose }: Props) {
                                 TOTAL BERAT
                             </p>
                             <p className="font-semibold text-primary">
-                                {totalWeight}
+                                {totalWeight} kg
                             </p>
                         </div>
 

@@ -275,7 +275,7 @@ export default function DeliveryItemsSection({
             )}
 
             <div className="p-4 rounded-lg bg-primary/10 flex items-center justify-between">
-                <span className="text-sm">Total Berat</span>
+                <span className="text-sm">Total Berat Bersih</span>
                 <span className="text-md font-extrabold text-primary">
                     {formatNumber(totalWeight)} {cartUnit ?? '-'}
                 </span>

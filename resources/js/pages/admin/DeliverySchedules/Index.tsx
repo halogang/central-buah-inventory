@@ -212,58 +212,67 @@ const DeliverySchedule = ({ deliveryOrders, items, carts, suppliers, customers, 
 
       <div className="flex-1 flex flex-col bg-background overflow-hidden">
           {/* Header */}
-          <div className="px-6 pt-6 pb-4 border-b border-border">
-          <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-foreground">Jadwal Surat Jalan</h1>
-              <div className="flex items-center gap-2">
-              {/* Filter */}
-              <div className="flex items-center gap-1 bg-secondary rounded-lg p-1 text-sm">
-                  {(["all", "in", "out"] as const).map((t) => (
+          <div className="px-4 sm:px-6 pt-6 pb-4 border-b border-border space-y-4">
+
+            {/* TITLE */}
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground text-center sm:text-left">
+              Jadwal Surat Jalan
+            </h1>
+
+            {/* FILTER */}
+            <div className="flex justify-center sm:justify-start">
+              <div className="flex items-center gap-1 bg-secondary rounded-lg p-1 text-sm w-full sm:w-auto overflow-x-auto">
+                {(["all", "in", "out"] as const).map((t) => (
                   <button
-                      key={t}
-                      onClick={() => setFilterType(t)}
-                      className={`px-3 py-1.5 rounded-md font-medium transition-colors ${
+                    key={t}
+                    onClick={() => setFilterType(t)}
+                    className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md font-medium transition-colors whitespace-nowrap ${
                       filterType === t
-                          ? "bg-card text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
                   >
-                      {t === "all" ? "Semua" : t === "in" ? "Pembelian" : "Pengiriman"}
+                    {t === "all" ? "Semua" : t === "in" ? "Pembelian" : "Pengiriman"}
                   </button>
-                  ))}
+                ))}
               </div>
-              </div>
-          </div>
+            </div>
 
-          <div className="flex items-center justify-between">
-              {/* Legend */}
-              <div className="flex items-center gap-4 text-sm">
-              <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                  Pembelian (IN)
-              </span>
-              <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-blue-500" />
-                  Pengiriman (OUT)
-              </span>
-              </div>
+            {/* NAVIGATION */}
+            <div className="flex items-center justify-between sm:justify-end gap-2">
 
-              {/* Navigation */}
-              <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={goToday}>
-                  Hari Ini
+                Hari Ini
               </Button>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goPrev}>
+
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={goPrev}>
                   <ChevronLeft size={16} />
-              </Button>
-              <span className="text-sm font-semibold min-w-35 text-center capitalize">
+                </Button>
+
+                <span className="text-xs sm:text-sm font-semibold min-w-22.5 sm:min-w-30 text-center capitalize">
                   {monthLabel}
-              </span>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goNext}>
+                </span>
+
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={goNext}>
                   <ChevronRight size={16} />
-              </Button>
+                </Button>
               </div>
-          </div>
+
+            </div>
+
+            {/* LEGEND */}
+            <div className="flex justify-center sm:justify-start gap-4 text-xs sm:text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                Pembelian
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                Pengiriman
+              </span>
+            </div>
+
           </div>
 
           {/* Calendar */}

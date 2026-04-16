@@ -55,16 +55,23 @@ class DeliveryorderService {
             $before = $product->stock;
 
             if ($deliveryOrder->type === 'in') {
+
                 $product->increment('stock', $cleanQty);
 
                 if ($badStock > 0) {
                     $product->increment('bad_stock', $badStock);
                 }
-
+                
                 $type = 'in';
-
+                
             } else {
+
                 $product->decrement('stock', $cleanQty);
+
+                if ($badStock > 0) {
+                    // 🔥 TAMBAHAN
+                    $product->increment('bad_stock', $badStock);
+                }
                 $type = 'out';
             }
 
@@ -94,6 +101,7 @@ class DeliveryorderService {
             $cleanQty = $item->quantity - $item->bad_stock;
 
             if ($deliveryOrder->type === 'in') {
+
                 $product->decrement('stock', $cleanQty);
 
                 if ($item->bad_stock > 0) {
@@ -101,7 +109,13 @@ class DeliveryorderService {
                 }
 
             } else {
+
                 $product->increment('stock', $cleanQty);
+
+                if ($item->bad_stock > 0) {
+                    // 🔥 TAMBAHAN
+                    $product->decrement('bad_stock', $item->bad_stock);
+                }
             }
         }
 
