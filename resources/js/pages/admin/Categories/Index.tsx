@@ -94,26 +94,26 @@ export default function Index() {
                     <button
                         type="button"
                         onClick={() => setActiveTab('barang')}
-                        className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                        className={`w-full text-sm sm:text-lg cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
                             activeTab === 'barang'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                     >
                         <Tag className="size-4" />
-                        Kategori Barang
+                        Barang
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveTab('pengeluaran')}
-                        className={`w-full cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                        className={`w-full text-sm sm:text-lg cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
                             activeTab === 'pengeluaran'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                         }`}
                     >
                         <Wallet className="size-4" />
-                        Kategori Pengeluaran
+                        Pengeluaran
                     </button>
                 </div>
 

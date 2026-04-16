@@ -123,7 +123,7 @@ export function TabKeuangan({ data }: Props) {
         columns={dailyColumns}
         data={data.dailyCash}
         footer={
-          <div className="grid grid-cols-3 gap-4 px-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 py-4">
             <div className="rounded-xl bg-primary/5 p-4 text-center">
               <p className="text-xs text-muted-foreground">🔥 Total Modal</p>
               <p className="text-lg font-bold text-primary">{formatCurrency(data.summary.income)}</p>

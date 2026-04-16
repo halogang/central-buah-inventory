@@ -1,6 +1,7 @@
 import { TrendingDown, ShoppingCart, Settings } from "lucide-react";
 import { ChartArea } from "@/components/report/ChartArea";
 import { SummaryCard } from "@/components/report/SummaryCard";
+import { formatCurrency } from "@/helpers/format";
 
 const breakdownData = [
   { category: "Pembelian Stok", amount: 24000000, persen: "65%" },
@@ -52,9 +53,9 @@ export function TabPengeluaran({ data }: { data: Data }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <SummaryCard title="Total Pengeluaran" value={String(data.summary.total)} subtitle="▼ -3.2% vs lalu" subtitleColor="destructive" icon={TrendingDown} />
-        <SummaryCard title="Pembelian Stok" value={String(data.summary.stok)} subtitle="▲ 65% Total" subtitleColor="success" icon={ShoppingCart} />
-        <SummaryCard title="Beban Operasional" value={String(data.summary.operasional)} subtitle="▲ 35% Total" subtitleColor="destructive" icon={Settings} />
+        <SummaryCard title="Total Pengeluaran" value={formatCurrency(data.summary.total)} subtitle="▼ -3.2% vs lalu" subtitleColor="destructive" icon={TrendingDown} />
+        <SummaryCard title="Pembelian Stok" value={formatCurrency(data.summary.stok)} subtitle="▲ 65% Total" subtitleColor="success" icon={ShoppingCart} />
+        <SummaryCard title="Beban Operasional" value={formatCurrency(data.summary.operasional)} subtitle="▲ 35% Total" subtitleColor="destructive" icon={Settings} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Invoice;
 use App\Models\Item;
 use App\Models\PettyCashTransaction;
@@ -51,7 +52,7 @@ class ReportController extends Controller
                 'keuangan' => $this->getKeuanganData($start, $end, $groupBy, $monthFilter),
                 'stok' => $this->getStokData($start, $end, $monthFilter),
                 'penjualan' => $this->getPenjualanData($start, $end, $monthFilter),
-                'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter, $category),
+                'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter, $groupBy, $category),
                 'labaRugi' => $this->getLabaRugiData($start, $end, $groupBy, $monthFilter),
             ]);
         } catch (\Throwable $e) {
@@ -492,15 +493,17 @@ class ReportController extends Controller
                 $invoiceQuery->unionAll($posQuery),
                 'sales'
             )
+            ->leftJoin('items as it', 'it.id', '=', 'sales.item_id')
             ->selectRaw("
-                item_id,
-                name,
-                category,
-                SUM(qty) as terjual,
-                SUM(revenue) as revenue,
-                AVG(avg_price) as avg_jual
+                sales.item_id,
+                it.purchase_price as purchase_price,
+                sales.name as name,
+                sales.category as category,
+                SUM(sales.qty) as terjual,
+                SUM(sales.revenue) as revenue,
+                AVG(sales.avg_price) as avg_jual
             ")
-            ->groupBy('item_id', 'name', 'category')
+            ->groupBy('sales.item_id', 'sales.name', 'sales.category', 'it.purchase_price')
             ->get();
 
         // =========================
@@ -519,26 +522,46 @@ class ReportController extends Controller
             ")
             ->groupBy('doi.item_id')
             ->pluck('avg_beli', 'item_id');
-
-        // =========================
-        // 🔥 FINAL MAP (RINGAN BANGET)
-        // =========================
+        
+            
+            // =========================
+            // 🔥 FINAL MAP (RINGAN BANGET)
+            // =========================
+            
         $data = collect($sales)->map(function ($item) use ($doItems) {
 
             $avgBeli = $doItems[$item->item_id] ?? 0;
-            $laba = $item->avg_jual - $avgBeli;
+            $isEstimated = false;
+
+            if (!$avgBeli || $avgBeli == 0) {
+                $avgBeli = $item->purchase_price ?? 0;
+                $isEstimated = true;
+            }
+
+            $totalJual = $item->revenue;
+            $totalBeli = $avgBeli * $item->terjual;
+
+
+            $laba = $totalJual - $totalBeli;
 
             return [
                 'produk' => $item->name,
                 'kategori' => $item->category,
+
                 'avg_jual' => round($item->avg_jual),
                 'avg_beli' => round($avgBeli),
+
                 'terjual' => (int) $item->terjual,
-                'revenue' => (int) $item->revenue,
-                'margin' => $laba,
-                'margin_percent' => $avgBeli > 0
-                    ? round(($laba / $avgBeli) * 100, 1)
+                'revenue' => (int) $totalJual,
+
+                'laba' => (int) $laba,
+
+                'margin_percent' => $totalBeli > 0
+                    ? round(($laba / $totalBeli) * 100, 1)
                     : 0,
+
+                // 🔥 tambahan penting
+                'is_estimated' => $isEstimated,
             ];
         });
 
@@ -592,9 +615,7 @@ class ReportController extends Controller
         // =========================
         $table = $data->map(fn ($i) => [
             ...$i,
-            'persen' => $totalRevenue > 0
-                ? round(($i['revenue'] / $totalRevenue) * 100, 1)
-                : 0,
+            'persen' => $i['margin_percent'],
         ]);
 
         return [
@@ -615,7 +636,7 @@ class ReportController extends Controller
     | PENGELUARAN
     |--------------------------------------------------------------------------
     */
-    private function getPengeluaranData($start, $end, $monthFilter, $category = null)
+    private function getPengeluaranData($start, $end, $monthFilter, $groupBy, $category = null)
     {
         // ======================
         // 🔥 PEMBELIAN STOK
@@ -671,6 +692,7 @@ class ReportController extends Controller
         // ======================
         $pettyTrendRaw = PettyCashTransaction::query()
             ->selectRaw('
+                DATE(date) as full_date,
                 MONTH(date) as month,
                 expense_category,
                 SUM(amount) as total
@@ -679,20 +701,20 @@ class ReportController extends Controller
             ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
             ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
             ->when($category && $category !== 'all', fn ($q) => $q->where('expense_category', $category))
-            ->groupBy('month', 'expense_category')
+            ->groupBy('full_date', 'month', 'expense_category')
             ->get();
 
         $stokTrendRaw = Invoice::query()
             ->selectRaw('
+                DATE(date) as full_date,
                 MONTH(date) as month,
                 SUM(total) as total
             ')
             ->where('type', 'in')
             ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
             ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
-            ->groupBy('month')
-            ->get()
-            ->keyBy('month');
+            ->groupBy('full_date', 'month')
+            ->get();
 
         $topCategories = $pettyTrendRaw
             ->groupBy('expense_category')
@@ -702,21 +724,63 @@ class ReportController extends Controller
             ->keys()
             ->values();
 
-        $months = collect(range(1, 12));
+        $allCategories = Category::where('type', 'pengeluaran')
+            ->pluck('name');
 
-        $trend = $months->map(function ($month) use ($pettyTrendRaw, $stokTrendRaw, $topCategories) {
+        $periods = collect();
+            $current = $start->copy();
 
-            $label = Carbon::create()->month($month)->format('M');
+            while ($current <= $end) {
+
+                $key = match ($groupBy) {
+                    'daily' => $current->format('Y-m-d'),
+                    'monthly' => $current->format('Y-m'),
+                    'yearly' => $current->format('Y'),
+                };
+
+                $label = match ($groupBy) {
+                    'daily' => $current->format('d'),   // 🔥 tanggal
+                    'monthly' => $current->format('M'), // 🔥 bulan
+                    'yearly' => $current->format('Y'),
+                };
+
+                $periods->push([
+                    'key' => $key,
+                    'label' => $label,
+                    'month' => $current->month, // tetap simpan untuk mapping SQL
+                ]);
+
+                $current = match ($groupBy) {
+                    'daily' => $current->addDay(),
+                    'monthly' => $current->addMonth(),
+                    'yearly' => $current->addYear(),
+                };
+            }
+
+        $trend = $periods->map(function ($p) use ($pettyTrendRaw, $stokTrendRaw, $allCategories, $groupBy) {
 
             $row = [
-                'name' => $label,
-                'stok' => (int) ($stokTrendRaw[$month]->total ?? 0),
+                'name' => $p['label'],
+                'stok' => 0,
                 'operasional' => 0,
             ];
 
-            foreach ($topCategories as $cat) {
+            // 🔥 STOK
+            if ($groupBy === 'monthly') {
+                $row['stok'] = (int) ($stokTrendRaw->firstWhere('month', $p['month'])->total ?? 0);
+            }
+
+            // 🔥 PETTY
+            foreach ($allCategories as $cat) {
+
                 $value = $pettyTrendRaw
-                    ->where('month', $month)
+                    ->filter(function ($item) use ($p, $groupBy) {
+                        return match ($groupBy) {
+                            'daily' => $item->full_date === $p['key'],
+                            'monthly' => $item->month == $p['month'],
+                            'yearly' => Carbon::parse($item->full_date)->format('Y') === $p['key'],
+                        };
+                    })
                     ->where('expense_category', $cat)
                     ->sum('total');
 
@@ -735,7 +799,7 @@ class ReportController extends Controller
             ],
             'breakdown' => $breakdown,
             'trend' => $trend, // 🔥 ini yang kamu butuh
-            'categories' => $topCategories,
+            'categories' => $allCategories,
         ];
     }
 

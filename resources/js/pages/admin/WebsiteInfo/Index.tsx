@@ -114,7 +114,7 @@ export default function WebsiteInfoIndex({ info }: any) {
 
                 <form onSubmit={submit} className="space-y-6">
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* INFORMASI USAHA */}
                         <div className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
 

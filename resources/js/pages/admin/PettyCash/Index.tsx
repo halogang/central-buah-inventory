@@ -158,7 +158,7 @@ export default function Index() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title='Keuangan - Petty Cash'>
+            <Head title='Petty Cash'>
                 <meta name="robots" content="noindex" />
             </Head>
 

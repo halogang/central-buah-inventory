@@ -43,6 +43,12 @@ export function TabPenjualan({ data }: { data: any }) {
       render: (v: number) => <span className="text-primary font-medium">{formatCurrency(v)}</span>,
     },
     {
+      key: "laba",
+      label: "Laba",
+      align: "right" as const,
+      render: (v: number) => <span className="text-primary font-medium">{formatCurrency(v)}</span>,
+    },
+    {
       key: "persen",
       label: "% Margin",
       align: "right" as const,
@@ -58,9 +64,9 @@ export function TabPenjualan({ data }: { data: any }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard title="Total Terjual" value={data.summary.totalTerjual} subtitle="▲ +17% bulan lalu" subtitleColor="success" icon={ShoppingCart} />
-        <SummaryCard title="Revenue" value={formatRp(data.summary.revenue)} subtitle="▲ +8.3%" subtitleColor="success" icon={DollarSign} />
-        <SummaryCard title="Bad Stock" value={data.summary.badStock ?? 0} subtitle="▲ 5 Tipe barang" subtitleColor="destructive" icon={AlertCircle} />
+        <SummaryCard title="Total Terjual" value={data.summary.totalTerjual} icon={ShoppingCart} />
+        <SummaryCard title="Revenue" value={formatRp(data.summary.revenue)} icon={DollarSign} />
+        <SummaryCard title="Bad Stock" value={data.summary.badStock ?? 0}  icon={AlertCircle} />
         <SummaryCard title="Avg Order" value={formatRp(data.summary.avgOrder ?? 0)} icon={Receipt} />
       </div>
 
