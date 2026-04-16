@@ -37,11 +37,12 @@ export function TabStok({ data }: { data: any }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <SummaryCard title="Total SKU" value={data.summary.totalSku} icon={Package} />
         <SummaryCard title="Stok Rendah" value={data.summary.lowStock}  icon={AlertTriangle} />
         <SummaryCard title="Total Stok Barang" value={data.summary.totalStock + " Unit"}  subtitleColor="success" icon={Boxes} />
-        <SummaryCard title="Nilai Stok" value={formatCurrency(data.summary.stockValue)} icon={DollarSign} />
+        <SummaryCard title="Nilai Stok Bersih" value={formatCurrency(data.summary.stockValue)} icon={DollarSign} />
+        <SummaryCard title="Nilai Bad Stock" value={formatCurrency(data.summary.badStockValue)} icon={DollarSign} />
       </div>
 
       <TableLaporan title="📦 Laporan Stok Barang" columns={columns} data={data.table} />

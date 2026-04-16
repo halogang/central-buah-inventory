@@ -109,12 +109,14 @@ export default function LaporanPage() {
                 </div>
 
                 {/* Filters & Export */}
-                <div className="flex items-center justify-between">
-                    <FilterBar
-                        month={month}
-                        year={year}
-                        onMonthChange={(m) => handleFilterChange(m, year)}
-                        onYearChange={(y) => handleFilterChange(month, y)}/>
+                <div className={`flex items-center ${activeTab === 'stok' ? 'justify-end' : 'justify-between'}`}>
+                    {activeTab !== 'stok' && (
+                        <FilterBar
+                            month={month}
+                            year={year}
+                            onMonthChange={(m) => handleFilterChange(m, year)}
+                            onYearChange={(y) => handleFilterChange(month, y)}/>
+                    )}
                     <ExportButtons/>
                 </div>
 

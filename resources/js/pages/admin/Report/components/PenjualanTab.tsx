@@ -3,6 +3,7 @@ import { ChartBar } from "@/components/report/ChartBar";
 import { ChartDonut } from "@/components/report/ChartDonut";
 import { SummaryCard } from "@/components/report/SummaryCard";
 import { TableLaporan } from "@/components/report/TableLaporan";
+import { formatCurrency } from "@/helpers/format";
 
 const categoryData = [
   { name: "Buah Lokal", value: 45, color: "#10B981" },
@@ -18,12 +19,29 @@ export function TabPenjualan({ data }: { data: any }) {
     { key: "produk", label: "Produk" },
     { key: "terjual", label: "Terjual", align: "right" as const },
     {
+      key: "avg_beli",
+      label: "Rata-rata Harga Beli",
+      align: "right" as const,
+      render: (v: number) => <span className="text-primary font-medium">{formatCurrency(v)}</span>,
+    },
+    {
+      key: "avg_jual",
+      label: "Rata-rata Harga Jual",
+      align: "right" as const,
+      render: (v: number) => <span className="text-primary font-medium">{formatCurrency(v)}</span>,
+    },
+    {
       key: "revenue",
       label: "Revenue",
       align: "right" as const,
-      render: (v: number) => <span className="text-primary font-medium">{formatRp(v)}</span>,
+      render: (v: number) => <span className="text-primary font-medium">{formatCurrency(v)}</span>,
     },
-    { key: "persen", label: "% Total", align: "right" as const },
+    {
+      key: "persen",
+      label: "% Margin",
+      align: "right" as const,
+      render: (v: number) => <span className="text-primary font-medium">{v}%</span>,
+    },
   ];
 
   return (

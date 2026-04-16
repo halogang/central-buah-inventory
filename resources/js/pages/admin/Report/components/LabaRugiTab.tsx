@@ -5,13 +5,18 @@ import { TableLaporan } from "@/components/report/TableLaporan";
 import { formatCurrency } from "@/helpers/format";
 
 export function TabLabaRugi({ data }: { data: any }) {
+
+  const isDaily = data.chart?.[0]?.tanggal !== null;
   const columns = [
-    { key: "bulan", label: "Bulan" },
+    ...(isDaily
+      ? [{ key: "tanggal", label: "Tanggal" }]
+      : [{ key: "bulan", label: "Bulan" }]),
+
     { key: "pendapatan", label: "Pendapatan", align: "right" as const, render: (v: number) => formatCurrency(v) },
     { key: "hpp", label: "HPP", align: "right" as const, render: (v: number) => <span className="text-destructive">{formatCurrency(v)}</span> },
     { key: "bebanOps", label: "Beban Ops", align: "right" as const, render: (v: number) => <span className="text-destructive">{formatCurrency(v)}</span> },
     { key: "labaBersih", label: "Laba Bersih", align: "right" as const, render: (v: number) => <span className="text-primary font-semibold">{formatCurrency(v)}</span> },
-    { key: "margin", label: "Margin", align: "right" as const },
+    { key: "margin", label: "Margin", align: "right" as const, render: (v: number) => <span className="text-primary font-semibold">{v}%</span> },
   ];
 
   return (

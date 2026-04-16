@@ -34,11 +34,21 @@ interface Data {
     operasional: number
   };
   breakdown: Breakdown[]
+  trend: []
+  categories: []
 }
 
 const maxAmount = Math.max(...breakdownData.map((d) => d.amount));
 
 export function TabPengeluaran({ data }: { data: Data }) {
+  const areas = [
+    { dataKey: "stok", color: "#111827", name: "Stok" },
+    ...data.categories.map((cat, i) => ({
+      dataKey: cat,
+      color: ["#6B7280", "#9CA3AF", "#D1D5DB"][i % 3],
+      name: cat,
+    })),
+  ];
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -72,12 +82,8 @@ export function TabPengeluaran({ data }: { data: Data }) {
         {/* Trend Chart */}
         <ChartArea
           title="Tren Pengeluaran"
-          data={trendData}
-          areas={[
-            { dataKey: "stok", color: "#111827", name: "Stok" },
-            { dataKey: "operasional", color: "#6B7280", name: "Operasional" },
-            { dataKey: "gaji", color: "#D1D5DB", name: "Gaji" },
-          ]}
+          data={data.trend}
+          areas={areas}
         />
       </div>
     </div>

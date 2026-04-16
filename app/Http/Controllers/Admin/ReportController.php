@@ -9,441 +9,11 @@ use App\Models\Item;
 use App\Models\PettyCashTransaction;
 use App\Models\Pos;
 use App\Models\PosItem;
+use App\Models\StockMovement;
+use App\Models\DeliveryOrderItem;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-
-// class ReportController extends Controller
-// {
-
-//     private function dateFilter($query, $start, $end)
-//     {
-//         return $start && $end
-//             ? $query->whereBetween('date', [$start, $end])
-//             : $query;
-//     }
-//     /**
-//      * Display a listing of the resource.
-//      */
-//     public function index(Request $request)
-//     {
-
-//         $month = $request->month;
-//         $year = $request->year;
-
-//         $start = ($month && $year)
-//             ? Carbon::create($year, $month)->startOfMonth()
-//             : null;
-
-//         $end = ($month && $year)
-//             ? Carbon::create($year, $month)->endOfMonth()
-//             : null;
-
-//         return Inertia::render('admin/Report/Index', [
-//             'filters' => [
-//                 'month' => $month,
-//                 'year' => $year,
-//             ],
-            
-//             'keuangan' => $this->getKeuanganData($start, $end, $year, $month),
-//             'stok' => $this->getStokData(),
-//             'penjualan' => $this->getPenjualanData($start, $end),
-//             'pengeluaran' => $this->getPengeluaranData($start, $end),
-//             'labaRugi' => $this->getLabaRugiData($start, $end, $year),
-//         ]);
-//     }
-
-//     private function getKeuanganData($start, $end, $year, $month)
-//     {
-//         // $invoiceOut = $this->dateFilter(Invoice::where('type', 'out'), $start, $end)->sum('total');
-//         // $pos = $this->dateFilter(Pos::query(), $start, $end)->sum('total');
-//         $pettyIncome = $this->dateFilter(PettyCashTransaction::where('type', 'income'), $start, $end)->sum('amount');
-
-//         // $invoiceIn = $this->dateFilter(Invoice::where('type', 'in'), $start, $end)->sum('total');
-//         $pettyExpense = $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end)->sum('amount');
-
-//         // CASHFLOW (12 bulan tetap)
-//         $year = $year ?? now()->year;
-
-//         ['start' => $start, 'end' => $end, 'groupBy' => $groupBy] = $this->getDateRange($month, $year);
-
-//         $cashflow = $this->generateCashflow($start, $end, $groupBy);
-
-//         // PETTY CASH
-//         $pettyCash = $this->dateFilter(PettyCashTransaction::query(), $start, $end)
-//             ->latest()
-//             ->get()
-//             ->map(fn ($i) => [
-//                 'tanggal' => $i->date,
-//                 'keterangan' => $i->description,
-//                 'jenis' => $i->type === 'income' ? 'Modal' : 'Pengeluaran',
-//                 'jumlah' => $i->type === 'income' ? $i->amount : -$i->amount,
-//             ]);
-
-//         // DAILY CASH
-//         $daily = collect();
-
-//         foreach ($this->dateFilter(PettyCashTransaction::query(), $start, $end)->get() as $p) {
-//             $daily->push([
-//                 'tanggal' => $p->date,
-//                 'modal' => $p->type === 'income' ? $p->amount : null,
-//                 'pendapatan' => null,
-//                 'pengeluaran' => $p->type === 'expense' ? $p->amount : null,
-//             ]);
-//         }
-
-//         foreach ($this->dateFilter(Invoice::query(), $start, $end)->get() as $inv) {
-//             $daily->push([
-//                 'tanggal' => $inv->date,
-//                 'modal' => null,
-//                 'pendapatan' => $inv->type === 'out' ? $inv->total : null,
-//                 'pengeluaran' => $inv->type === 'in' ? $inv->total : null,
-//             ]);
-//         }
-
-//         foreach ($this->dateFilter(Pos::query(), $start, $end)->get() as $p) {
-//             $daily->push([
-//                 'tanggal' => $p->date,
-//                 'modal' => null,
-//                 'pendapatan' => $p->total,
-//                 'pengeluaran' => null,
-//             ]);
-//         }
-
-//         $daily = $daily->sortBy('tanggal')->values();
-
-//         $saldo = 0;
-//         $daily = $daily->map(function ($item) use (&$saldo) {
-//             $saldo += ($item['modal'] ?? 0);
-//             $saldo += ($item['pendapatan'] ?? 0);
-//             $saldo -= ($item['pengeluaran'] ?? 0);
-
-//             return [...$item, 'saldo' => $saldo];
-//         });
-
-//         return [
-//             'summary' => [
-//                 'income' => $pettyIncome,
-//                 'expense' => $pettyExpense,
-//                 'net' => $pettyIncome - $pettyExpense,
-//             ],
-//             'cashflow' => $cashflow,
-//             'pettyCash' => $pettyCash,
-//             'dailyCash' => $daily,
-//         ];
-//     }
-
-//     private function getStokData()
-//     {
-//         $items = Item::all();
-
-//         // Summary
-//         $totalSku = $items->count();
-//         $lowStockItems = $items->filter(fn ($i) => $i->stock <= $i->min_stock);
-//         $lowStock = $lowStockItems->count();
-//         $totalStock = $items->sum('stock');
-//         $stockValue = $items->sum(fn ($i) => $i->stock * $i->purchase_price);
-
-//         // Table
-//         $table = $items->map(function ($item) {
-//             return [
-//                 'barang' => $item->name,
-//                 'stok' => $item->stock,
-//                 'masuk' => 0,   // nanti bisa ambil dari DO IN
-//                 'keluar' => 0,  // nanti dari DO OUT / POS
-//                 'sisa' => $item->stock,
-//                 'status' => $item->stock <= $item->min_stock ? 'Rendah' : 'Aman',
-//             ];
-//         });
-
-//         // Chart (sementara simple)
-//         $chart = $items->take(6)->map(fn ($i) => [
-//             'name' => $i->name,
-//             'masuk' => rand(50, 200),
-//             'keluar' => rand(30, 180),
-//         ]);
-
-//         return [
-//             'summary' => [
-//                 'totalSku' => $totalSku,
-//                 'lowStock' => $lowStock,
-//                 'totalStock' => $totalStock,
-//                 'stockValue' => $stockValue,
-//             ],
-//             'table' => $table,
-//             'chart' => $chart,
-//         ];
-//     }
-
-//     private function getPenjualanData($start, $end)
-//     {
-//         $invoice = InvoiceItem::whereHas('invoice', function ($q) use ($start, $end) {
-//             $q->where('type', 'out');
-//             if ($start && $end) $q->whereBetween('date', [$start, $end]);
-//         })->with('item')->get();
-
-//         $pos = PosItem::whereHas('pos', function ($q) use ($start, $end) {
-//             if ($start && $end) $q->whereBetween('date', [$start, $end]);
-//         })->get();
-
-//         $merged = collect();
-
-//         foreach ($invoice as $i) {
-//             $merged->push([
-//                 'name' => $i->item->name,
-//                 'qty' => $i->quantity,
-//                 'revenue' => $i->total,
-//             ]);
-//         }
-
-//         foreach ($pos as $p) {
-//             $merged->push([
-//                 'name' => $p->item_name,
-//                 'qty' => $p->quantity,
-//                 'revenue' => $p->total,
-//             ]);
-//         }
-
-//         $grouped = $merged->groupBy('name')->map(fn ($items) => [
-//             'produk' => $items->first()['name'],
-//             'terjual' => $items->sum('qty'),
-//             'revenue' => $items->sum('revenue'),
-//         ])->values();
-
-//         $totalRevenue = $grouped->sum('revenue');
-
-//         $table = $grouped->map(fn ($item) => [
-//             ...$item,
-//             'persen' => $totalRevenue > 0 ? round(($item['revenue'] / $totalRevenue) * 100, 1) : 0,
-//         ]);
-
-//         $badStock = Item::sum('bad_stock');
-
-//         $totalOrder = Invoice::where('type', 'out')->count() + Pos::count();
-
-//         $avgOrder = $totalOrder > 0 ? $totalRevenue / $totalOrder : 0;
-
-//         return [
-//             'summary' => [
-//                 'totalTerjual' => $grouped->sum('terjual'),
-//                 'revenue' => $totalRevenue,
-//                 'badStock' => $badStock,
-//                 'avgOrder' => $avgOrder,
-//             ],
-//             'chart' => $grouped->map(fn ($i) => [
-//                 'name' => $i['produk'],
-//                 'value' => $i['terjual'],
-//             ]),
-//             'table' => $table,
-//         ];
-//     }
-
-//     private function getPengeluaranData($start, $end)
-//     {
-//         $stok = $this->dateFilter(Invoice::where('type', 'in'), $start, $end)->sum('total');
-
-//         $petty = $this->dateFilter(
-//             PettyCashTransaction::where('type', 'expense'),
-//             $start,
-//             $end
-//         )->get();
-
-//         $grouped = $petty->groupBy('expense_category')
-//             ->map(fn ($items) => $items->sum('amount'));
-
-//         $totalOps = $grouped->sum();
-//         $total = $stok + $totalOps;
-
-//         $breakdown = collect([
-//             ['category' => 'Pembelian Stok', 'amount' => $stok],
-//         ])->merge(
-//             $grouped->map(fn ($v, $k) => [
-//                 'category' => $k ?? 'Lainnya',
-//                 'amount' => $v
-//             ])
-//         )->map(fn ($item) => [
-//             ...$item,
-//             'persen' => $total > 0 ? round(($item['amount'] / $total) * 100, 1) : 0,
-//         ]);
-
-//         return [
-//             'summary' => [
-//                 'total' => $total,
-//                 'stok' => $stok,
-//                 'operasional' => $totalOps,
-//             ],
-//             'breakdown' => $breakdown->values(),
-//         ];
-//     }
-
-//     private function getLabaRugiData($start = null, $end = null, $year = null)
-//     {
-//         $year = $year ?? now()->year;
-//         $month = now()->month;
-
-//         /*
-//         |--------------------------------------------------------------------------
-//         | DATA PER BULAN (UNTUK CHART & TABLE)
-//         |--------------------------------------------------------------------------
-//         */
-//         $months = collect(range(1, $month))->map(function ($m) use ($year) {
-//             $startMonth = Carbon::create($year, $m)->startOfMonth();
-//             $endMonth = Carbon::create($year, $m)->endOfMonth();
-
-//             $pendapatan =
-//                 Invoice::where('type', 'out')->whereBetween('date', [$startMonth, $endMonth])->sum('total')
-//                 + Pos::whereBetween('date', [$startMonth, $endMonth])->sum('total');
-
-//             $hpp = Invoice::where('type', 'in')
-//                 ->whereBetween('date', [$startMonth, $endMonth])
-//                 ->sum('total');
-
-//             $beban = PettyCashTransaction::where('type', 'expense')
-//                 ->whereBetween('date', [$startMonth, $endMonth])
-//                 ->sum('amount');
-
-//             $laba = $pendapatan - $hpp - $beban;
-
-//             return [
-//                 'month_number' => $m,
-//                 'bulan' => Carbon::create($year, $m)->format('M Y'), // ✅ FIX YEAR
-//                 'name' => Carbon::create($year, $m)->format('M'),   // ✅ untuk chart
-//                 'pendapatan' => $pendapatan,
-//                 'hpp' => $hpp,
-//                 'bebanOps' => $beban,
-//                 'labaBersih' => $laba,
-//                 'margin' => $pendapatan > 0
-//                     ? round(($laba / $pendapatan) * 100, 1)
-//                     : 0,
-//             ];
-//         });
-
-//         /*
-//         |--------------------------------------------------------------------------
-//         | SUMMARY (TOTAL / FILTERED)
-//         |--------------------------------------------------------------------------
-//         */
-
-//         if ($start && $end) {
-//             // ✅ kalau filter aktif (per bulan)
-//             $pendapatan =
-//                 Invoice::where('type', 'out')->whereBetween('date', [$start, $end])->sum('total')
-//                 + Pos::whereBetween('date', [$start, $end])->sum('total');
-
-//             $hpp = Invoice::where('type', 'in')->whereBetween('date', [$start, $end])->sum('total');
-
-//             $beban = PettyCashTransaction::where('type', 'expense')->whereBetween('date', [$start, $end])->sum('amount');
-//         } else {
-//             // ✅ TANPA FILTER → TOTAL SEMUA DATA
-//             $pendapatan =
-//                 Invoice::where('type', 'out')->sum('total')
-//                 + Pos::sum('total');
-
-//             $hpp = Invoice::where('type', 'in')->sum('total');
-
-//             $beban = PettyCashTransaction::where('type', 'expense')->sum('amount');
-//         }
-
-//         $laba = $pendapatan - $hpp - $beban;
-
-//         return [
-//             'summary' => [
-//                 'pendapatan' => $pendapatan,
-//                 'hpp' => $hpp,
-//                 'bebanOps' => $beban,
-//                 'labaBersih' => $laba,
-//                 'margin' => $pendapatan > 0
-//                     ? round(($laba / $pendapatan) * 100, 1)
-//                     : 0,
-//             ],
-//             'chart' => $months, // ✅ sudah ada name
-//             'table' => $months->sortByDesc('month_number')->values(),
-//         ];
-//     }
-
-//     private function getDateRange($month, $year)
-//     {
-//         if ($month && $year) {
-//             return [
-//                 'start' => Carbon::create($year, $month)->startOfMonth(),
-//                 'end' => Carbon::create($year, $month)->endOfMonth(),
-//                 'groupBy' => 'day',
-//             ];
-//         }
-
-//         if ($year) {
-//             return [
-//                 'start' => Carbon::create($year)->startOfYear(),
-//                 'end' => Carbon::create($year)->endOfYear(),
-//                 'groupBy' => 'month',
-//             ];
-//         }
-
-//         return [
-//             'start' => null,
-//             'end' => null,
-//             'groupBy' => 'month',
-//         ];
-//     }
-
-//     private function generateCashflow($start, $end, $groupBy)
-//     {
-//         $data = [];
-
-//         if ($groupBy === 'month') {
-//             foreach (range(1, 12) as $m) {
-//                 $startMonth = Carbon::create($start->year, $m)->startOfMonth();
-//                 $endMonth = Carbon::create($start->year, $m)->endOfMonth();
-
-//                 $data[] = [
-//                     'name' => Carbon::create()->month($m)->format('M'),
-//                     'pendapatan' => PettyCashTransaction::where('type', 'income')
-//                         ->whereBetween('date', [$startMonth, $endMonth])
-//                         ->sum('amount'),
-//                     'pengeluaran' => PettyCashTransaction::where('type', 'expense')
-//                         ->whereBetween('date', [$startMonth, $endMonth])
-//                         ->sum('amount'),
-//                 ];
-//             }
-//         }
-
-//         if ($groupBy === 'day') {
-//             $current = $start->copy();
-
-//             while ($current <= $end) {
-//                 $data[] = [
-//                     'name' => $current->format('d'),
-//                     'pendapatan' => PettyCashTransaction::where('type', 'income')
-//                         ->whereDate('date', $current)
-//                         ->sum('amount'),
-//                     'pengeluaran' => PettyCashTransaction::where('type', 'expense')
-//                         ->whereDate('date', $current)
-//                         ->sum('amount'),
-//                 ];
-
-//                 $current->addDay();
-//             }
-//         }
-
-//         return collect($data);
-//     }
-// }
-
-
-// <?php
-
-// namespace App\Http\Controllers\Admin;
-
-// use App\Http\Controllers\Controller;
-// use App\Models\Invoice;
-// use App\Models\InvoiceItem;
-// use App\Models\Item;
-// use App\Models\PettyCashTransaction;
-// use App\Models\Pos;
-// use App\Models\PosItem;
-// use Carbon\Carbon;
-// use Illuminate\Http\Request;
-// use Inertia\Inertia;
 
 class ReportController extends Controller
 {
@@ -454,11 +24,10 @@ class ReportController extends Controller
     */
     public function index(Request $request)
     {
-        // if ($request->month || $request->year) {
-        // }
 
         $month = $request->month === 'all' ? null : (int) $request->month;
         $year  = $request->year === 'all' ? null : (int) $request->year;
+        $category = $request->category ?? null;
         // dd($month, $year);
 
         try {
@@ -477,13 +46,14 @@ class ReportController extends Controller
                 'filters' => [
                     'month' => $month ?? -1,
                     'year' => $year ?? 0,
+                    'category' => $category,
                 ],
     
     
                 'keuangan' => $this->getKeuanganData($start, $end, $groupBy, $monthFilter),
-                'stok' => $this->getStokData(),
+                'stok' => $this->getStokData($start, $end, $monthFilter),
                 'penjualan' => $this->getPenjualanData($start, $end, $monthFilter),
-                'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter),
+                'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter, $category),
                 'labaRugi' => $this->getLabaRugiData($start, $end, $groupBy, $monthFilter),
             ]);
         } catch (\Throwable $e) {
@@ -797,30 +367,61 @@ class ReportController extends Controller
     | STOK
     |--------------------------------------------------------------------------
     */
-    private function getStokData()
+    private function getStokData($start, $end, $monthFilter)
     {
         $items = Item::all();
+
+        $table = [];
+        foreach($items as $item) {
+            $movements = StockMovement::where('item_id', $item->id)->get();
+
+            $hasMovement = $movements->isNotEmpty();
+
+            $stok = $hasMovement
+                ? optional($movements->first())->stock_before
+                : $item->stock;
+
+            $masuk = $hasMovement
+                ? $movements->where('type', 'in')->sum('quantity')
+                : 0;
+
+            $keluar = $hasMovement
+                ? $movements->where('type', 'out')->sum('quantity')
+                : 0;
+
+            $sisa = $item->stock;
+
+            $table[] = [
+                'barang' => $item->name,
+                'stok' => $stok,
+                'masuk' => $masuk,
+                'keluar' => $keluar,
+                'sisa' => $sisa,
+                'status' => $sisa <= $item->min_stock ? 'Rendah' : 'Aman',
+            ];
+            
+        }
+
+        $chart = collect($table)
+            ->sortByDesc(fn ($item) => $item['masuk'] + $item['keluar'])
+            ->take(6)
+            ->map(fn ($item) => [
+                'name' => $item['barang'],
+                'keluar' => $item['keluar'],
+                'masuk' => $item['masuk'],
+            ])
+            ->values();
 
         return [
             'summary' => [
                 'totalSku' => $items->count(),
-                'lowStock' => $items->where('stock', '<=', 'min_stock')->count(),
+                'lowStock' => $items->filter(fn ($item) => $item->stock <= $item->min_stock)->count(),
                 'totalStock' => $items->sum('stock'),
-                'stockValue' => $items->sum(fn ($i) => $i->stock * $i->purchase_price),
+                'badStockValue' => $items->sum(fn ($i) => $i->bad_stock * $i->purchase_price),
+                'stockValue' => $items->sum(fn ($i) => ($i->stock - $i->bad_stock) * $i->purchase_price),
             ],
-            'table' => $items->map(fn ($i) => [
-                'barang' => $i->name,
-                'stok' => $i->stock,
-                'masuk' => 0,
-                'keluar' => 0,
-                'sisa' => $i->stock,
-                'status' => $i->stock <= $i->min_stock ? 'Rendah' : 'Aman',
-            ]),
-            'chart' => $items->take(6)->map(fn ($i) => [
-                'name' => $i->name,
-                'masuk' => rand(50, 200),
-                'keluar' => rand(30, 180),
-            ]),
+            'table' => $table,
+            'chart' => $chart,
         ];
     }
 
@@ -850,25 +451,63 @@ class ReportController extends Controller
 
         foreach ($invoice as $i) {
             $merged->push([
+                'item_id' => $i->item_id,
                 'name' => $i->item?->name ?? 'Unknown',
                 'qty' => $i->quantity,
                 'revenue' => $i->total,
+                'price' => $i->quantity > 0 ? $i->total / $i->quantity : 0, // 🔥 harga jual
             ]);
         }
 
         foreach ($pos as $p) {
             $merged->push([
+                'item_id' => $p->item_id ?? null, // ⚠️ pastikan ada
                 'name' => $p->item_name,
                 'qty' => $p->quantity,
                 'revenue' => $p->total,
+                'price' => $p->quantity > 0 ? $p->total / $p->quantity : 0,
             ]);
         }
 
-        $grouped = $merged->groupBy('name')->map(fn ($items) => [
-            'produk' => $items->first()['name'],
-            'terjual' => $items->sum('qty'),
-            'revenue' => $items->sum('revenue'),
-        ])->values();
+        $doItems = DeliveryOrderItem::whereHas('deliveryOrder', function ($q) use ($start, $end, $monthFilter) {
+            $q->where('type', 'in'); // 🔥 pembelian
+
+            if ($start && $end) {
+                $q->whereBetween('date', [$start, $end]);
+            }
+
+            if ($monthFilter) {
+                $q->whereMonth('date', $monthFilter);
+            }
+        })->get()
+        ->groupBy('item_id');
+
+        $grouped = $merged->groupBy('name')->map(function ($items) use ($doItems) {
+
+            $itemId = $items->first()['item_id'];
+
+            // 🔥 avg harga jual
+            $avgJual = $items->avg('price');
+
+            // 🔥 avg harga beli (dari DO)
+            $avgBeli = 0;
+
+            if ($itemId && isset($doItems[$itemId])) {
+                $avgBeli = $doItems[$itemId]->avg('price');
+            }
+
+            return [
+                'produk' => $items->first()['name'],
+                'avg_jual' => round($avgJual),
+                'avg_beli' => round($avgBeli),
+                'terjual' => $items->sum('qty'),
+                'revenue' => $items->sum('revenue'),
+                'margin' => $avgJual - $avgBeli,
+                'margin_percent' => $avgBeli > 0 
+                    ? round((($avgJual - $avgBeli) / $avgBeli) * 100, 1) 
+                    : 0,
+            ];
+        })->values();
 
         $totalRevenue = $grouped->sum('revenue');
 
@@ -901,22 +540,117 @@ class ReportController extends Controller
     | PENGELUARAN
     |--------------------------------------------------------------------------
     */
-    private function getPengeluaranData($start, $end, $monthFilter)
+    private function getPengeluaranData($start, $end, $monthFilter, $category = null)
     {
-        $stok = $this->dateFilter(Invoice::where('type', 'in'), $start, $end, $monthFilter)->sum('total');
+        // ======================
+        // 🔥 PEMBELIAN STOK
+        // ======================
+        $stok = $this->dateFilter(
+            Invoice::where('type', 'in'),
+            $start,
+            $end,
+            $monthFilter
+        )->sum('total');
 
-        $petty = $this->dateFilter(
+        // ======================
+        // 🔥 PETTY CASH (FILTER CATEGORY)
+        // ======================
+        $pettyQuery = $this->dateFilter(
             PettyCashTransaction::where('type', 'expense'),
             $start,
             $end,
             $monthFilter
-        )->get();
+        );
 
+        if ($category && $category !== 'all') {
+            $pettyQuery->where('expense_category', $category);
+        }
+
+        $petty = $pettyQuery->get();
+
+        // ======================
+        // 🔥 BREAKDOWN
+        // ======================
         $grouped = $petty->groupBy('expense_category')
             ->map(fn ($items) => $items->sum('amount'));
 
         $totalOps = $grouped->sum();
         $total = $stok + $totalOps;
+
+        $breakdown = collect([
+            ['category' => 'Pembelian Stok', 'amount' => $stok],
+        ])->merge(
+            $grouped->map(fn ($v, $k) => [
+                'category' => $k ?? 'Lainnya',
+                'amount' => $v
+            ])
+        )->map(fn ($item) => [
+            ...$item,
+            'persen' => $total > 0
+                ? round(($item['amount'] / $total) * 100, 1)
+                : 0,
+        ])->values();
+
+        // ======================
+        // 🔥 TREND DATA (DINAMIS)
+        // ======================
+        $pettyTrendRaw = PettyCashTransaction::query()
+            ->selectRaw('
+                MONTH(date) as month,
+                expense_category,
+                SUM(amount) as total
+            ')
+            ->where('type', 'expense')
+            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->when($category && $category !== 'all', fn ($q) => $q->where('expense_category', $category))
+            ->groupBy('month', 'expense_category')
+            ->get();
+
+        $stokTrendRaw = Invoice::query()
+            ->selectRaw('
+                MONTH(date) as month,
+                SUM(total) as total
+            ')
+            ->where('type', 'in')
+            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->groupBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $topCategories = $pettyTrendRaw
+            ->groupBy('expense_category')
+            ->map(fn ($items) => $items->sum('total'))
+            ->sortDesc()
+            ->take(3)
+            ->keys()
+            ->values();
+
+        $months = collect(range(1, 12));
+
+        $trend = $months->map(function ($month) use ($pettyTrendRaw, $stokTrendRaw, $topCategories) {
+
+            $label = Carbon::create()->month($month)->format('M');
+
+            $row = [
+                'name' => $label,
+                'stok' => (int) ($stokTrendRaw[$month]->total ?? 0),
+                'operasional' => 0,
+            ];
+
+            foreach ($topCategories as $cat) {
+                $value = $pettyTrendRaw
+                    ->where('month', $month)
+                    ->where('expense_category', $cat)
+                    ->sum('total');
+
+                $row[$cat] = (int) $value;
+                $row['operasional'] += $value;
+            }
+
+            return $row;
+        });
 
         return [
             'summary' => [
@@ -924,19 +658,9 @@ class ReportController extends Controller
                 'stok' => $stok,
                 'operasional' => $totalOps,
             ],
-            'breakdown' => collect([
-                ['category' => 'Pembelian Stok', 'amount' => $stok],
-            ])->merge(
-                $grouped->map(fn ($v, $k) => [
-                    'category' => $k ?? 'Lainnya',
-                    'amount' => $v
-                ])
-            )->map(fn ($item) => [
-                ...$item,
-                'persen' => $total > 0
-                    ? round(($item['amount'] / $total) * 100, 1)
-                    : 0,
-            ])->values(),
+            'breakdown' => $breakdown,
+            'trend' => $trend, // 🔥 ini yang kamu butuh
+            'categories' => $topCategories,
         ];
     }
 
@@ -949,22 +673,136 @@ class ReportController extends Controller
     {
         if (!$start || !$end) return [];
 
-        $chart = $this->generateLabaRugiChart($start, $end, $groupBy, $monthFilter);
+        // =========================
+        // 🔥 FORMAT GROUPING SQL
+        // =========================
+        $format = match ($groupBy) {
+            'daily' => '%Y-%m-%d',
+            'monthly' => '%Y-%m',
+            'yearly' => '%Y',
+            default => '%Y-%m',
+        };
 
-        $pendapatan =
-            Invoice::where('type', 'out')->whereBetween('date', [$start, $end])->sum('total') +
-            Pos::whereBetween('date', [$start, $end])->sum('total');
+        // =========================
+        // 🔥 INVOICE OUT (PENDAPATAN)
+        // =========================
+        $invoiceOut = Invoice::query()
+            ->selectRaw("
+                DATE_FORMAT(date, '{$format}') as period,
+                SUM(total) as total
+            ")
+            ->where('type', 'out')
+            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->groupBy('period')
+            ->pluck('total', 'period');
 
-        $hpp = Invoice::where('type', 'in')->whereBetween('date', [$start, $end])->sum('total');
+        // =========================
+        // 🔥 POS (PENDAPATAN TAMBAHAN)
+        // =========================
+        $pos = Pos::query()
+            ->selectRaw("
+                DATE_FORMAT(date, '{$format}') as period,
+                SUM(total) as total
+            ")
+            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->groupBy('period')
+            ->pluck('total', 'period');
 
-        $beban = PettyCashTransaction::where('type', 'expense')
-            ->whereBetween('date', [$start, $end])
-            ->sum('amount');
+        // =========================
+        // 🔥 INVOICE IN (HPP)
+        // =========================
+        $invoiceIn = Invoice::query()
+            ->selectRaw("
+                DATE_FORMAT(date, '{$format}') as period,
+                SUM(total) as total
+            ")
+            ->where('type', 'in')
+            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->groupBy('period')
+            ->pluck('total', 'period');
 
-        $laba = $pendapatan - $hpp - $beban;
+        // =========================
+        // 🔥 PETTY CASH (BEBAN OPS)
+        // =========================
+        $petty = PettyCashTransaction::query()
+            ->selectRaw("
+                DATE_FORMAT(date, '{$format}') as period,
+                SUM(amount) as total
+            ")
+            ->where('type', 'expense')
+            ->when($start && $end, fn ($q) => $q->whereBetween('date', [$start, $end]))
+            ->when($monthFilter, fn ($q) => $q->whereMonth('date', $monthFilter))
+            ->groupBy('period')
+            ->pluck('total', 'period');
 
-        return [
-            'summary' => [
+        // =========================
+        // 🔥 GENERATE PERIOD LIST
+        // =========================
+        $periods = collect();
+        $current = $start->copy();
+
+        while ($current <= $end) {
+            $periodKey = match ($groupBy) {
+                'daily' => $current->format('Y-m-d'),
+                'monthly' => $current->format('Y-m'),
+                'yearly' => $current->format('Y'),
+            };
+
+            $label = match ($groupBy) {
+                'daily' => $current->format('d'),
+                'monthly' => $current->format('M'),
+                'yearly' => $current->format('Y'),
+            };
+
+            $periods->push([
+                'key' => $periodKey,
+                'label' => $label,
+            ]);
+
+            $current = match ($groupBy) {
+                'daily' => $current->addDay(),
+                'monthly' => $current->addMonth(),
+                'yearly' => $current->addYear(),
+            };
+        }
+
+        // =========================
+        // 🔥 BUILD FINAL DATA
+        // =========================
+        $chart = $periods->map(function ($p) use ($invoiceOut, $pos, $invoiceIn, $petty, $groupBy) {
+
+            $pendapatan = (int) ($invoiceOut[$p['key']] ?? 0) + (int) ($pos[$p['key']] ?? 0);
+            $hpp = (int) ($invoiceIn[$p['key']] ?? 0);
+            $beban = (int) ($petty[$p['key']] ?? 0);
+            $laba = $pendapatan - $hpp - $beban;
+
+            // 🔥 dynamic label
+            $tanggal = null;
+            $bulan = null;
+
+            if ($groupBy === 'daily') {
+                $tanggal = Carbon::parse($p['key'])->format('d M Y'); // 16 Apr 2026
+                $bulan = Carbon::parse($p['key'])->format('M');       // Apr
+            }
+
+            if ($groupBy === 'monthly') {
+                $bulan = Carbon::parse($p['key'])->format('M Y');     // Apr 2026
+            }
+
+            if ($groupBy === 'yearly') {
+                $bulan = $p['key']; // 2026
+            }
+
+            return [
+                'name' => $p['label'], // tetap untuk chart
+                'tanggal' => $tanggal,
+                'bulan' => $bulan,
+
+                'sort_date' => $p['key'],
+
                 'pendapatan' => $pendapatan,
                 'hpp' => $hpp,
                 'bebanOps' => $beban,
@@ -972,43 +810,67 @@ class ReportController extends Controller
                 'margin' => $pendapatan > 0
                     ? round(($laba / $pendapatan) * 100, 1)
                     : 0,
-            ],
-            'chart' => $chart,
-            'table' => $chart->sortByDesc('name')->values(),
-        ];
-    }
+            ];
+        });
 
-    private function generateLabaRugiChart($start, $end, $groupBy, $monthFilter)
-    {
-        return $this->generateTimeSeriesData(
-            $start,
-            $end,
-            $groupBy,
-            fn ($start, $end, $label) => $this->calculateLaba($start, $end, $label, $monthFilter)
-        );
-    }
+        // =========================
+        // 🔥 SUMMARY (DARI CHART)
+        // =========================
+        $summary = $chart->reduce(function ($carry, $item) {
+            $carry['pendapatan'] += $item['pendapatan'];
+            $carry['hpp'] += $item['hpp'];
+            $carry['bebanOps'] += $item['bebanOps'];
+            $carry['labaBersih'] += $item['labaBersih'];
+            return $carry;
+        }, [
+            'pendapatan' => 0,
+            'hpp' => 0,
+            'bebanOps' => 0,
+            'labaBersih' => 0,
+        ]);
 
-    private function calculateLaba($start, $end, $label, $monthFilter)
-    {
-        $pendapatan =
-            $this->dateFilter(Invoice::where('type', 'out'), $start, $end, $monthFilter)->sum('total') +
-            $this->dateFilter(Pos::query(), $start, $end, $monthFilter)->sum('total');
-
-        $hpp =
-            $this->dateFilter(Invoice::where('type', 'in'), $start, $end, $monthFilter)->sum('total');
-
-        $beban =
-            $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end, $monthFilter)->sum('amount');
-
-        $laba = $pendapatan - $hpp - $beban;
+        $summary['margin'] = $summary['pendapatan'] > 0
+            ? round(($summary['labaBersih'] / $summary['pendapatan']) * 100, 1)
+            : 0;
 
         return [
-            'name' => $label,
-            'pendapatan' => $pendapatan,
-            'hpp' => $hpp,
-            'bebanOps' => $beban,
-            'labaBersih' => $laba,
-            'margin' => $pendapatan > 0 ? round(($laba / $pendapatan) * 100, 1) : 0,
+            'summary' => $summary,
+            'chart' => $chart,
+            'table' => $chart->sortBy('sort_date')->values(),
         ];
     }
+
+    // private function generateLabaRugiChart($start, $end, $groupBy, $monthFilter)
+    // {
+    //     return $this->generateTimeSeriesData(
+    //         $start,
+    //         $end,
+    //         $groupBy,
+    //         fn ($start, $end, $label) => $this->calculateLaba($start, $end, $label, $monthFilter)
+    //     );
+    // }
+
+    // private function calculateLaba($start, $end, $label, $monthFilter)
+    // {
+    //     $pendapatan =
+    //         $this->dateFilter(Invoice::where('type', 'out'), $start, $end, $monthFilter)->sum('total') +
+    //         $this->dateFilter(Pos::query(), $start, $end, $monthFilter)->sum('total');
+
+    //     $hpp =
+    //         $this->dateFilter(Invoice::where('type', 'in'), $start, $end, $monthFilter)->sum('total');
+
+    //     $beban =
+    //         $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end, $monthFilter)->sum('amount');
+
+    //     $laba = $pendapatan - $hpp - $beban;
+
+    //     return [
+    //         'name' => $label,
+    //         'pendapatan' => $pendapatan,
+    //         'hpp' => $hpp,
+    //         'bebanOps' => $beban,
+    //         'labaBersih' => $laba,
+    //         'margin' => $pendapatan > 0 ? round(($laba / $pendapatan) * 100, 1) : 0,
+    //     ];
+    // }
 }
