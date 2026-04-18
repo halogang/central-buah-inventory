@@ -18,6 +18,8 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
 
 
+
+
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Events\AfterSheet;
 
@@ -58,7 +60,9 @@ class ReportExport implements
             'B' => 30,
             'C' => 20,
             'D' => 20,
-            'E' => 20,
+            'E' => 5,   // spacer
+            'F' => 25,  // label summary
+            'G' => 25,  // value (IMPORTANT 🔥)
         ];
     }
 
@@ -77,38 +81,81 @@ class ReportExport implements
         return [
             AfterSheet::class => function (AfterSheet $event) {
 
-                $sheet = $event->sheet->getDelegate();
+            $sheet = $event->sheet->getDelegate();
 
-                // Header bold + center
-                $sheet->getStyle('A1:E1')->applyFromArray([
-                    'font' => ['bold' => true],
-                ]);
+            $dataCount = count($this->data['pettyCash']);
+            $startRow = 6; // header posisi
 
-                // Table header
-                $sheet->getStyle('A6:E6')->applyFromArray([
-                    'font' => ['bold' => true],
-                    'fill' => [
-                        'fillType' => 'solid',
-                        'startColor' => ['argb' => 'FFEFEFEF'],
-                    ],
-                ]);
+            // 👉 posisi summary di kanan (kolom F)
+            $colLabel = 'F';
+            $colValue = 'G';
 
-                // Border all
-                $sheet->getStyle('A6:E100')->applyFromArray([
+            $row = $startRow;
+
+            $sheet->setCellValue("{$colLabel}{$row}", 'Summary');
+            $sheet->mergeCells("{$colLabel}{$row}:{$colValue}{$row}");
+            $sheet->getStyle("{$colLabel}{$row}")->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => 'solid',
+                    'startColor' => ['argb' => 'FFEFEFEF'],
+                ],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => 'thin'],
+                ],
+            ]);
+
+            $row++;
+
+            $sheet->setCellValue("{$colLabel}{$row}", 'Total Modal');
+            $sheet->setCellValue("{$colValue}{$row}", $this->data['summary']['income']);
+
+            $row++;
+
+            $sheet->setCellValue("{$colLabel}{$row}", 'Total Pengeluaran');
+            $sheet->setCellValue("{$colValue}{$row}", $this->data['summary']['expense']);
+
+            $row++;
+
+            $sheet->setCellValue("{$colLabel}{$row}", 'Kas Bersih');
+            $sheet->setCellValue("{$colValue}{$row}", $this->data['summary']['net']);
+
+            // 💅 Styling
+            $sheet->getStyle("{$colLabel}" . ($startRow+1) . ":{$colValue}{$row}")
+                ->applyFromArray([
                     'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => 'thin',
-                        ],
+                        'allBorders' => ['borderStyle' => 'thin'],
                     ],
                 ]);
 
-                $sheet->getStyle('D7:D100')
-                    ->getNumberFormat()
-                    ->setFormatCode('"Rp" #,##0');
+            $sheet->getStyle("{$colValue}" . ($startRow+1) . ":{$colValue}{$row}")
+                ->getNumberFormat()
+                ->setFormatCode('"Rp" #,##0');
 
-                // Align right for numbers
-                $sheet->getStyle('D:E')->getAlignment()->setHorizontal('right');
-            },
+            $sheet->getStyle('A6:D6')->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => [
+                    'fillType' => 'solid',
+                    'startColor' => ['argb' => 'FFEFEFEF'],
+                ],
+            ]);
+
+            $sheet->getStyle('F6:G6')->applyFromArray([
+                'font' => ['bold' => true],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => 'thin'],
+                ],
+            ]);
+
+            $lastRow = 6 + count($this->data['pettyCash']);
+
+            $sheet->getStyle("A6:D{$lastRow}")
+                ->applyFromArray([
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => 'thin'],
+                    ],
+                ]);
+        },
         ];
     }
 }

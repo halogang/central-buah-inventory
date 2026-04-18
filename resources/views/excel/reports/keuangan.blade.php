@@ -4,21 +4,6 @@
 
 <table>
     <tr>
-        <th>Total Modal</th>
-        <th>Total Pengeluaran</th>
-        <th>Kas Bersih</th>
-    </tr>
-    <tr>
-        <td>{{ $data['summary']['income'] }}</td>
-        <td>{{ $data['summary']['expense'] }}</td>
-        <td>{{ $data['summary']['net'] }}</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
         <th>Tanggal</th>
         <th>Keterangan</th>
         <th>Jenis</th>
