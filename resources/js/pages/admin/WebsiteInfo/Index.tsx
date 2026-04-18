@@ -50,6 +50,8 @@ export default function WebsiteInfoIndex({ info }: any) {
         hero_image_url: null as File | null,
         about_image_url: null as File | null,
         about_content: '',
+        remove_hero_image: false,
+        remove_about_image: false,
     }
 
     const [form, setForm] = useState(
@@ -65,6 +67,8 @@ export default function WebsiteInfoIndex({ info }: any) {
             hero_image_url: info.hero_image_url,
             about_image_url: info.about_image_url,
             about_content: info.about_content,
+            remove_hero_image: false,
+            remove_about_image: false,
         } : emptyForm
     )
 
@@ -280,6 +284,11 @@ export default function WebsiteInfoIndex({ info }: any) {
                                         : form.hero_image_url
                                 }
                                 onChange={(file) => setForm({ ...form, hero_image: file })}
+                                onRemove={() => setForm({
+                                    ...form,
+                                    hero_image: null,
+                                    remove_hero_image: true
+                                })}
                                 hint="maksimal 15MB"
                             />
 
@@ -291,6 +300,11 @@ export default function WebsiteInfoIndex({ info }: any) {
                                         : form.about_image_url
                                 }
                                 onChange={(file) => setForm({ ...form, about_image: file })}
+                                onRemove={() => setForm({
+                                    ...form,
+                                    about_image: null,
+                                    remove_about_image: true
+                                })}
                                 hint="maksimal 15MB"
                             />
 

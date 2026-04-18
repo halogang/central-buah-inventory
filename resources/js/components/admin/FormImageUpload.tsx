@@ -13,6 +13,7 @@ interface FormImageUploadProps {
     title?: string;
     subtitle?: string;
     required?: boolean;
+    onRemove?: () => void;
 }
 
 export default function FormImageUpload({
@@ -26,6 +27,7 @@ export default function FormImageUpload({
     title,
     subtitle,
     required,
+    onRemove,
 }: FormImageUploadProps) {
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -61,9 +63,13 @@ export default function FormImageUpload({
         }
 
         onChange(null);
+
+        // 🔥 trigger parent
+        onRemove?.();
+
         setPreviewUrl(null);
 
-    }, [onChange, previewUrl]);
+    }, [onChange, previewUrl, onRemove]);
 
     const currentPreview = previewUrl;
 

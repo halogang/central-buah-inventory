@@ -43,122 +43,103 @@ class WebsiteInfoController extends Controller
             'alamat' => 'required|string',
             'kontak' => 'required|string',
             'email' => 'nullable|email',
-            // 'npwp' => 'nullable|string',
             'jam_operasional' => 'required|string',
             'link_maps' => 'nullable|url',
             'hero_image' => 'nullable|image',
-            'about_content' => 'nullable|string',
             'about_image' => 'nullable|image',
-            // 'facebook' => 'nullable|url',
-            // 'instagram' => 'nullable|url',
-            // 'whatsapp' => 'nullable|string',
-            // 'footer_copyright' => 'nullable|string',
+            'about_content' => 'nullable|string',
+
+            // 🔥 flag delete
+            'remove_hero_image' => 'nullable|boolean',
+            'remove_about_image' => 'nullable|boolean',
         ]);
 
         $uploadPath = '../../public_html/images/website';
         $savePath = '/images/website';
-
         $destination = public_path($uploadPath);
 
-        if ($request->hasFile('hero_image')) {
-            if ($websiteInfo->hero_image) {
-                $oldHeroImage = public_path($websiteInfo->hero_image);
+        // helper upload (biar ga duplikat)
+        $processImage = function ($file, $oldPath = null) use ($destination, $savePath) {
 
-                if (File::exists($oldHeroImage)) {
-                    File::delete($oldHeroImage);
+            // hapus lama
+            if ($oldPath) {
+                $fullOld = public_path($oldPath);
+                if (File::exists($fullOld)) {
+                    File::delete($fullOld);
                 }
             }
 
-            $image = $request->file('hero_image');
-
-            // ambil nama asli tanpa ekstensi
-            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-            // format nama: lowercase + spasi jadi -
-            $baseName = Str::slug($originalName);
-
-            // default nama file
-            $fileName = $baseName . '.webp';
-
-            $fullPath = $destination . '/' . $fileName;
-
-            // 🔁 handle jika file sudah ada
-            $counter = 1;
-            while (File::exists($fullPath)) {
-                $fileName = $baseName . " ($counter).webp";
-                $fullPath = $destination . '/' . $fileName;
-                $counter++;
-            }
-
-            // pastikan folder ada
-            if (!File::exists($destination)) {
-                File::makeDirectory($destination, 0755, true);
-            }
-
-            // proses image
-            $manager = new ImageManager(new Driver());
-            $img = $manager->read($image->getRealPath());
-
-            $img->scale(width: 1200);
-            $img->toWebp(80)->save($fullPath);
-
-            // simpan path
-            $data['hero_image'] = $savePath . '/' . $fileName;
-        }
-
-        if ($request->hasFile('about_image')) {
-            if ($websiteInfo->about_image) {
-                $oldAboutImage = public_path($websiteInfo->about_image);
-
-                if (File::exists($oldAboutImage)) {
-                    File::delete($oldAboutImage);
-                }
-            }
-
-            $image = $request->file('about_image');
-
-            // ambil nama asli tanpa ekstensi
-            $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
-
-            // format nama: lowercase + spasi jadi -
-            $baseName = Str::slug($originalName);
-
-            // default nama file
-            $fileName = $baseName . '.webp';
-
-            $fullPath = $destination . '/' . $fileName;
-
-            // 🔁 handle jika file sudah ada
-            $counter = 1;
-            while (File::exists($fullPath)) {
-                $fileName = $baseName . " ($counter).webp";
-                $fullPath = $destination . '/' . $fileName;
-                $counter++;
-            }
-
-            // pastikan folder ada
-            if (!File::exists($destination)) {
-                File::makeDirectory($destination, 0755, true);
-            }
-
-            // proses image
-            $manager = new ImageManager(new Driver());
-            $img = $manager->read($image->getRealPath());
-
-            $img->scale(width: 1200);
-            $img->toWebp(80)->save($fullPath);
-
-            // simpan path
-            $data['about_image'] = $savePath . '/' . $fileName;
-        }
-
-
-        function generateFileName($file, $prefix = '')
-        {
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeName = Str::slug($originalName);
+            $baseName = Str::slug($originalName);
+            $fileName = $baseName . '.webp';
+            $fullPath = $destination . '/' . $fileName;
 
-            return ($prefix ? $prefix . '-' : '') . $safeName . '-' . time() . '.webp';
+            $counter = 1;
+            while (File::exists($fullPath)) {
+                $fileName = $baseName . " ($counter).webp";
+                $fullPath = $destination . '/' . $fileName;
+                $counter++;
+            }
+
+            if (!File::exists($destination)) {
+                File::makeDirectory($destination, 0755, true);
+            }
+
+            $manager = new ImageManager(new Driver());
+            $img = $manager->read($file->getRealPath());
+
+            $img->scale(width: 1200);
+            $img->toWebp(80)->save($fullPath);
+
+            return $savePath . '/' . $fileName;
+        };
+
+        // =========================
+        // ❌ DELETE HERO
+        // =========================
+        if ($request->boolean('remove_hero_image')) {
+            if ($websiteInfo->hero_image) {
+                $old = public_path($websiteInfo->hero_image);
+                if (File::exists($old)) {
+                    File::delete($old);
+                }
+            }
+
+            $data['hero_image'] = null;
+        }
+
+        // =========================
+        // ❌ DELETE ABOUT
+        // =========================
+        if ($request->boolean('remove_about_image')) {
+            if ($websiteInfo->about_image) {
+                $old = public_path($websiteInfo->about_image);
+                if (File::exists($old)) {
+                    File::delete($old);
+                }
+            }
+
+            $data['about_image'] = null;
+        }
+
+        // =========================
+        // 📤 UPLOAD HERO
+        // =========================
+        if ($request->hasFile('hero_image') && !$request->boolean('remove_hero_image')) {
+            $data['hero_image'] = $processImage(
+                $request->file('hero_image'),
+                $websiteInfo->hero_image
+            );
+        }
+
+        // =========================
+        // 📤 UPLOAD ABOUT
+        // =========================
+        if ($request->hasFile('about_image') && !$request->boolean('remove_about_image')) {
+            $data['about_image'] = $processImage(
+                $request->file('about_image'),
+                $websiteInfo->about_image
+            );
         }
 
         $websiteInfo->update($data);

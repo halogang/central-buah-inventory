@@ -70,7 +70,7 @@ export default function LaporanPage() {
         setYear(newYear);
         setCategory(finalCategory);
 
-        const monthToSend = newMonth === -1 ? 'all' : newMonth;
+        const monthToSend = newMonth === 0 ? 'all' : newMonth;
         const yearToSend = newYear === 0 ? 'all' : newYear;
 
         router.get(index(), {
@@ -147,7 +147,11 @@ export default function LaporanPage() {
                         )}
                     </div>
 
-                    <ExportButtons />
+                    <ExportButtons 
+                        activeTab={activeTab} 
+                        month={month} 
+                        year={year} 
+                    />
                 </div>
 
                 {/* Tab Content */}

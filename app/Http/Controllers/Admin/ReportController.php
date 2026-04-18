@@ -10,10 +10,14 @@ use App\Models\Item;
 use App\Models\PettyCashTransaction;
 use App\Models\Pos;
 use App\Models\StockMovement;
+use App\Models\WebsiteInfo;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Exports\ReportExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -25,11 +29,15 @@ class ReportController extends Controller
     public function index(Request $request)
     {
 
-        $month = $request->month === 'all' ? null : (int) $request->month;
-        $year  = $request->year === 'all' ? null : (int) $request->year;
-        $category = $request->category ?? null;
-        // dd($month, $year);
+        $month = $request->month;
+        $year = $request->year;
 
+        // 🔥 NORMALISASI
+        $month = ($month === 'all' || $month == 0) ? null : (int) $month;
+        $year = ($year === 'all' || $year == 0) ? null : (int) $year;
+
+        $category = $request->category ?? null;
+        
         try {
             ['start' => $start, 'end' => $end, 'groupBy' => $groupBy, 'monthFilter' => $monthFilter]
                 = $this->getDateRange($month, $year);
@@ -37,14 +45,29 @@ class ReportController extends Controller
             dd($e->getMessage(), $e->getFile(), $e->getLine());
         }
 
+        $export = $request->export;
+        $tab = $request->tab;
 
-        // dd($this->getDateRange($month, $year));
+
+        if ($export) {
+
+            return $this->handleExport(
+                $export,
+                $tab,
+                $start,
+                $end,
+                $groupBy,
+                $request,
+                $monthFilter,
+                $category
+            );
+        }
 
         
         try {
             return Inertia::render('admin/Report/Index', [
                 'filters' => [
-                    'month' => $month ?? -1,
+                    'month' => $month ?? 0,
                     'year' => $year ?? 0,
                     'category' => $category,
                 ],
@@ -921,6 +944,8 @@ class ReportController extends Controller
 
             return [
                 'name' => $p['label'],
+                'tanggal' => $groupBy === 'daily' ? $p['key'] : null,
+                'bulan' => $groupBy !== 'daily' ? $p['label'] : null,
                 'sort_date' => $p['key'],
                 'pendapatan' => $pendapatan,
                 'hpp' => $hppVal,
@@ -956,37 +981,143 @@ class ReportController extends Controller
         ];
     }
 
-    // private function generateLabaRugiChart($start, $end, $groupBy, $monthFilter)
-    // {
-    //     return $this->generateTimeSeriesData(
-    //         $start,
-    //         $end,
-    //         $groupBy,
-    //         fn ($start, $end, $label) => $this->calculateLaba($start, $end, $label, $monthFilter)
-    //     );
-    // }
+    public function handleExport($type, $tab, $start, $end, $groupBy, $request, $monthFilter, $category = null)
+    {
+        $websiteInfo = WebsiteInfo::first();
+        $company = [
+            'name' => $websiteInfo->nama_usaha,
+            'address' => $websiteInfo->alamat,
+            'phone' => $websiteInfo->kontak,
+        ];
+        // $data = $this->getDataByTab($tab, $start, $end, $groupBy, $request);
+        $data = match ($tab) {
+            'keuangan' => $this->getKeuanganData($start, $end, $groupBy, $monthFilter),
+            'stok' => $this->getStokData($start, $end, $request->month),
+            'penjualan' => $this->getPenjualanData($start, $end, $monthFilter),
+            'pengeluaran' => $this->getPengeluaranData($start, $end, $monthFilter, $groupBy, $category),
+            'laba-rugi' => $this->getLabaRugiData($start, $end, $groupBy, $monthFilter),
+            default => abort(404),
+        };
 
-    // private function calculateLaba($start, $end, $label, $monthFilter)
-    // {
-    //     $pendapatan =
-    //         $this->dateFilter(Invoice::where('type', 'out'), $start, $end, $monthFilter)->sum('total') +
-    //         $this->dateFilter(Pos::query(), $start, $end, $monthFilter)->sum('total');
+        if ($type === 'pdf') {
+            return $this->exportPdf($tab, $data, $request, $company);
+        }
 
-    //     $hpp =
-    //         $this->dateFilter(Invoice::where('type', 'in'), $start, $end, $monthFilter)->sum('total');
+        if ($type === 'excel') {
+            return $this->exportExcel($tab, $data, $request, $company);
+        }
+    }
 
-    //     $beban =
-    //         $this->dateFilter(PettyCashTransaction::where('type', 'expense'), $start, $end, $monthFilter)->sum('amount');
+    private function formatPeriod($month, $year)
+    {
+        $months = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
 
-    //     $laba = $pendapatan - $hpp - $beban;
+        $month = ($month === 'all' || $month == 0) ? null : (int) $month;
+        $year  = ($year === 'all' || $year == 0) ? null : (int) $year;
 
-    //     return [
-    //         'name' => $label,
-    //         'pendapatan' => $pendapatan,
-    //         'hpp' => $hpp,
-    //         'bebanOps' => $beban,
-    //         'labaBersih' => $laba,
-    //         'margin' => $pendapatan > 0 ? round(($laba / $pendapatan) * 100, 1) : 0,
-    //     ];
-    // }
+        if ($month && $year) {
+            return "{$months[$month]} {$year}";
+        }
+
+        if ($month && !$year) {
+            return "{$months[$month]} (Semua Tahun)";
+        }
+
+        if (!$month && $year) {
+            return "Tahun {$year}";
+        }
+
+        return "Semua Periode";
+    }
+
+    private function formatPeriodForFile($month, $year)
+    {
+        $months = [
+            1 => 'januari',
+            2 => 'februari',
+            3 => 'maret',
+            4 => 'april',
+            5 => 'mei',
+            6 => 'juni',
+            7 => 'juli',
+            8 => 'agustus',
+            9 => 'september',
+            10 => 'oktober',
+            11 => 'november',
+            12 => 'desember',
+        ];
+
+        $month = ($month === 'all' || $month == 0) ? null : (int) $month;
+        $year = ($year === 'all' || $year == 0) ? null : (int) $year;
+
+        if ($month && $year) {
+            return "{$months[$month]}-{$year}";
+        }
+
+        if ($month && !$year) {
+            return "{$months[$month]}-semua-tahun";
+        }
+
+        if (!$month && $year) {
+            return "tahun-{$year}";
+        }
+
+        return "semua-periode";
+    }
+    
+    private function exportPdf($tab, $data, $request, $company)
+    {
+        $view = "pdf.reports.$tab"; // contoh: exports.penjualan
+
+        $filters = [
+            'period' => $this->formatPeriod($request->month, $request->year),
+        ];
+
+        $title = match ($tab) {
+            'keuangan' => 'Laporan Keuangan - ' .$filters['period'],
+            'stok' => 'Laporan Stok - ' .$filters['period'],
+            'penjualan' => 'Laporan Penjualan - ' .$filters['period'],
+            'pengeluaran' => 'Laporan Pengeluaran - ' .$filters['period'],
+            'laba-rugi' => 'Laporan Laba Rugi - ' .$filters['period'],
+        };
+
+        $periodFile = $this->formatPeriodForFile($request->month, $request->year);
+
+        $pdf = Pdf::loadView($view, [
+            'data' => $data,
+            'tab' => $tab,
+            'title' => $title,
+            'filters' => $filters,
+            'company' => $company
+        ]);
+
+        return $pdf->download("laporan-{$tab}-{$periodFile}.pdf");
+    }
+
+    private function exportExcel($tab, $data, $request, $company)
+    {
+        $filters = [
+            'period' => $this->formatPeriod($request->month, $request->year),
+        ];
+
+        $periodFile = $this->formatPeriodForFile($request->month, $request->year);
+
+        return Excel::download(
+            new ReportExport($tab, $data, $filters, $company),
+            "laporan-{$tab}-{$periodFile}.xlsx"
+        );
+    }
 }
