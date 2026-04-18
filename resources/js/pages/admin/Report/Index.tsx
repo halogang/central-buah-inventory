@@ -114,9 +114,12 @@ export default function LaporanPage() {
                     }
                 </div>
 
-                <div className={`flex items-center gap-2 ${activeTab === 'stok' ? 'justify-end' : 'justify-between'}`}>
+                <div className={`
+                    flex flex-col gap-3
+                    sm:flex-row sm:flex-wrap sm:items-center sm:justify-between
+                `}>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3 w-full sm:w-auto">
                         {activeTab !== 'stok' && (
                             <FilterBar
                                 month={month}
@@ -132,7 +135,7 @@ export default function LaporanPage() {
                                 <select
                                     value={category ?? 'all'}
                                     onChange={(e) => handleFilterChange(month, year, e.target.value)}
-                                    className="appearance-none rounded-lg border border-border bg-card px-4 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                                    className="w-full sm:w-auto appearance-none rounded-lg border border-border bg-card px-4 py-2 pr-8 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                                 >
                                     <option value="all">Semua Kategori</option>
 
@@ -147,11 +150,16 @@ export default function LaporanPage() {
                         )}
                     </div>
 
-                    <ExportButtons 
-                        activeTab={activeTab} 
-                        month={month} 
-                        year={year} 
-                    />
+                    <div className={`
+                        w-full sm:w-auto flex
+                        justify-start sm:justify-end
+                    `}>
+                        <ExportButtons 
+                            activeTab={activeTab} 
+                            month={month} 
+                            year={year} 
+                        />
+                    </div>
                 </div>
 
                 {/* Tab Content */}

@@ -24,7 +24,7 @@ export function ExportButtons({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto justify-start">
       <button
         onClick={() => handleExport("pdf")}
         className="flex items-center gap-1.5 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"

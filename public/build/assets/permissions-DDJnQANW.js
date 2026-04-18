@@ -1,0 +1,1 @@
+import{c as n,u as t}from"./app-Cob93Xk1.js";function r(){const s=n.c(2),{auth:i}=t().props;let e;return s[0]!==i?.permissions?(e=i?.permissions??[],s[0]=i?.permissions,s[1]=e):e=s[1],e}const u=()=>{const s=n.c(2),i=r();let e;return s[0]!==i?(e=o=>i.includes(o),s[0]=i,s[1]=e):e=s[1],e};export{u};
