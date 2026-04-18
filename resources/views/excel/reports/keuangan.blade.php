@@ -1,4 +1,4 @@
-@extends('excel.reports.layouts.base')
+@extends('excel.reports.layouts.base', ['company' => $company, 'filters' => $filters])
 
 @section('content')
 
