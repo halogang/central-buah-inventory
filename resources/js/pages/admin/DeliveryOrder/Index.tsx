@@ -254,7 +254,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                             }`}
                         >
-                            <ArrowDownToLine className="size-4" />
+                            <ArrowDownToLine className="size-4 hidden sm:block" />
                             Surat Jalan Masuk
                         </button>
                     )}
@@ -268,7 +268,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                                 : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                     >
-                        <ArrowUpToLine className="size-4" />
+                        <ArrowUpToLine className="size-4 hidden sm:block" />
                         Surat Jalan Keluar
                     </button>
 
@@ -339,7 +339,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
 
                         <div
                             key={delivery.id}
-                            className="flex flex-col gap-3 rounded-xl border p-4 shadow-sm"
+                            className="flex flex-col gap-3 rounded-xl border p-4 shadow-sm w-full"
                         >
 
                             {/* HEADER */}
@@ -392,7 +392,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
                             </div>
 
                             {/* ACTION */}
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
 
                                 <Button onClick={() => openDetail(delivery)}
                                     variant="secondary"

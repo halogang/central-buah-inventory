@@ -16,7 +16,7 @@ import { useCan } from '@/utils/permissions';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Keuangan - Petty Cash',
+        title: 'Petty Cash',
         href: '/keuangan',
     },
 ];
@@ -53,8 +53,8 @@ export default function Index() {
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
 
     const [search, setSearch] = useState('')
-    const [month, setMonth] = useState<number>(0)
-    const [year, setYear] = useState<number>(0)
+    const [month, setMonth] = useState<number>(new Date().getMonth() + 1)
+    const [year, setYear] = useState<number>(new Date().getFullYear())
 
     const [dateFrom, setDateFrom] = useState("")
     const [dateTo, setDateTo] = useState("")

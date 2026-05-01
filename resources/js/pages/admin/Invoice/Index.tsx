@@ -184,7 +184,7 @@ export default function Index({invoices, summary, paymentMethods} : Props) {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div
                         className='flex flex-col gap-1 items-center justify-center rounded-xl border border-sidebar-border/70 bg-background p-4 shadow-sm dark:border-sidebar-border'>
                         <DollarSign className="text-primary size-5"/>

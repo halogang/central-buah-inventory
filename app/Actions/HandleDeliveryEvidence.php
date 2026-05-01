@@ -4,8 +4,7 @@ namespace App\Actions;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Laravel\Facades\Image;
 
 class HandleDeliveryEvidence
 {
@@ -22,8 +21,6 @@ class HandleDeliveryEvidence
         if (!File::exists($destination)) {
             File::makeDirectory($destination, 0755, true);
         }
-
-        $manager = new ImageManager(new Driver());
 
         /**
          * 🔥 2. AMBIL DATA DARI REQUEST
@@ -54,7 +51,7 @@ class HandleDeliveryEvidence
 
                 $fileName = Str::uuid() . '.webp';
 
-                $img = $manager->read($file->getRealPath());
+                $img = Image::read($file->getRealPath());
                 $img->scale(width: 1200);
                 $img->toWebp(80)->save($destination . '/' . $fileName);
 

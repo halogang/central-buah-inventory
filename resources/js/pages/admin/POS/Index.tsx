@@ -218,7 +218,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             <div class="container">
                 <div class="center">
                     <div class="logo">
-                        <img src="/logo.png" />
+                        <img src="/logo.webp" />
                     </div>
                     <div class="title">Central Buah</div>
                     <div class="subtitle">POS Kasir</div>

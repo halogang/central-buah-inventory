@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Intervention\Image;
 
-use Intervention\Image\Interfaces\DataUriInterface;
 use Intervention\Image\Interfaces\EncodedImageInterface;
-use Throwable;
 
 class EncodedImage extends File implements EncodedImageInterface
 {
     /**
-     * Create new instance.
+     * Create new instance
      *
      * @param string|resource $data
      */
@@ -47,40 +45,21 @@ class EncodedImage extends File implements EncodedImageInterface
      *
      * @see EncodedImageInterface::toDataUri()
      */
-    public function toDataUri(): DataUriInterface
+    public function toDataUri(): string
     {
-        return DataUri::create(
-            data: (string) $this,
-            mediaType: $this->mediaType(),
-        );
+        return sprintf('data:%s;base64,%s', $this->mediaType(), base64_encode((string) $this));
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @see EncodedImageInterface::toBase64()
-     */
-    public function toBase64(): string
-    {
-        return base64_encode((string) $this);
-    }
-
-    /**
-     * Show debug info for the current image.
+     * Show debug info for the current image
      *
      * @return array<string, mixed>
      */
     public function __debugInfo(): array
     {
-        try {
-            $size = $this->size();
-        } catch (Throwable) {
-            $size = 0;
-        }
-
         return [
             'mediaType' => $this->mediaType(),
-            'size' => $size,
+            'size' => $this->size(),
         ];
     }
 }

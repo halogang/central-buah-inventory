@@ -16,9 +16,10 @@ use IteratorAggregate;
 class Collection implements CollectionInterface, IteratorAggregate, Countable
 {
     /**
-     * Create new collection object.
+     * Create new collection object
      *
      * @param array<int|string, mixed> $items
+     * @return void
      */
     public function __construct(protected array $items = [])
     {
@@ -26,7 +27,7 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * Static constructor.
+     * Static constructor
      *
      * @param array<int|string, mixed> $items
      * @return self<int|string, mixed>
@@ -47,19 +48,7 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @see CollectionInterface::set()
-     */
-    public function set(int|string $key, mixed $item): self
-    {
-        $this->items[$key] = $item;
-
-        return $this;
-    }
-
-    /**
-     * Returns Iterator.
+     * Returns Iterator
      *
      * @return Traversable<int|string, mixed>
      */
@@ -79,7 +68,7 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * Count items in collection.
+     * Count items in collection
      */
     public function count(): int
     {
@@ -87,7 +76,7 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * Append new item to collection.
+     * Append new item to collection
      *
      * @return CollectionInterface<int|string, mixed>
      */
@@ -99,33 +88,33 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * Return first item in collection.
+     * Return first item in collection
      */
     public function first(): mixed
     {
-        if (count($this->items) === 0) {
-            return null;
+        if ($item = reset($this->items)) {
+            return $item;
         }
 
-        return reset($this->items);
+        return null;
     }
 
     /**
-     * Returns last item in collection.
+     * Returns last item in collection
      */
     public function last(): mixed
     {
-        if (count($this->items) === 0) {
-            return null;
+        if ($item = end($this->items)) {
+            return $item;
         }
 
-        return end($this->items);
+        return null;
     }
 
     /**
-     * Return item at given position starting at 0.
+     * Return item at given position starting at 0
      */
-    public function at(int $key = 0, mixed $default = null): mixed
+    public function getAtPosition(int $key = 0, mixed $default = null): mixed
     {
         if ($this->count() == 0) {
             return $default;
@@ -176,9 +165,7 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @see CollectionInterface::map()
+     * Map each item of collection by given callback
      */
     public function map(callable $callback): self
     {
@@ -192,9 +179,7 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @see CollectionInterface::map()
+     * Run callback on each item of the collection an remove it if it does not return true
      */
     public function filter(callable $callback): self
     {
@@ -209,9 +194,9 @@ class Collection implements CollectionInterface, IteratorAggregate, Countable
     /**
      * {@inheritdoc}
      *
-     * @see CollectionInterface::clear()
+     * @see CollectionInterface::empty()
      */
-    public function clear(): CollectionInterface
+    public function empty(): CollectionInterface
     {
         $this->items = [];
 

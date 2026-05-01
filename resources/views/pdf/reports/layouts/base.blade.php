@@ -100,7 +100,7 @@
 <table class="header-table">
     <tr>
         <td width="60">
-            <img src="{{ public_path('logo.png') }}" height="50">
+            <img src="{{ public_path('logo.webp') }}" height="50">
         </td>
 
         <td>

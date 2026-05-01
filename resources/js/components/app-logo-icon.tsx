@@ -1,7 +1,7 @@
 export default function AppLogoIcon() {
     return (
         <img
-            src="/logo.png"
+            src="/logo.webp"
             alt="Logo"
             className=""
         />

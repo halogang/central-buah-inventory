@@ -4,8 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Laravel\Facades\Image;
 
 class SignatureService
 {
@@ -39,9 +38,7 @@ class SignatureService
 
         $imageData = base64_decode($image);
 
-        $manager = new ImageManager(new Driver());
-
-        $img = $manager->read($imageData);
+        $img = Image::read($imageData);
 
         /*
         =========================

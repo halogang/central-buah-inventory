@@ -112,7 +112,7 @@
 
         <div class="header">
 
-            <img src="{{ public_path('logo.png') }}">
+            <img src="{{ public_path('logo.webp') }}">
 
             <div class="company-name">
                 {{ $websiteInfo->nama_usaha ?? 'Central Buah Sutomo' }}
