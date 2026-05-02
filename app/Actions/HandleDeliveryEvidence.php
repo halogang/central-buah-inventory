@@ -9,7 +9,7 @@ use Intervention\Image\Laravel\Facades\Image;
 class HandleDeliveryEvidence
 {
     protected string $uploadPath = '../../public_html/images/delivery-orders';
-    protected string $savePath = 'images/delivery_orders';
+    protected string $savePath = 'images/delivery-orders';
 
     public function handle($request, $existingFromDB = [])
     {
