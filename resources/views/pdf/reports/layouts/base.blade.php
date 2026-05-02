@@ -99,8 +99,8 @@
 <!-- HEADER -->
 <table class="header-table">
     <tr>
-        <td width="60">
-            <img src="{{ public_path('logo.webp') }}" height="50">
+        <td width="80">
+            <img src="{{ public_path('small_logo.jpg') }}" height="80" alt="Logo">
         </td>
 
         <td>

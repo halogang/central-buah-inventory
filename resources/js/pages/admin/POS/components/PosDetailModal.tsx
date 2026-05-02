@@ -123,7 +123,7 @@ export default function PosDetailModal({data, onClose} : {
                 <div class="container">
                     <div class="center">
                         <div class="logo">
-                            <img src="/logo.webp" />
+                            <img src="/small_logo.jpg" />
                         </div>
                         <div class="title">Central Buah</div>
                         <div class="subtitle">POS Kasir</div>
