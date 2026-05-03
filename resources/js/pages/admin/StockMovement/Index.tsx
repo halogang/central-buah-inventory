@@ -202,7 +202,7 @@ export default function Index() {
                 {/* MOBILE CARD */}
                 <div className="grid gap-3 md:hidden">
 
-                    {filtered.map((m) => {
+                    {paginatedData.map((m) => {
 
                         const { label, style, icon } = getMovementType(m.type);
 

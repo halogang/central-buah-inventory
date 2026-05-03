@@ -315,13 +315,6 @@ export default function Show({ data, onClose }: Props) {
                             Cetak PDF
                         </Button>
 
-                        <Button
-                            variant="outline"
-                            className="flex-1"
-                        >
-                            INV/{data.do_number}
-                        </Button>
-
                     </div>
 
                 </div>

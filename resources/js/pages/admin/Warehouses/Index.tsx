@@ -206,7 +206,7 @@ export default function Warehouses() {
                                 </div>
 
                                 <div className="rounded-full bg-primary/10 px-2 py-1 text-xs font-bold text-primary dark:bg-muted dark:text-muted-foreground">
-                                    Cabang {w.branch? w.branch.name : ''}
+                                    {w.branch? w.branch.name : ''}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 justify-between">
