@@ -17,13 +17,13 @@ class DatabaseSeeder extends Seeder
         $this->call(BranchSeeder::class);
         $this->call(WebsiteInfoSeeder::class);
         $this->call(RolePermissionSeeder::class);
-        $this->call(CategorySeeder::class);
+        // $this->call(CategorySeeder::class);
         $this->call(WarehouseSeeder::class);
         $this->call(SupplierSeeder::class);
         $this->call(CustomerSeeder::class);
         $this->call(PaymentMethodSeeder::class);
         $this->call(UnitSeeder::class);
         $this->call(CartSeeder::class);
-        $this->call(ItemSeeder::class);
+        // $this->call(ItemSeeder::class);
     }
 }
