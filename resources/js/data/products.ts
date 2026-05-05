@@ -25,7 +25,7 @@ export const products: Product[] = [
   { id: "8", name: "Pepaya California", stock: 120, unit: "kg", price: 12000 },
 ];
 
-export type PaymentMethod = "tunai" | "transfer" | "qris";
+export type PaymentMethod = "Tunai" | "Transfer" | "QRIS";
 
 export const formatRupiah = (amount: number): string => {
   return `Rp ${amount.toLocaleString("id-ID")}`;

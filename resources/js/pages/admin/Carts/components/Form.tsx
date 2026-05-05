@@ -92,16 +92,14 @@ export default function Form({
                         onChange={(e) =>
                             setForm({ ...form, cart_code: e.target.value })
                         }
-                        required
                     />
 
                     <FormTextarea
-                        label="Keteragan"
+                        label="Keterangan"
                         value={form.note}
                         onChange={(e) =>
                             setForm({ ...form, note: e.target.value })
                         }
-                        required
                     />
 
 

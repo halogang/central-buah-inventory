@@ -167,6 +167,7 @@ export default function Index() {
                     {can('user.create') && activeTab == "users" && isOwner && (
                         <Button
                             onClick={() => {
+                                setSelectedUser(null)
                                 setShowUserModal(true)
                             }}
                         >
@@ -221,7 +222,10 @@ export default function Index() {
 
                 <UserFormModal
                     open={showUserModal}
-                    onClose={() => setShowUserModal(false)}
+                    onClose={() => {
+                        setShowUserModal(false)
+                        setSelectedUser(null)
+                    }}
                     user={selectedUser}
                     roles={roles}
                 />

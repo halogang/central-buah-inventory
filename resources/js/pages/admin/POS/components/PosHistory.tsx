@@ -3,38 +3,45 @@ import {SearchInput} from "@/components/search-input";
 import {usePagination} from "@/hooks/use-pagination";
 import Pagination from "@/components/Pagination";
 import PosDetailModal from "./PosDetailModal";
+import PosEditModal from "./PosEditModal";
 import { formatCurrency } from "@/helpers/format";
-
-interface PosItem {
-    id: number;
-    item_name: string;
-    quantity: number;
-    price: number;
-    total: number;
-    unit: string;
-}
-
-interface Pos {
-    id: number;
-    pos_number: string;
-    payment_method: string;
-    total: number;
-    paid_amount: number;
-    change_amount: number;
-    created_at: string;
-    type: string;
-    pos_items: PosItem[];
-}
+import { Edit3, Trash2 } from "lucide-react";
+import { router } from "@inertiajs/react";
+import { destroy } from "@/routes/pos";
+import { notify } from "@/lib/notify";
+import type { PosData } from "@/types/pos";
 
 export default function PosHistory({data} : {
-    data: Pos[]
+    data: PosData[]
 }) {
     const [search, setSearch] = useState("");
-    const [selected, setSelected] = useState < Pos | null > (null);
+    const [selected, setSelected] = useState<PosData | null>(null);
+    const [editing, setEditing] = useState<PosData | null>(null);
 
     const filtered = data.filter(
         (p) => p.pos_number.toLowerCase().includes(search.toLowerCase())
     );
+
+    const confirmDelete = (pos: PosData) => {
+        notify.confirmDelete({
+            message: `Hapus ${pos.pos_number}?`,
+            onConfirm: () => performDelete(pos),
+        });
+    };
+
+    const performDelete = (pos: PosData) => {
+        const loading = notify.loading("Menghapus transaksi POS...");
+        router.delete(destroy(pos.id), {
+            onSuccess: () => {
+                notify.dismiss(loading);
+                notify.success(`Transaksi ${pos.pos_number} berhasil dihapus`);
+            },
+            onError: () => {
+                notify.dismiss(loading);
+                notify.error(`Gagal menghapus ${pos.pos_number}`);
+            },
+        });
+    };
 
     const {currentPage, totalPages, paginatedData, goTo} = usePagination(
         filtered,
@@ -107,6 +114,29 @@ export default function PosHistory({data} : {
                                         {formatCurrency(p.change_amount)}
                                     </td>
 
+                                    <td className="p-3 text-right">
+                                        <div className="flex justify-end gap-3 items-center">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setEditing(p);
+                                                }}
+                                                className="p-1 rounded hover:bg-muted/50"
+                                            >
+                                                <Edit3 className="w-4 h-4 text-yellow-500" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    confirmDelete(p);
+                                                }}
+                                                className="p-1 rounded hover:bg-muted/50"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-red-500" />
+                                            </button>
+                                        </div>
+                                    </td>
+
                                 </tr>
                             ))
                         }
@@ -128,7 +158,13 @@ export default function PosHistory({data} : {
             <div className="grid gap-3 md:hidden">
                 {
                     filtered.map((p) => (
-                        <button onClick={() => setSelected(p)} key={p.id} className="border rounded-xl p-3 bg-background shadow-sm">
+                        <div
+                            onClick={() => setSelected(p)}
+                            key={p.id}
+                            role="button"
+                            tabIndex={0}
+                            className="border rounded-xl p-3 bg-background shadow-sm cursor-pointer"
+                        >
 
                             <div className="flex justify-between">
                                 <div className="font-semibold">{p.pos_number}</div>
@@ -171,7 +207,29 @@ export default function PosHistory({data} : {
                                 }
                             </div>
 
-                        </button>
+                            <div className="mt-3 flex items-center justify-end gap-2">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditing(p);
+                                    }}
+                                    className="rounded-xl border border-border px-3 py-2 text-xs font-semibold"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        confirmDelete(p);
+                                    }}
+                                    className="rounded-xl border border-border px-3 py-2 text-xs font-semibold text-destructive"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
                     ))
                 }
             </div>
@@ -185,6 +243,19 @@ export default function PosHistory({data} : {
                 <PosDetailModal
                     data={selected}
                     onClose={() => setSelected(null)}
+                    onEdit={(pos) => {
+                        setSelected(null);
+                        setEditing(pos);
+                    }}
+                    onDelete={confirmDelete}
+                />
+            )}
+
+            {editing && (
+                <PosEditModal
+                    data={editing}
+                    onClose={() => setEditing(null)}
+                    onSuccess={() => setEditing(null)}
                 />
             )}
 

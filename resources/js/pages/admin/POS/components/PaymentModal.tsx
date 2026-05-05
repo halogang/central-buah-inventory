@@ -10,11 +10,12 @@ interface PaymentModalProps {
   cart: CartItem[];
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (m: PaymentMethod) => void;
+  paymentMethods: any[];
   onClose: () => void;
   onSuccess: (cashReceived: number, change: number, charger: number, finalTotal: number) => void;
 }
 
-const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onSuccess }: PaymentModalProps) => {
+const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMethods, onClose, onSuccess }: PaymentModalProps) => {
   
 
   const [purchaseType, setPurchaseType] = useState<"self-buying" | "delivery">("self-buying");
@@ -72,18 +73,18 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
     500000,
   ].filter((v, i, arr) => arr.indexOf(v) === i);
 
-  const methods: { key: PaymentMethod; label: string; icon: string }[] = [
-    { key: "tunai", label: "Tunai", icon: "💵" },
-    { key: "transfer", label: "Transfer", icon: "🏦" },
-    { key: "qris", label: "QRIS", icon: "📱" },
-  ];
+  const methods = paymentMethods.map((pm: any) => ({
+    key: pm.name,
+    label: pm.name,
+    icon: pm.icon,
+  }));
 
 
   const handleProcess = () => {
     let paid = finalTotal;
     let changeAmount = 0;
 
-    if (paymentMethod === "tunai") {
+    if (paymentMethod === "Tunai") {
       const received = Number(cashReceived);
 
       if (!received || received < finalTotal) {
@@ -137,7 +138,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
 
   return (
     <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-bold text-foreground">Pembayaran</h2>
@@ -146,7 +147,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
           </button>
         </div>
 
-        <div className="px-6 py-4 space-y-4">
+        <div className="px-6 py-4 space-y-4 overflow-y-auto">
           {/* Items */}
           <div className="bg-background rounded-xl p-4 space-y-2">
             {cart.map((item) => (
@@ -239,7 +240,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, onClose, onS
           </div>
 
           {/* Cash input */}
-          {paymentMethod === "tunai" && (
+          {paymentMethod === "Tunai" && (
             <div>
               <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Jumlah Uang Diterima</div>
               <div className="relative mt-1">
@@ -304,7 +305,7 @@ interface SuccessModalProps {
 }
 
 export const SuccessModal = ({ total, cashReceived, change, paymentMethod, onNewTransaction, onPrintReceipt }: SuccessModalProps) => {
-  const methodLabel = paymentMethod === "tunai" ? "Tunai" : paymentMethod === "transfer" ? "Transfer" : "QRIS";
+  const methodLabel = paymentMethod === "Tunai" ? "Tunai" : paymentMethod === "Transfer" ? "Transfer" : "QRIS";
 
   return (
     <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">

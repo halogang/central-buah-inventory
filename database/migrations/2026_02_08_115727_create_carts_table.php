@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('cart_code');
-            $table->string('note');
+            $table->string('cart_code')->nullable();
+            $table->string('note')->nullable();
             $table->timestamps();
         });
     }

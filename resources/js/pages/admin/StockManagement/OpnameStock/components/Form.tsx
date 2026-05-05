@@ -11,7 +11,7 @@ interface Props {
     warehouses: any[]
     items: any[]
     opname?: any
-    users?: any[]
+    user?: any
     roleName: any
     authUser: any
 }
@@ -23,13 +23,13 @@ type OpnameItem = {
     difference: number
 }
 
-export default function Form({onClose, warehouses, items, opname, users, roleName, authUser} : Props) {
+export default function Form({onClose, warehouses, items, opname, user, roleName, authUser} : Props) {
 
     const [form, setForm] = useState({
         date: opname?.date.substring(0,10) || '',
         warehouse_id: opname?.warehouse_id || '',
-        user_id: roleName === 'spv_gudang'
-        ? authUser.id
+        user_id: user
+        ? user.id
         : opname?.user_id || '',
         note: opname?.note || ''
     })
@@ -177,10 +177,13 @@ export default function Form({onClose, warehouses, items, opname, users, roleNam
         }
     }
 
-    const filteredWarehouses =
-        roleName === 'spv_gudang'
-            ? warehouses
-            : warehouses.filter(w => w.user_id == form.user_id)
+    // const filteredWarehouses =
+    //     roleName === 'spv_gudang'
+
+    //         ? warehouses
+    //         : warehouses.filter(w => w.user_id == form.user_id)
+
+    const filteredItems = items.filter(i => i.warehouse_id == form.warehouse_id);
 
     return (
 
@@ -221,7 +224,7 @@ export default function Form({onClose, warehouses, items, opname, users, roleNam
                             required
                             />
 
-                        {
+                        {/* {
                             roleName !== 'spv_gudang' && (
 
                                 <div>
@@ -252,13 +255,12 @@ export default function Form({onClose, warehouses, items, opname, users, roleNam
                                 </div>
 
                             )
-                        }
+                        } */}
 
                         <div>
                             <label className="text-sm">Gudang</label>
 
                             <select
-                                disabled={roleName !== 'spv_gudang' && !form.user_id}
                                 className="w-full border rounded-md p-2"
                                 value={form.warehouse_id}
                                 onChange={(e) => setForm({
@@ -269,7 +271,7 @@ export default function Form({onClose, warehouses, items, opname, users, roleNam
 
                                 <option value="">Pilih Gudang</option>
 
-                                {filteredWarehouses.map(w => (
+                                {warehouses.map(w => (
                                     <option key={w.id} value={w.id}>
                                         {w.name}
                                     </option>
@@ -288,7 +290,6 @@ export default function Form({onClose, warehouses, items, opname, users, roleNam
                             ...form,
                             note: e.target.value
                         })}
-                        required
                         />
 
                     <div className="border rounded-lg p-3">
@@ -353,7 +354,7 @@ export default function Form({onClose, warehouses, items, opname, users, roleNam
                                                         <option value="">Pilih Item</option>
 
                                                         {
-                                                            items.map(it => (<option key={it.id} value={it.id}>
+                                                            filteredItems.map(it => (<option key={it.id} value={it.id}>
                                                                 {it.name}
                                                             </option>))
                                                         }

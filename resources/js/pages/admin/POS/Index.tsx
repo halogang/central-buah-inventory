@@ -9,7 +9,6 @@ import PaymentModal, { SuccessModal } from "./components/PaymentModal";
 import ProductGrid from "./components/ProductGrid";
 import { ShoppingCart } from "lucide-react";
 import PosHistory from "./components/PosHistory";
-import AppLogoIcon from "@/components/app-logo-icon";
 import { formatCurrency } from "@/helpers/format";
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,7 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
   const Index = () => {
-  const { productData, posData } = usePage().props as any;
+  const { productData, posData, paymentMethods } = usePage().props as any;
   const products: Product[] = productData.map((item: any) => ({
     id: String(item.id),
     name: item.name,
@@ -35,7 +34,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("tunai");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Tunai");
   const [showPayment, setShowPayment] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0, charge: 0 });
@@ -113,7 +112,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   const handleNewTransaction = () => {
     setCart([]);
     setShowSuccess(false);
-    setPaymentMethod("tunai");
+    setPaymentMethod("Tunai");
   };
 
   const handlePrintReceipt = () => {
@@ -319,6 +318,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     cart={cart}
                     paymentMethod={paymentMethod}
                     onPaymentMethodChange={setPaymentMethod}
+                    paymentMethods={paymentMethods}
                     onQtyChange={changeQty}
                     onRemove={removeFromCart}
                     onCustomPrice={setCustomPrice}
@@ -348,6 +348,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                         cart={cart}
                         paymentMethod={paymentMethod}
                         onPaymentMethodChange={setPaymentMethod}
+                        paymentMethods={paymentMethods}
                         onQtyChange={changeQty}
                         onRemove={removeFromCart}
                         onCustomPrice={setCustomPrice}
@@ -372,6 +373,7 @@ const breadcrumbs: BreadcrumbItem[] = [
               cart={cart}
               paymentMethod={paymentMethod}
               onPaymentMethodChange={setPaymentMethod}
+              paymentMethods={paymentMethods}
               onClose={() => setShowPayment(false)}
               onSuccess={handlePaySuccess}
               />

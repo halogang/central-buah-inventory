@@ -1,12 +1,6 @@
 import { Head, usePage, router } from '@inertiajs/react';
-import { Warehouse, MapPin, SquarePen, Trash2, Plus, X, Eye } from 'lucide-react';
+import { Warehouse, MapPin, SquarePen, Trash2, Plus, Eye } from 'lucide-react';
 import React, { useState } from 'react';
-import {
-    FormInput,
-    FormTextarea,
-    FormSwitch,
-    FormSelect,
-} from '@/components/admin';
 import Pagination from '@/components/Pagination';
 import { SearchInput } from '@/components/search-input';
 import { Button } from '@/components/ui/button';
@@ -15,6 +9,8 @@ import AppLayout from '@/layouts/app-layout';
 import { store, update, destroy, show } from '@/routes/master/warehouses';
 import type { BreadcrumbItem } from '@/types';
 import { useCan } from '@/utils/permissions';
+import { notify } from '@/lib/notify';
+import Form from './components/Form';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -43,13 +39,6 @@ interface Warehouse {
     status: 'active' | 'nonactive';
 }
 
-type WarehouseForm = {
-    name: string;
-    address: string;
-    user_id: string;
-    branch_id: string;
-    status: 'active' | 'nonactive';
-};
 
 export default function Warehouses() {
     const can = useCan();
@@ -60,41 +49,18 @@ export default function Warehouses() {
         branches: Branch[]
     }>().props
     const errors = usePage<{ errors?: Record<string, string> }>().props.errors || {};
-    const [showCreate, setShowCreate] = useState(false);
-    const [editItem, setEditItem] = useState<Warehouse | null>(null);
+    const [showForm, setShowForm] = useState(false);
+    const [editWarehouse, setEditWarehouse] = useState<Warehouse | null>(null);
     const [search, setSearch] = useState('');
 
-    const emptyForm: WarehouseForm = {
-        name: '',
-        address: '',
-        user_id: '',
-        branch_id: '', 
-        status: 'active',
-    }
-    const [form, setForm] = useState(emptyForm);
-
     const openForm = (item?: Warehouse) => {
-        if (item) {
-            setEditItem(item)
-            setForm({
-                name: item.name,
-                address: item.address || '',
-                user_id: String(item.user_id ?? ''),
-                branch_id: String(item.branch?.id ?? ''),
-                status: item.status === 'active' ? 'active' : 'nonactive',
-            })
-        } else {
-            setEditItem(null)
-            setForm(emptyForm)
-        }
-
-        setShowCreate(true)
+        setEditWarehouse(item || null);
+        setShowForm(true);
     }
 
     const closeForm = () => {
-        setShowCreate(false);
-        setEditItem(null);
-        setForm(emptyForm);
+        setShowForm(false);
+        setEditWarehouse(null);
     };
 
 
@@ -112,42 +78,22 @@ export default function Warehouses() {
         goTo,
     } = usePagination(filtered, 6);
 
-    const submitForm = (e: React.FormEvent) => {
-        e.preventDefault();
-        const payload = {
-            name: form.name,
-            address: form.address,
-            user_id: form.user_id || null,
-            branch_id: form.branch_id || null,
-            status: form.status,
-        }
-        if (editItem) {
-            router.put(update(editItem.id), payload, {
-                onSuccess: () => {
-                    closeForm();
-                },
-            });
-        } else {
-            router.post(store(), payload, {
-                onSuccess: () => closeForm(),
-            });
-        }
-    };
-
     const confirmDelete = (item: Warehouse) => {
-        setDeleteItem(item);
-        setToastMessage(`Hapus ${item.name}?`);
+        notify.confirmDelete({
+            message: `Hapus ${item.name}?`,
+            onConfirm: () => performDelete(item),
+        });
     };
 
-    const performDelete = () => {
-        if (deleteItem) {
-            router.delete(destroy(deleteItem.id), {
-                onSuccess: () => {
-                    setToastMessage(null);
-                    setDeleteItem(null);
-                },
-            });
-        }
+    const performDelete = (item: Warehouse) => {
+        router.delete(destroy(item.id), {
+            onSuccess: () => {
+                notify.success(`${item.name} berhasil dihapus`);
+            },
+            onError: () => {
+                notify.error(`Gagal menghapus ${item.name}`);
+            },
+        });
     };
 
     return (
@@ -245,111 +191,13 @@ export default function Warehouses() {
                     onPageChange={goTo}
                 />
 
-                {(showCreate || editItem) && (
-                    <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs animate__animated animate__fadeIn p-1"
-                        onClick={() => closeForm()}
-                    >
-                        <div className="bg-background rounded-lg py-6 w-full max-w-2xl shadow-lg animate__animated animate__zoomIn"
-                             onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="flex justify-between items-center border-b border-sidebar-border pb-2 px-6 mb-4">
-                                <h2 className="text-lg font-semibold">
-                                    {editItem ? `Edit ${editItem.name}` : 'Tambah Gudang'}
-                                </h2>
-                                <X className="h-5 w-5 cursor-pointer" onClick={closeForm} />
-                            </div>
-                            <form onSubmit={submitForm} className="space-y-4 px-6">
-                                <FormInput
-                                    label="Nama Gudang"
-                                    value={form.name}
-                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                    error={errors.name}
-                                    required
-                                    placeholder="Nama gudang..."
-                                />
-                                <FormTextarea
-                                    label="Alamat"
-                                    value={form.address}
-                                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                                    error={errors.address}
-                                    placeholder="Alamat gudang..."
-                                />
-                                <FormSelect
-                                    label="PIC Gudang"
-                                    value={form.user_id}
-                                    onChange={(e) =>
-                                        setForm({ ...form, user_id: e.target.value })
-                                    }
-                                    error={errors.user_id}
-                                    options={[
-                                        { value: '', label: 'Pilih PIC' },
-                                        ...users.map((u: any) => ({
-                                            value: String(u.id),
-                                            label: u.name,
-                                        })),
-                                    ]}
-                                />
-                                <FormSelect
-                                label="Cabang"
-                                    value={form.branch_id}
-                                    onChange={(e) =>
-                                        setForm({ ...form, branch_id: e.target.value })
-                                    }
-                                    error={errors.branch_id}
-                                    options={[
-                                        { value: '', label: 'Pilih Cabang' },
-                                        ...branches.map((b: any) => ({
-                                            value: String(b.id),
-                                            label: b.name,
-                                        })),
-                                    ]}
-                                />
-                                {/* <FormStatusRadio
-                                    value={form.status}
-                                    onChange={(val) => setForm({ ...form, status: val })}
-                                    error={errors.status}
-                                /> */}
-                                <FormSwitch
-                                    label="Aktif"
-                                    value={form.status}
-                                    onChange={(val) => setForm({ ...form, status: val })}
-                                    error={errors.status}
-                                />
-
-                                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-sidebar-border">
-                                    <Button
-                                        variant="secondary"
-                                        type="button"
-                                        onClick={closeForm}
-                                    >
-                                        Batal
-                                    </Button>
-                                    <Button type="submit">
-                                        Simpan
-                                    </Button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
-
-                {toastMessage && (
-                    <div className="fixed bottom-4 right-4 bg-background border border-sidebar-border/70 rounded-lg p-4 shadow-lg flex items-center gap-4">
-                        <span>{toastMessage}</span>
-                        <button
-                            className="text-red-600 font-semibold"
-                            onClick={performDelete}
-                        >
-                            Ya
-                        </button>
-                        <button
-                            className="text-muted-foreground"
-                            onClick={() => setToastMessage(null)}
-                        >
-                            Tidak
-                        </button>
-                    </div>
+                {showForm && (
+                    <Form 
+                        warehouse={editWarehouse}
+                        onClose={closeForm}
+                        users={users}
+                        branches={branches}
+                    />
                 )}
             </div>
         </AppLayout>

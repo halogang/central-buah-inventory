@@ -351,6 +351,7 @@ export default function Form({
                             getNetQty={getNetQty}
                             getItemTotal={getItemTotal}
                             disabled={isStaffAntar}
+                            type={type}
                         />
 
                         {form.status === 'done' && (

@@ -8,6 +8,7 @@ interface CartPanelProps {
   cart: CartItem[];
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (m: PaymentMethod) => void;
+  paymentMethods: any[];
   onQtyChange: (productId: string, delta: number) => void;
   onRemove: (productId: string) => void;
   onCustomPrice: (productId: string, price: number) => void;
@@ -18,6 +19,7 @@ const CartPanel = ({
   cart,
   paymentMethod,
   onPaymentMethodChange,
+  paymentMethods,
   onQtyChange,
   onRemove,
   onCustomPrice,
@@ -50,14 +52,14 @@ const CartPanel = ({
     setEditingId(null);
   };
 
-  const methods: { key: PaymentMethod; label: string; icon: string }[] = [
-    { key: "tunai", label: "Tunai", icon: "💵" },
-    { key: "transfer", label: "Transfer", icon: "🏦" },
-    { key: "qris", label: "QRIS", icon: "📱" },
-  ];
+  const methods = paymentMethods.map((pm: any) => ({
+    key: pm.name,
+    label: pm.name,
+    icon: pm.icon,
+  }));
 
   return (
-    <div className="w-full md:w-120 md:min-w-95 bg-card border md:rounded-xl rounded-none flex flex-col h-full">
+    <div className="w-full md:w-120 md:min-w-95 bg-card border md:rounded-xl rounded-none flex flex-col h-fit">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex items-center gap-2">

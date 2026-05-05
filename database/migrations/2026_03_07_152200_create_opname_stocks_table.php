@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('date');
             $table->foreignId('warehouse_id')->nullable()->constrained()->nullOnDelete();
             $table->string('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->text('note');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

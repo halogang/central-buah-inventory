@@ -37,8 +37,8 @@ class CartController extends Controller
         // dd($request);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'cart_code' => 'required|string',
-            'note' => 'required|string'
+            'cart_code' => 'nullable|string',
+            'note' => 'nullable|string'
         ]);
 
         Cart::create($validated);

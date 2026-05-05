@@ -1,35 +1,14 @@
 import {formatCurrency} from "@/helpers/format";
 import {Printer, X} from "lucide-react";
+import type { PosData } from "@/types/pos";
 
-interface PosItem {
-    id: number;
-    item_name: string;
-    quantity: number;
-    price: number;
-    total: number;
-    unit: string;
-}
-
-interface Pos {
-    id: number;
-    pos_number: string;
-    payment_method: string;
-    total: number;
-    discount?: number;
-    charge?: number;
-    subtotal?: number;
-    paid_amount: number;
-    change_amount: number;
-    created_at: string;
-    type: string;
-    pos_items: PosItem[];
-}
-
-export default function PosDetailModal({data, onClose} : {
-    data: Pos;
+export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
+    data: PosData;
     onClose: () => void;
+    onEdit?: (data: PosData) => void;
+    onDelete?: (data: PosData) => void;
 }) {
-    const printReceipt = (pos : Pos) => {
+    const printReceipt = (pos : PosData) => {
         const receiptWindow = window.open("", "_blank", "width=400,height=600");
         if (!receiptWindow) 
             return;
@@ -183,14 +162,35 @@ export default function PosDetailModal({data, onClose} : {
             {/* overlay */}
             <div className="absolute inset-0 bg-black/40" onClick={onClose}/> {/* modal */}
             <div
-                className="relative bg-background w-full max-w-lg rounded-xl shadow-lg p-5">
+                className="relative bg-background w-full max-w-lg rounded-xl shadow-lg p-5 max-h-screen overflow-y-auto">
 
                 {/* header */}
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold">Detail Transaksi</h2>
-                    <button onClick={onClose}>
-                        <X className="size-5"/>
-                    </button>
+                <div className="flex justify-between items-center mb-4 gap-2">
+                    <div>
+                        <h2 className="text-lg font-semibold">Detail Transaksi</h2>
+                        <div className="text-sm text-muted-foreground">{data.pos_number}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {onEdit && (
+                            <button
+                                onClick={() => onEdit(data)}
+                                className="rounded-xl border border-border px-3 py-2 text-xs font-semibold hover:bg-muted/50"
+                            >
+                                Edit
+                            </button>
+                        )}
+                        {onDelete && (
+                            <button
+                                onClick={() => onDelete(data)}
+                                className="rounded-xl border border-border px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"
+                            >
+                                Hapus
+                            </button>
+                        )}
+                        <button onClick={onClose}>
+                            <X className="size-5"/>
+                        </button>
+                    </div>
                 </div>
 
                 {/* info */}
@@ -227,7 +227,7 @@ export default function PosDetailModal({data, onClose} : {
                 </div>
 
                 {/* items */}
-                <div className="border rounded-lg overflow-hidden mb-4">
+                <div className="border rounded-lg overflow-hidden mb-4 max-h-[40vh] overflow-y-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50">
                             <tr>

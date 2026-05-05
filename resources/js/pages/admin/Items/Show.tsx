@@ -189,7 +189,7 @@ export default function Show({
                             Stok Rendah
                         </div>
                         <h1 className="text-red-500 text-xl font-semibold">
-                            {items.filter((i) => i.stock < i.min_stock).length}
+                            {items.filter((i) => (i.stock - i.bad_stock) < i.min_stock).length}
                         </h1>
                     </div>
                 </div>
@@ -221,6 +221,7 @@ export default function Show({
                                 <th className="text-center p-3">Min Stok</th>
                                 <th className="text-center p-3">Stok</th>
                                 <th className="text-center p-3">Bad</th>
+                                <th className="text-center p-3">Stok Bersih</th>
                                 <th className="text-center p-3"></th>
                             </tr>
                         </thead>
@@ -275,12 +276,7 @@ export default function Show({
 
                                     <td className="p-3 text-center">
                                         <span
-                                            className={`px-2 py-1 rounded-full text-xs font-medium
-                                            ${
-                                                item.stock < item.min_stock
-                                                    ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"
-                                                    : "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
-                                            }`}
+                                            className={`px-2 py-1 rounded-full text-xs font-medium`}
                                         >
                                             {item.stock}
                                         </span>
@@ -291,6 +287,16 @@ export default function Show({
                                             <TriangleAlert className="h-3 w-3" />
                                             {item.bad_stock}
                                         </div>
+                                    </td>
+
+                                    <td className="p-3 text-center">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                (item.stock - item.bad_stock) < item.min_stock
+                                                    ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"
+                                                    : "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                                            }`}>
+                                            {item.stock - item.bad_stock}
+                                        </span>
                                     </td>
 
                                     <td className="p-3 text-center">

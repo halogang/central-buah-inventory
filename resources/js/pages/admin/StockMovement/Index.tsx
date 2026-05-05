@@ -1,11 +1,12 @@
 import { Head, usePage } from "@inertiajs/react";
-import { ArrowDown, ArrowUp, Repeat } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Repeat } from "lucide-react";
 import { useState } from "react";
 import Pagination from "@/components/Pagination";
 import { SearchInput } from "@/components/search-input";
 import { usePagination } from "@/hooks/use-pagination";
 import AppLayout from "@/layouts/app-layout";
 import type { BreadcrumbItem } from "@/types";
+import { Button } from "@/components/ui/button";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -101,12 +102,21 @@ export default function Index() {
 
                 </div>
 
-                {/* SEARCH */}
-                <SearchInput
-                    placeholder="Cari Barang..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+                <div className="flex flex-col sm:flex-row items-center mb-4 gap-2">
+                    {/* SEARCH */}
+                    <SearchInput
+                        placeholder="Cari Barang..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <Button  
+                        // onClick={openCreate} 
+                        size="lg" className='w-full sm:w-fit'>
+                        <Plus />
+                        Tambah
+                    </Button>
+                </div>
 
                 {/* DESKTOP TABLE */}
                 <div className="hidden md:block rounded-xl border bg-background overflow-x-auto">

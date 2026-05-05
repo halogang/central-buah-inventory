@@ -35,7 +35,6 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'icon' => 'nullable|string',
             'type' => 'required|in:barang,pengeluaran',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
@@ -85,10 +84,6 @@ class CategoryController extends Controller
             $validated['image'] = $this->savePath.'/'.$fileName;
         }
 
-        if ($validated['type'] === 'pengeluaran') {
-            $validated['icon'] = '💵';
-        }
-
         Category::create($validated);
         return redirect()->route('master.categories.index');
     }
@@ -113,7 +108,6 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'icon' => 'nullable|string',
             'type' => 'required|in:barang,pengeluaran',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);

@@ -8,6 +8,7 @@ import { store, update } from "@/routes/master/items";
 
 export default function ItemForm({
     item,
+    category,
     categories,
     warehouses,
     units,
@@ -17,7 +18,7 @@ export default function ItemForm({
     const emptyForm = {
         image: null as File | null,
         name: '',
-        category_id: categories?.[0] ? String(categories[0].id) : '',
+        category_id: category ? String(category.id) : categories?.[0] ? String(categories[0].id) : '',
         unit_id: units?.[0] ? String(units[0].id) : '',
         warehouse_id: warehouses?.[0] ? String(warehouses[0].id) : '',
         purchase_price: '',
@@ -35,7 +36,7 @@ export default function ItemForm({
         item ? {
             image: null as File | null,
             name: item.name,
-            category_id: String(item.category?.id || ''),
+            category_id: String(item.category?.id || category ? category.id : categories?.[0]?.id || ''),
             unit_id: String(item.unit?.id || ''),
             warehouse_id: String(item.warehouse?.id || ''),
             purchase_price: String(item.purchase_price ?? ''),
@@ -131,7 +132,14 @@ export default function ItemForm({
                             value={form.name}
                             onChange={(e)=>setForm({...form,name:e.target.value})}
                             required
+                            
                         />
+
+                        {/* <FormInput
+                            label="Kategori"
+                            value={category ? category.name : "-"}
+                            readOnly                            
+                        /> */}
 
                         <FormSelect
                             label="Kategori"
@@ -142,6 +150,7 @@ export default function ItemForm({
                                 label:c.name
                             }))}
                             required
+                            disabled
                         />
 
                         <FormSelect

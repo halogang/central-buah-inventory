@@ -20,13 +20,14 @@ export default function DeliveryItemsSection({
     getItemTotal,
     carts,
     disabled,
+    type
 }: any) {
     const [errors, setErrors] = useState({});
 
     const handleNumberInput = (index, field, value, max) => {
         const num = Number(value);
 
-        if (num > max) {
+        if (max && num > max) {
             setErrors((prev) => ({
                 ...prev,
                 [`${field}-${index}`]: `Maksimal ${max}`,
@@ -113,10 +114,10 @@ export default function DeliveryItemsSection({
                                 label="Jumlah"
                                 type="number"
                                 disabled={disabled}
-                                max={item.stock ?? ''}
+                                // max={ type === 'out' ? item.stock ?? '' : '' }
                                 value={item.quantity}
                                 onChange={(e) =>
-                                    handleNumberInput(index, "quantity", e.target.value, item.stock)
+                                    handleNumberInput(index, "quantity", e.target.value, type === 'out' ? item.stock ?? '' : '')
                                 }
                             />
                             
@@ -125,15 +126,15 @@ export default function DeliveryItemsSection({
                                 label="Bad Stock"
                                 type="number"
                                 disabled={disabled}
-                                max={item.stock ?? ''}
+                                max={item.quantity ?? ''}
                                 value={item.bad_stock}
                                 onChange={(e) =>
-                                    handleNumberInput(index, "bad_stock", e.target.value, item.stock)
+                                    handleNumberInput(index, "bad_stock", e.target.value, type === 'out' ? item.stock ?? '' : '')
                                 }
                             />
 
                             <FormInput
-                                label={`Harga${item.unit?.unit_code ? '/' + item.unit.unit_code : '/-'}`}
+                                label="Total Harga"
                                 type="number"
                                 disabled={disabled}
                                 value={item.price}

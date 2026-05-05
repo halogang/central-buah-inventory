@@ -1,9 +1,12 @@
 import { router } from "@inertiajs/react";
 import { X } from "lucide-react";
 import { useState } from "react";
-import { FormInput } from "@/components/admin";
-import FormSwitch from "@/components/admin/FormSwitch";
-import FormTextarea from "@/components/admin/FormTextarea";
+import {
+    FormInput,
+    FormTextarea,
+    FormSwitch,
+    FormSelect,
+} from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notify";
 import { store, update } from "@/routes/master/warehouses";
@@ -11,24 +14,24 @@ import { store, update } from "@/routes/master/warehouses";
 export default function Form({
     warehouse,
     onClose,
+    users,
+    branches,
 }: any) {
 
     const emptyForm = {
         name: '',
         address: '',
-        capacity: '',
-        branch: '',
-        pic: '',
+        user_id: '',
+        branch_id: '',
         status: 'active',
     };
 
     const [form, setForm] = useState(
         warehouse ? {
             name: warehouse.name,
-            address: warehouse.address,
-            branch: warehouse.branch,
-            capacity: String(warehouse.capacity),
-            pic: warehouse.pic,
+            address: warehouse.address || '',
+            user_id: String(warehouse.user_id ?? ''),
+            branch_id: String(warehouse.branch?.id ?? ''),
             status: warehouse.status,
         } : emptyForm
     );
@@ -37,8 +40,11 @@ export default function Form({
         e.preventDefault();
 
         const payload = {
-            ...form,
-            capacity: Number(form.capacity),
+            name: form.name,
+            address: form.address,
+            user_id: form.user_id || null,
+            branch_id: form.branch_id || null,
+            status: form.status,
         };
 
         if (warehouse) {
@@ -92,19 +98,33 @@ export default function Form({
                         onChange={(e) => setForm({ ...form, address: e.target.value })}
                         placeholder="Alamat gudang..."
                     />
-                    <FormInput
-                        label="Kapasitas (unit)"
-                        type="number"
-                        value={form.capacity}
-                        onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                        required
-                        placeholder="0"
+                    <FormSelect
+                        label="PIC Gudang"
+                        value={form.user_id}
+                        onChange={(e) =>
+                            setForm({ ...form, user_id: e.target.value })
+                        }
+                        options={[
+                            { value: '', label: 'Pilih PIC' },
+                            ...users.map((u: any) => ({
+                                value: String(u.id),
+                                label: u.name,
+                            })),
+                        ]}
                     />
-                    <FormInput
-                        label="PIC (Penanggung Jawab)"
-                        value={form.pic}
-                        onChange={(e) => setForm({ ...form, pic: e.target.value })}
-                        placeholder="Nama PIC..."
+                    <FormSelect
+                        label="Cabang"
+                        value={form.branch_id}
+                        onChange={(e) =>
+                            setForm({ ...form, branch_id: e.target.value })
+                        }
+                        options={[
+                            { value: '', label: 'Pilih Cabang' },
+                            ...branches.map((b: any) => ({
+                                value: String(b.id),
+                                label: b.name,
+                            })),
+                        ]}
                     />
                     <FormSwitch
                         label="Aktif"

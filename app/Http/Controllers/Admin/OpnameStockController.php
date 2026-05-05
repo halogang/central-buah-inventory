@@ -55,6 +55,7 @@ class OpnameStockController extends Controller
             'items' => $items,
             'roleName' => $roleName,
             'users' => $users,
+            'user' => $user,
             'authUser' => $user
         ]);
     }
@@ -135,7 +136,7 @@ class OpnameStockController extends Controller
                         'item_id' => $row['item_id'],
                         'warehouse_id' => $itemModel->warehouse_id,
                         
-                        'type' => $difference >= 0 ? 'in' : 'out',
+                        'type' => 'adjustment',
                         
                         'quantity' => abs($difference),
                         'stock_before' => $row['system_stock'],

@@ -52,11 +52,12 @@ function formatDate(date:string){
 export default function StockOpnames(){
     const can = useCan();
 
-    const { opnames, warehouses, items, users, roleName, authUser } = usePage<{
+    const { opnames, warehouses, items, users, user, roleName, authUser } = usePage<{
         opnames:Opname[]
         warehouses:Warehouse[]
         items:Item[]
         users:User[]
+        user: User
         roleName: string
         authUser: string
     }>().props
@@ -219,7 +220,7 @@ export default function StockOpnames(){
             <Form
                 onClose={closeForm}
                 warehouses={warehouses}
-                users={users}
+                user={user}
                 items={items}
                 opname={editItem}
                 roleName={roleName}

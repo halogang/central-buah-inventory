@@ -1,6 +1,6 @@
 import { router } from "@inertiajs/react"
 import { X } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notify"
 import type { UserData, RoleData } from "../types"
@@ -29,23 +29,26 @@ export default function UserFormModal({
         status_aktif: true
     }
 
-    const [form, setForm] = useState(() => {
-
-        if (!user) return emptyForm
-
-        return {
-            name: user.name,
-            username: user.username,
-            email: user.email,
-            password: "",
-            phone: user.phone || "",
-            role_id: user.roles?.[0]?.id?.toString() || "",
-            status_aktif: user.status_aktif ?? true
-        }
-
-    })
-
+    const [form, setForm] = useState(() => emptyForm)
     const [errors] = useState<Record<string, string>>({})
+
+    useEffect(() => {
+        if (!open) return
+
+        if (user) {
+            setForm({
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                password: "",
+                phone: user.phone || "",
+                role_id: user.roles?.[0]?.id?.toString() || "",
+                status_aktif: user.status_aktif ?? true
+            })
+        } else {
+            setForm(emptyForm)
+        }
+    }, [open, user])
 
     if (!open) return null
 
