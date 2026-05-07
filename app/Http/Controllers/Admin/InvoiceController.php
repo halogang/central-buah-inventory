@@ -32,6 +32,7 @@ class InvoiceController extends Controller
                 'invoiceNumber' => $invoice->invoice_number,
                 'date' => $invoice->date,
 
+                'loading_cost' => $invoice->loading_cost,
                 'total' => $invoice->total,
                 'paid' => $invoice->paid,
                 'remaining' => $invoice->remaining,

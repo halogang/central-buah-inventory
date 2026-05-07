@@ -37,6 +37,7 @@ export interface DeliveryItem {
   cart?: Cart | null;
   cart_qty: number;
   cart_weight: number;
+  unit_price: number;
   price: number;
 }
 
@@ -49,16 +50,19 @@ export interface DeliveryOrder {
   supplier_name?: string;
   customer_name?: string;
   supplier_id?: string;
-  supplier: Supplier | null;
-  customer: Customer | null;
+  supplier: string;
+  customer: string;
   customer_id?: string;
   sender: User | null;
   sender_id?: string;
   sender_name: string;
   receiver_name: string;
   note: string;
+  loading_cost: number;
   status: DeliveryStatus;
   items: DeliveryItem[];
+  items_count: number;
+  total_quantity: number;
 }
 
 export interface Item {

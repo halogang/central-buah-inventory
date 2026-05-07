@@ -14,6 +14,7 @@ class Invoice extends Model
         'supplier_id',
         'type',
         'total',
+        'loading_cost',
         'paid',
         'remaining',
         'status'

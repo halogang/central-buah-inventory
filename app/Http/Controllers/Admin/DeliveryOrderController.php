@@ -44,6 +44,7 @@ class DeliveryOrderController extends Controller
             'sender_id' => 'nullable|exists:users,id',
             'status' => 'required|in:draft,sent,done',
             'date' => 'required|date',
+            'loading_cost' => 'nullable|numeric|min:0',
 
             'sender_name' => 'nullable|string|max:255',
             'receiver_name' => 'nullable|string|max:255',
@@ -57,6 +58,7 @@ class DeliveryOrderController extends Controller
             'items.*.quantity' => 'required|numeric|min:0',
             'items.*.bad_stock' => 'nullable|numeric|min:0',
             'items.*.price' => 'nullable|numeric|min:0',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
 
             'items.*.cart_id' => 'nullable|exists:carts,id',
             'items.*.cart_qty' => 'nullable|numeric',
@@ -110,6 +112,8 @@ class DeliveryOrderController extends Controller
                 'evidence_url' => $do->evidence_url,
 
                 'notes' => $do->notes,
+                'loading_cost' => $do->loading_cost,
+                'total_amount' => $do->total_amount,
 
                 'items_count' => $do->items->count(),
                 'total_quantity' => $do->items->sum('quantity'),
@@ -121,6 +125,7 @@ class DeliveryOrderController extends Controller
                         'item_id' => $item->item_id,
                         'name' => $item->item?->name,
                         'cart' => $item->cart,
+                        'stock' => Item::find($item->item_id)->stock ?? 0,
                         'cart_id' => $item->cart_id,
                         'cart_weight' => $item->cart_weight,
                         'cart_qty' => $item->cart_qty,
@@ -130,6 +135,7 @@ class DeliveryOrderController extends Controller
 
                         'quantity' => $item->quantity,
                         'bad_stock' => $item->bad_stock,
+                        'unit_price' => $item->unit_price,
                         'price' => $item->price,
                     ];
 
@@ -394,13 +400,30 @@ class DeliveryOrderController extends Controller
              */
             $invoice = Invoice::where('delivery_order_id', $deliveryOrder->id);
 
+            /**
+             * 🔥 11. HANDLE INVOICE
+             */
             if ($validated['status'] === 'done') {
-                if (!$invoice->exists()) {
-                    $this->createInvoice($deliveryOrder);
-                }
+
+                /**
+                 * 🔥 refresh relation items terbaru
+                 */
+                $deliveryOrder->load('items');
+
+                /**
+                 * 🔥 create / sync invoice
+                 */
+                $this->createInvoice($deliveryOrder);
+
             } else {
-                // downgrade dari DONE → hapus invoice
-                $invoice->delete();
+
+                /**
+                 * downgrade DONE -> non DONE
+                 */
+                Invoice::where(
+                    'delivery_order_id',
+                    $deliveryOrder->id
+                )->delete();
             }
         });
 
@@ -429,50 +452,54 @@ class DeliveryOrderController extends Controller
 
     private function createInvoice($deliveryOrder)
     {
+        $invoice = Invoice::firstOrCreate(
+            [
+                'delivery_order_id' => $deliveryOrder->id
+            ],
+            [
+                'invoice_number' => $this->generateInvoiceNumber(),
+                'date' => now(),
 
-        $exists = Invoice::where('delivery_order_id',$deliveryOrder->id)->exists();
+                'customer_id' => $deliveryOrder->customer_id,
+                'supplier_id' => $deliveryOrder->supplier_id,
 
-        if ($exists) return;
+                'type' => $deliveryOrder->type
+            ]
+        );
 
-        $number = $this->generateInvoiceNumber();
+        $invoice->items()->delete();
 
-        $invoice = Invoice::create([
-
-            'delivery_order_id' => $deliveryOrder->id,
-            'invoice_number' => $number,
-            'date' => now(),
-
-            'customer_id' => $deliveryOrder->customer_id,
-            'supplier_id' => $deliveryOrder->supplier_id,
-
-            'type' => $deliveryOrder->type
-
-        ]);
-
-        $total = 0;
+        $subtotal = 0;
 
         foreach ($deliveryOrder->items as $item) {
 
-            $lineTotal = $item->quantity * $item->price;
+            $lineTotal = $item->price;
 
             InvoiceItem::create([
 
                 'invoice_id' => $invoice->id,
                 'item_id' => $item->item_id,
+
                 'quantity' => $item->quantity,
+
                 'price' => $item->price,
+
                 'total' => $lineTotal
 
             ]);
 
-            $total += $lineTotal;
+            $subtotal += $lineTotal;
         }
 
-        $invoice->update([
-            'total' => $total,
-            'remaining' => $total
-        ]);
+        $loadingCost = $deliveryOrder->loading_cost ?? 0;
 
+        $grandTotal = $subtotal + $loadingCost;
+
+        $invoice->update([
+            'loading_cost' => $loadingCost,
+            'total' => $grandTotal,
+            'remaining' => $grandTotal
+        ]);
     }
 
     public function previewNumber($type)

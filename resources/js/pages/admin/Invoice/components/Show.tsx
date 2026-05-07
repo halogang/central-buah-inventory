@@ -77,13 +77,33 @@ export default function Show({
 
                 {/* HEADER */}
 
-                <div className="flex items-center justify-between p-4 border-b shrink-0">
-                    <h2 className="font-semibold text-lg">
-                        {invoice.invoiceNumber}
-                    </h2>
+                <div className="flex items-center justify-between px-5 py-4 border-b bg-muted/30 shrink-0">
+                    <div>
+                        <h2 className="font-semibold text-lg">
+                            {invoice.invoiceNumber}
+                        </h2>
+                        <div className="flex gap-2 mt-1">
+
+                            <span
+                                className={`
+                                    text-xs px-2 py-1 rounded-full font-medium
+                                    ${invoice.type === 'in'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-orange-100 text-orange-700'
+                                    }
+                                `}
+                            >
+                                {invoice.type === 'in'
+                                    ? 'Invoice Supplier'
+                                    : 'Invoice Customer'}
+                            </span>
+
+                        </div>
+                    </div>
                     <button onClick={onClose}>
                         <X className="w-5 h-5 cursor-pointer"/>
                     </button>
+
                 </div>
 
                 <div className="grid grid-cols-2 p-4 gap-4">
@@ -95,7 +115,7 @@ export default function Show({
                         <p className="text-muted-foreground text-xs font-light mb-1">STATUS</p>
                         <p className="text-sm font-semibold">
                             <span
-                                className={`px-2 py-1 text-xs rounded-full ${
+                                className={`px-3 py-1 text-xs rounded-full font-medium ${
                                     invoice.status === 'unpaid' ?
                                     `bg-red-500/10 text-red-500`
                                     : invoice.status === 'partial' ?
@@ -133,14 +153,13 @@ export default function Show({
 
                             <table className="w-full text-sm">
 
-                                <thead className="bg-muted">
+                                <thead className="bg-muted/50">
 
-                                    <tr className="text-left">
+                                    <tr className="text-left text-xs uppercase text-muted-foreground">
 
-                                        <th className="p-3">BARANG</th>
-                                        <th className="p-3 text-center">QTY</th>
-                                        <th className="p-3 text-right">HARGA</th>
-                                        <th className="p-3 text-right">TOTAL</th>
+                                        <th className="p-3">Barang</th>
+                                        <th className="p-3 text-center">Qty</th>
+                                        <th className="p-3 text-right">Total Item</th>
 
                                     </tr>
 
@@ -149,41 +168,90 @@ export default function Show({
                                 <tbody>
 
                                     {invoice.invoiceItems.map((item: any) => {
+
                                         return (
+
                                             <tr
                                                 key={item.id}
-                                                className="border-t"
+                                                className="border-t hover:bg-muted/30 transition-colors"
                                             >
 
                                                 <td className="p-3">
-                                                    {item.item?.name}
+
+                                                    <div className="flex flex-col">
+
+                                                        <span className="font-medium">
+                                                            {item.item?.name}
+                                                        </span>
+
+                                                        <span className="text-xs text-muted-foreground">
+                                                            Qty: {item.quantity}
+                                                        </span>
+
+                                                    </div>
+
                                                 </td>
 
-                                                <td className="p-3 text-center text-muted-foreground">
+                                                <td className="p-3 text-center">
                                                     {item.quantity}
                                                 </td>
 
-                                                <td className="p-3 text-right text-muted-foreground">
-                                                    {formatCurrency(item.price)}
-                                                </td>
-
-                                                <td className="p-3 text-right font-medium">
+                                                <td className="p-3 text-right font-semibold text-primary">
                                                     {formatCurrency(item.total)}
                                                 </td>
 
                                             </tr>
+
                                         )
+
                                     })}
-                                    
+
                                 </tbody>
 
                             </table>
 
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">Total</p>
-                            <p className="text-lg font-semibold text-primary">{formatCurrency(invoice.total)}</p>
+                        <div className="rounded-xl border bg-muted/30 p-5 space-y-4 mt-3">
+
+                            <div className="flex items-center justify-between text-sm">
+
+                                <span className="text-muted-foreground">
+                                    Subtotal Barang
+                                </span>
+
+                                <span className="font-medium">
+                                    {formatCurrency(
+                                        (invoice.total || 0) - (invoice.loading_cost || 0)
+                                    )}
+                                </span>
+
+                            </div>
+
+                            <div className="flex items-center justify-between text-sm">
+
+                                <span className="text-muted-foreground">
+                                    Ongkos Muat / Angkut
+                                </span>
+
+                                <span className="font-medium">
+                                    {formatCurrency(invoice.loading_cost || 0)}
+                                </span>
+
+                            </div>
+
+                            <div className="border-t pt-4 flex items-center justify-between">
+
+                                <span className="font-semibold">
+                                    Grand Total
+                                </span>
+
+                                <span className="text-2xl font-extrabold text-primary">
+                                    {formatCurrency(invoice.total)}
+                                </span>
+
+                            </div>
+
                         </div>
 
                 </div>

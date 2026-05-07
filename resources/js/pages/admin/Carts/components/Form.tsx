@@ -96,7 +96,7 @@ export default function Form({
 
                     <FormTextarea
                         label="Keterangan"
-                        value={form.note}
+                        value={form.note}   
                         onChange={(e) =>
                             setForm({ ...form, note: e.target.value })
                         }

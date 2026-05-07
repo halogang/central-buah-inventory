@@ -27,7 +27,7 @@ import type { BreadcrumbItem } from "@/types"
 import Form from "./components/Form"
 import Show from "./components/Show"
 import { useCan } from "@/utils/permissions"
-import { FormSelect } from "@/components/admin"
+import { DeliveryOrder } from "@/data/deliveryOrders"
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -42,26 +42,27 @@ interface User {
     name: string,
 }
 
-interface DeliveryOrder {
-    id: number
-    do_number: string
-    type: "in" | "out"
-    date: string
-    supplier: string
-    customer: string
-    sender_id: number | string | null
-    sender_name: string
-    total_weight: number
-    status: "draft" | "sent" | "done"
-    items_count: number
-    total_quantity: number
-    evidence?: string
-    sender_signature?: string
-    receiver_signature?: string
-    evidence_url?: string
-    sender_signature_url?: string
-    receiver_signature_url?: string
-}
+// interface DeliveryOrder {
+//     id: number
+//     do_number: string
+//     type: "in" | "out"
+//     date: string
+//     supplier: string
+//     customer: string
+//     sender_id: number | string | null
+//     sender_name: string
+//     total_weight: number
+//     status: "draft" | "sent" | "done"
+//     items_count: number
+//     total_quantity: number
+//     total_amount: number
+//     evidence?: string
+//     sender_signature?: string
+//     receiver_signature?: string
+//     evidence_url?: string
+//     sender_signature_url?: string
+//     receiver_signature_url?: string
+// }
 
 interface Cart {
     id: number
@@ -121,7 +122,7 @@ export default function Index({ deliveryOrders, isStaffAntar, suppliers, items, 
     const performDelete = (delivery: DeliveryOrder) => {
         const loading = notify.loading("Menghapus surat jalan...")
 
-        router.delete(destroy(delivery.id), {
+        router.delete(destroy(Number(delivery.id)), {
             onSuccess: () => {
                 notify.dismiss(loading)
                 notify.success(`surat jalan ${delivery.do_number} berhasil dihapus`)

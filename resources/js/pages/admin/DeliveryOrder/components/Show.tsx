@@ -1,5 +1,6 @@
 import { X, Printer, Camera, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/helpers/format"
 
 interface Props {
     data: any
@@ -37,6 +38,8 @@ export default function Show({ data, onClose }: Props) {
         return sum + net + (cartQty * cartWeight)
     }, 0)
 
+    console.log(data);
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 
@@ -44,11 +47,31 @@ export default function Show({ data, onClose }: Props) {
 
                 {/* HEADER */}
 
-                <div className="flex items-center justify-between p-4 border-b shrink-0">
+                <div className="flex items-center justify-between px-5 py-4 border-b bg-muted/30 shrink-0">
 
-                    <h2 className="font-semibold text-lg">
-                        {data.do_number}
-                    </h2>
+                    <div>
+                        <h2 className="font-semibold text-lg">
+                            {data.do_number}
+                        </h2>
+
+                        <div className="flex items-center gap-2 mt-1">
+
+                            <span
+                                className={`
+                                    text-xs px-2 py-1 rounded-full font-medium
+                                    ${data.type === 'in'
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-orange-100 text-orange-700'
+                                    }
+                                `}
+                            >
+                                {data.type === 'in'
+                                    ? 'Surat Jalan Masuk'
+                                    : 'Surat Jalan Keluar'}
+                            </span>
+
+                        </div>
+                    </div>
 
                     <button onClick={onClose}>
                         <X className="w-5 h-5"/>
@@ -108,19 +131,21 @@ export default function Show({ data, onClose }: Props) {
                             DAFTAR BARANG
                         </p>
 
-                        <div className="rounded-lg overflow-hidden border">
+                        <div className="rounded-lg border overflow-x-auto">
 
                             <table className="w-full text-sm">
 
-                                <thead className="bg-muted">
+                                <thead className="bg-muted/50">
 
-                                    <tr className="text-left">
+                                    <tr className="text-left text-xs uppercase text-muted-foreground">
 
-                                        <th className="p-3">BARANG</th>
-                                        <th className="p-3">KERANJANG</th>
-                                        <th className="p-3 text-center">QTY</th>
-                                        <th className="p-3 text-center">BAD</th>
-                                        <th className="p-3 text-center">NET</th>
+                                        <th className="p-3">Barang</th>
+                                        <th className="p-3">Keranjang</th>
+                                        <th className="p-3 text-center">Qty</th>
+                                        <th className="p-3 text-center">Bad</th>
+                                        <th className="p-3 text-center">Net</th>
+                                        <th className="p-3 text-right">Harga/Kg</th>
+                                        <th className="p-3 text-right">Total</th>
 
                                     </tr>
 
@@ -136,33 +161,72 @@ export default function Show({ data, onClose }: Props) {
 
                                             <tr
                                                 key={i}
-                                                className="border-t"
+                                                className="border-t hover:bg-muted/30 transition-colors"
                                             >
 
                                                 <td className="p-3">
-                                                    {item.name}
+
+                                                    <div className="flex items-center gap-3">
+
+                                                        {item.image ? (
+                                                            <img
+                                                                src={item.image_url}
+                                                                className="w-10 h-10 rounded-md object-cover border"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center">
+                                                                -
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium">
+                                                                {item.name}
+                                                            </span>
+
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {item.unit?.unit_code ?? '-'}
+                                                            </span>
+                                                        </div>
+
+                                                    </div>
+
                                                 </td>
 
                                                 <td className="p-3">
+
                                                     <div className="flex flex-col gap-1">
-                                                        <span>{item.cart?.name ?? 'kosong'}</span>
-                                                        <div className="flex flex-col items-start text-xs text-muted-foreground">
-                                                            <span>jumlah: {item.cart_qty ?? 'kosong'}</span>
-                                                            <span>berat/keranjang: {item.cart_weight ?? 'kosong'}</span>
+
+                                                        <span className="font-medium">
+                                                            {item.cart?.name ?? '-'}
+                                                        </span>
+
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {item.cart_qty || 0} x {item.cart_weight || 0} kg
                                                         </div>
+
                                                     </div>
+
                                                 </td>
 
                                                 <td className="p-3 text-center">
                                                     {item.quantity}
                                                 </td>
 
-                                                <td className="p-3 text-center text-red-500">
+                                                <td className="p-3 text-center text-red-500 font-medium">
                                                     {item.bad_stock}
                                                 </td>
 
-                                                <td className="p-3 text-center text-green-600 font-medium">
-                                                    {net} {item.unit?.unit_code ?? '-'}
+                                                <td className="p-3 text-center text-green-600 font-semibold">
+                                                    {net}
+                                                </td>
+
+                                                <td className="p-3 text-right">
+                                                    {formatCurrency(item.unit_price || 0)}
+                                                </td>
+
+                                                <td className="p-3 text-right font-semibold text-primary">
+                                                    {formatCurrency(item.price || 0)}
                                                 </td>
 
                                             </tr>
@@ -179,17 +243,46 @@ export default function Show({ data, onClose }: Props) {
 
                     </div>
 
-                    {/* CART INFO */}
+                    {/* INFO */}
 
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="rounded-xl border bg-muted/30 p-5 space-y-4">
 
-                        <div className="bg-primary/10 rounded-lg p-4">
-                            <p className="text-xs text-muted-foreground">
-                                TOTAL BERAT
-                            </p>
-                            <p className="font-semibold text-primary">
-                                {totalWeight} kg
-                            </p>
+                        <div className="flex items-center justify-between text-sm">
+
+                            <span className="text-muted-foreground">
+                                Total Barang
+                            </span>
+
+                            <span className="font-medium">
+                                {formatCurrency(
+                                    (data.total_amount || 0) - (data.loading_cost || 0)
+                                )}
+                            </span>
+
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+
+                            <span className="text-muted-foreground">
+                                Ongkos Muat / Angkut
+                            </span>
+
+                            <span className="font-medium">
+                                {formatCurrency(data.loading_cost || 0)}
+                            </span>
+
+                        </div>
+
+                        <div className="border-t pt-4 flex items-center justify-between">
+
+                            <span className="font-semibold">
+                                Grand Total
+                            </span>
+
+                            <span className="text-2xl font-extrabold text-primary">
+                                {formatCurrency(data.total_amount || 0)}
+                            </span>
+
                         </div>
 
                     </div>
@@ -199,7 +292,7 @@ export default function Show({ data, onClose }: Props) {
 
                     <div className="grid grid-cols-2 gap-4">
 
-                        <div className="bg-muted rounded-lg p-4 flex flex-col gap-2 items-center justify-center">
+                        <div className="border rounded-xl p-5 flex flex-col gap-3 items-center justify-center bg-background">
 
                             <p className="text-xs text-muted-foreground">
                                 PENGIRIM
@@ -234,7 +327,7 @@ export default function Show({ data, onClose }: Props) {
                         </div>
 
 
-                        <div className="bg-muted rounded-lg p-4 flex flex-col gap-2 items-center justify-center">
+                        <div className="border rounded-xl p-5 flex flex-col gap-3 items-center justify-center bg-background">
 
                             <p className="text-xs text-muted-foreground">
                                 PENERIMA
@@ -273,7 +366,7 @@ export default function Show({ data, onClose }: Props) {
 
                     {/* EVIDENCE */}
 
-                    <div className="bg-muted rounded-lg p-6 text-center">
+                    <div className="border rounded-xl p-6">
 
                         <Camera className="mx-auto mb-4"/>
 

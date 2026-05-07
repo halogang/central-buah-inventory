@@ -27,6 +27,7 @@ class DeliveryOrder extends Model
         'cart_qty',
         'total_amount',
         'total_weight',
+        'loading_cost',
         'note'
     ];
 

@@ -21,8 +21,16 @@ class DeliveryorderService {
 
             $badStock = $item['bad_stock'] ?? 0;
             $qty = $item['quantity'] ?? 0;
-            $cleanQty = $qty - $badStock;
+
+            /**
+             * 🔥 PRICE SEKARANG ADALAH TOTAL ITEM
+             */
             $price = $item['price'] ?? 0;
+
+            /**
+             * 🔥 HARGA/KG ASLI
+             */
+            $unitPrice = $item['unit_price'] ?? 0;
 
             DeliveryOrderItem::create([
                 'delivery_order_id' => $deliveryOrder->id,
@@ -32,12 +40,33 @@ class DeliveryorderService {
                 'cart_qty' => $item['cart_qty'] ?? 0,
                 'quantity' => $qty,
                 'bad_stock' => $badStock,
+
+                /**
+                 * 🔥 TOTAL HARGA ITEM
+                 */
                 'price' => $price,
+
+                /**
+                 * 🔥 HARGA/KG
+                 */
+                'unit_price' => $unitPrice,
             ]);
 
-            $totalAmount += $qty * $price;
-            $totalWeight += ($item['cart_qty'] ?? 0) * ($item['cart_weight'] ?? 0);
+            /**
+             * 🔥 SEKARANG TIDAK DIKALI LAGI
+             * karena price SUDAH subtotal item
+             */
+            $totalAmount += $price;
+
+            $totalWeight +=
+                ($item['cart_qty'] ?? 0)
+                * ($item['cart_weight'] ?? 0);
         }
+
+        /**
+         * 🔥 TAMBAHKAN ONGKOS MUAT
+         */
+        $totalAmount += $deliveryOrder->loading_cost ?? 0;
 
         return [$totalAmount, $totalWeight];
     }
@@ -88,7 +117,7 @@ class DeliveryorderService {
                 'reference_type' => 'delivery_order',
                 'reference_id' => $deliveryOrder->id,
                 'user_id' => Auth::id(),
-                'note' => 'Delivery Order '.$deliveryOrder->do_number
+            'note' => 'Delivery Order '.$deliveryOrder->do_number
             ]);
         }
     }

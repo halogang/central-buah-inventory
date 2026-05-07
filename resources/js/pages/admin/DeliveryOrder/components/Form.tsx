@@ -19,6 +19,7 @@ type DeliveryItem = {
     unit?: any
     quantity: number | string
     bad_stock?: number | string
+    unit_price?: number | string
     price?: number | string
     cart_id?: number | string
     cart_weight?: number | string
@@ -37,6 +38,7 @@ type DeliveryForm = {
     sender_signature: string
     receiver_signature: string
     note: string | null
+    loading_cost: number | null
 
     evidence: {
         existing: string[]
@@ -74,6 +76,7 @@ export default function Form({
         receiver_name: "",
         sender_signature: "",
         receiver_signature: "",
+        loading_cost: "",
         note: "",
         evidence: {
             existing: [],
@@ -140,7 +143,11 @@ export default function Form({
             stock: item.stock,
             quantity: "",
             bad_stock: "",
-            price: type === 'in' ? item.purchase_price : item.selling_price,
+            // unit_price: type === 'in' ? item.purchase_price : item.selling_price,
+            unit_price: type === 'in'
+                ? item.purchase_price
+                : item.selling_price,
+            price: 0,
             cart_id: "",
             cart_weight: "",
             cart_qty: ""
@@ -190,15 +197,18 @@ export default function Form({
     }
 
     const getItemTotal = (item:any) => {
-        const net = getNetQty(item)
-        const price = Number(item.price || 0)
-
-        return net * price
+        return Number(item.price || 0)
     }
 
-    const totalAmount = (form?.items || []).reduce((sum:number, item:any) => {
-        return sum + getItemTotal(item)
-    }, 0)
+    const totalItems = (form?.items || []).reduce(
+        (sum:number, item:any) => {
+            return sum + Number(item.price || 0)
+        },
+        0
+    )
+
+    const totalAmount =
+        totalItems + Number(form.loading_cost || 0)
 
     const totalWeight = (form?.items || []).reduce((sum: number, item: any) => {
         // const qty = Number(item.quantity || 0)
@@ -289,6 +299,8 @@ export default function Form({
         }
 
     }
+
+    console.log(data) // cek ini
 
     return (
 

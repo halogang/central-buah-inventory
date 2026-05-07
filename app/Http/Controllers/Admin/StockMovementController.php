@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Item;
 use App\Models\StockMovement;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class StockMovementController extends Controller
@@ -20,13 +24,18 @@ class StockMovementController extends Controller
         $user = Auth::user();
         $roleName = $user->roles->first()->name;
 
+        $items = Item::all();
+        $warehouses = Warehouse::all();
+
         if ($roleName === 'spv_gudang') {
             $stockMovements = StockMovement::with('warehouse', 'item', 'user')
                 ->where('user_id', $user->id)->latest()->get();
         }
 
         return Inertia::render('admin/StockMovement/Index', [
-            'stockMovements' => $stockMovements
+            'stockMovements' => $stockMovements,
+            'items' => $items,
+            'warehouses' => $warehouses,
         ]);
     }
 
@@ -76,5 +85,82 @@ class StockMovementController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Move stock from one warehouse to another
+     */
+    public function moveStock(Request $request)
+    {
+        $validated = $request->validate([
+            'source_item_id' => 'required|exists:items,id',
+            'destination_item_id' => 'required|exists:items,id',
+            'quantity' => 'required|integer|min:1',
+            'source_warehouse_id' => 'required|exists:warehouses,id',
+            'destination_warehouse_id' => 'required|exists:warehouses,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $sourceItem = Item::findOrFail($validated['source_item_id']);
+            $destinationItem = Item::findOrFail($validated['destination_item_id']);
+            $quantity = $validated['quantity'];
+            $user = Auth::user();
+
+            if ($sourceItem->stock < $quantity) {
+                throw ValidationException::withMessages([
+                    'quantity' => 'Stok tidak cukup di gudang asal'
+                ]);
+            }
+
+            $sourceWarehouse = Warehouse::findOrFail($validated['source_warehouse_id']);
+            $destinationWarehouse = Warehouse::findOrFail($validated['destination_warehouse_id']);
+
+            // OUT
+            $stockBefore = $sourceItem->stock;
+            $sourceItem->decrement('stock', $quantity);
+
+            StockMovement::create([
+                'item_id' => $sourceItem->id,
+                'warehouse_id' => $sourceWarehouse->id,
+                'type' => 'movement',
+                'reference_type' => 'stock_movement',
+                'reference_id' => null,
+                'quantity' => -$quantity,
+                'stock_before' => $stockBefore,
+                'stock_after' => $sourceItem->stock,
+                'note' => "Moved from {$sourceWarehouse->name} to {$destinationWarehouse->name}",
+                'user_id' => $user->id,
+            ]);
+
+            // IN
+            $destBefore = $destinationItem->stock;
+            $destinationItem->increment('stock', $quantity);
+
+            StockMovement::create([
+                'item_id' => $destinationItem->id,
+                'warehouse_id' => $destinationWarehouse->id,
+                'type' => 'movement',
+                'reference_type' => 'stock_movement',
+                'reference_id' => null,
+                'quantity' => $quantity,
+                'stock_before' => $destBefore,
+                'stock_after' => $destinationItem->stock,
+                'note' => "Moved from {$sourceWarehouse->name} to {$destinationWarehouse->name}",
+                'user_id' => $user->id,
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Stok berhasil dipindahkan');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            throw ValidationException::withMessages([
+                'general' => 'Gagal memindahkan stok'
+            ]);
+        }
     }
 }

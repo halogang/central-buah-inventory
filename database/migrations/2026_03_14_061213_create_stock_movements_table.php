@@ -25,7 +25,8 @@ return new class extends Migration
             $table->enum('type', [
                 'in',
                 'out',
-                'adjustment'
+                'adjustment',
+                'movement'
             ]);
 
             // perubahan stok

@@ -14,6 +14,7 @@ class DeliveryOrderItem extends Model
         'item_id',
         'quantity',
         'bad_stock',
+        'unit_price',
         'price',
         'cart_id',
         'cart_weight',

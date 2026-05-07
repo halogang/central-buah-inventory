@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\Admin\WebsiteInfoController;
+use App\Http\Controllers\Api\ItemController as ApiItemController;
 
 Route::inertia('/', 'Home', [
     'canRegister' => Features::enabled(Features::registration()),
@@ -99,6 +100,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('movement', StockMovementController::class)
             ->middleware('permission:stock_movement.index|stock_movement.create|stock_movement.update|stock_movement.delete');
 
+        Route::post('movement/move-stock', [StockMovementController::class, 'moveStock'])
+            ->middleware('permission:stock_movement.create')
+            ->name('movement.move-stock');
+
     });
     
 
@@ -161,6 +166,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('pos', POSController::class)
         ->middleware('permission:pos.index|pos.create');
         
+});
+
+// API Routes
+Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    Route::get('/warehouses/{warehouse}/items', [ApiItemController::class, 'getItemsByWarehouse']);
+    Route::get('/warehouses/{warehouse}/items/search', [ApiItemController::class, 'searchItemsByWarehouse']);
 });
 
 require __DIR__.'/settings.php';

@@ -1,4 +1,4 @@
-import { Package, Plus, Trash2, Image } from "lucide-react"
+import { Package, Plus, Trash2, Image, Dot } from "lucide-react"
 import { useState } from "react";
 import { FormInput, FormSelect } from "@/components/admin"
 import { formatCurrency, formatNumber } from "@/helpers/format"
@@ -20,11 +20,13 @@ export default function DeliveryItemsSection({
     getItemTotal,
     carts,
     disabled,
-    type
+    type,
+    setForm,
 }: any) {
     const [errors, setErrors] = useState({});
 
     const handleNumberInput = (index, field, value, max) => {
+
         const num = Number(value);
 
         if (max && num > max) {
@@ -40,7 +42,37 @@ export default function DeliveryItemsSection({
             [`${field}-${index}`]: null,
         }));
 
+        /**
+         * update field dulu
+         */
         updateItem(index, field, num);
+
+        /**
+         * 🔥 AUTO HITUNG TOTAL HARGA
+         */
+        const currentItem = form.items[index];
+
+        const quantity =
+            field === 'quantity'
+                ? num
+                : Number(currentItem.quantity || 0);
+
+        const badStock =
+            field === 'bad_stock'
+                ? num
+                : Number(currentItem.bad_stock || 0);
+
+        const unitPrice =
+            Number(currentItem.unit_price || 0);
+
+        const netQty = quantity - badStock;
+
+        const totalPrice = Math.max(netQty, 0) * unitPrice;
+
+        /**
+         * AUTO UPDATE TOTAL PRICE
+         */
+        updateItem(index, 'price', totalPrice);
     };
 
     return (
@@ -85,13 +117,11 @@ export default function DeliveryItemsSection({
                                         {item.name ?? "Pisang Cavendish"}
                                     </p>
 
-                                    <div className="flex items-center gap-1">
-                                        <p className="text-xs font-light">
-                                            {item.stock ?? "stok"} {item.unit?.unit_code ?? "kg"}
-                                        </p>
-                                        <p className="text-xs font-light">
-                                            
-                                        </p>
+                                    <div className="flex items-center gap-1 text-xs font-light">
+
+                                        <span>
+                                            {item.stock + " " + item.unit?.unit_code}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -256,9 +286,15 @@ export default function DeliveryItemsSection({
 
                                     <div className="flex flex-col text-left">
                                         <span className="text-sm font-medium">{item.name}</span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {item.stock + " " + item.unit?.unit_code}
-                                        </span>
+                                        <div className="flex gap-2 items-center text-xs text-muted-foreground">
+                                            <span>
+                                                {item.stock + " " + item.unit?.unit_code}
+                                            </span>
+                                            <Dot className="-mx-2" />
+                                            <span className="text-orange-500">
+                                                {formatCurrency(type === 'in' ? item.purchase_price : item.selling_price) + "/" + item.unit?.unit_code}
+                                            </span>
+                                        </div>
                                     </div>
 
                                 </button>
@@ -275,22 +311,27 @@ export default function DeliveryItemsSection({
 
             )}
 
+            <FormInput
+                label="Ongkos Muat / Angkut"
+                type="number"
+                value={form.loading_cost}
+                onChange={(e) =>
+                    setForm({ ...form, loading_cost: Number(e.target.value) })
+                }
+            />
+
             <div className="p-4 rounded-lg bg-primary/10 flex items-center justify-between">
                 <span className="text-sm">Total Berat Bersih</span>
                 <span className="text-md font-extrabold text-primary">
                     {formatNumber(totalWeight)} {cartUnit ?? '-'}
                 </span>
             </div>
-            {form.items.length !== 0 && (
-
-                <div className="p-4 rounded-lg bg-primary/10 flex items-center justify-between">
-                    <span className="text-sm">Total</span>
-                    <span className="text-md font-extrabold text-primary">
-                        {formatCurrency(totalAmount)}
-                    </span>
-                </div>
-
-            )}
+            <div className="p-4 rounded-lg bg-primary/10 flex items-center justify-between">
+                <span className="text-sm">Total</span>
+                <span className="text-md font-extrabold text-primary">
+                    {formatCurrency(totalAmount ?? 0)}
+                </span>
+            </div>
 
         </div>
 

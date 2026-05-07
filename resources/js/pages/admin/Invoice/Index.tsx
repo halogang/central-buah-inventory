@@ -64,6 +64,7 @@ interface Invoice {
     invoiceNumber: string 
     date: string 
     total: number 
+    loading_cost: number 
     paid: number 
     remaining: number 
     status: string 

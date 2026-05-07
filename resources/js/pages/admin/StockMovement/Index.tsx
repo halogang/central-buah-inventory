@@ -1,5 +1,5 @@
 import { Head, usePage } from "@inertiajs/react";
-import { ArrowDown, ArrowUp, Plus, Repeat } from "lucide-react";
+import { ArrowDown, ArrowRightLeft, ArrowUp, Plus, Repeat } from "lucide-react";
 import { useState } from "react";
 import Pagination from "@/components/Pagination";
 import { SearchInput } from "@/components/search-input";
@@ -7,6 +7,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import AppLayout from "@/layouts/app-layout";
 import type { BreadcrumbItem } from "@/types";
 import { Button } from "@/components/ui/button";
+import MoveStockModal from "./MoveStockModal";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -47,11 +48,17 @@ interface StockMovement {
     user?: User;
 }
 
+interface PageProps {
+    stockMovements: StockMovement[];
+    warehouses: Warehouse[];
+}
+
 export default function Index() {
 
-    const { stockMovements } = usePage<{ stockMovements: StockMovement[] }>().props;
+    const { stockMovements, warehouses } = usePage<PageProps>().props;
 
     const [search, setSearch] = useState("");
+    const [showMoveModal, setShowMoveModal] = useState(false);
 
     const filtered = stockMovements.filter((m) =>
         m.item?.name?.toLowerCase().includes(search.toLowerCase())
@@ -111,7 +118,7 @@ export default function Index() {
                     />
 
                     <Button  
-                        // onClick={openCreate} 
+                        onClick={() => setShowMoveModal(true)} 
                         size="lg" className='w-full sm:w-fit'>
                         <Plus />
                         Tambah
@@ -268,6 +275,13 @@ export default function Index() {
                 />
 
             </div>
+
+            {showMoveModal && (
+                <MoveStockModal 
+                    warehouses={warehouses} 
+                    onClose={() => setShowMoveModal(false)} 
+                />
+            )}
         </AppLayout>
     );
 }
@@ -307,6 +321,14 @@ function getMovementType(type: string) {
             label: "Keluar",
             icon: <ArrowUp size={14} />,
             style: "text-red-500",
+        };
+    }
+
+    if (type === "movement") {
+        return {
+            label: "Pindah",
+            icon: <ArrowRightLeft size={14} />,
+            style: "text-blue-500",
         };
     }
 
