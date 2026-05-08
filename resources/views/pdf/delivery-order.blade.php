@@ -228,7 +228,7 @@
                     <br><br>
 
                     @if($deliveryOrder->sender_signature)
-                    <img src="{{ $deliveryOrder->sender_signature_url }}" alt="{{ $deliveryOrder->sender_signature_url }}" height="60">
+                    <img src="{{ public_path($deliveryOrder->sender_signature) }}" alt="TTD Pengirim" height="60">
                     @endif
 
                     <div class="sign-line"></div>
@@ -240,7 +240,7 @@
                     <br><br>
 
                     @if($deliveryOrder->receiver_signature)
-                    <img src="{{ $deliveryOrder->receiver_signature_url }}" alt="{{ $deliveryOrder->receiver_signature_url }}" height="60">
+                    <img src="{{ public_path($deliveryOrder->receiver_signature) }}" alt="TTD Penerima" height="60">
                     @endif
 
                     <div class="sign-line"></div>
