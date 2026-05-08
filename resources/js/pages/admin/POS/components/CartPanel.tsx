@@ -85,7 +85,7 @@ const CartPanel = ({
               {item.product.image ? (
                   <img
                     src={item.product.image}
-                    alt={item.product.name}
+                    alt="Produk"
                     className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-150"
                   />
                 ) : (

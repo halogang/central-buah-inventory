@@ -87,7 +87,7 @@ const ProductGrid = ({ products, searchQuery, onSearchChange, onProductClick }: 
                 {product.image ? (
                   <img
                     src={product.image}
-                    alt={product.name}
+                    alt="Produk"
                     className="w-full h-full object-cover  group-hover:scale-105 transition-transform duration-150"
                   />
                 ) : (

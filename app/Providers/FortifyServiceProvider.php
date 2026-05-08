@@ -15,6 +15,7 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\LogoutResponse;
 use Illuminate\Support\Facades\Route;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -41,6 +42,14 @@ class FortifyServiceProvider extends ServiceProvider
                 public function toResponse($request)
                 {
                     $user = $request->user();
+
+                    /**
+                     * 🔥 CHECK SIGNATURE
+                     */
+                    if (!$user->signature) {
+                        return redirect()->route('profile.edit')
+                            ->with('info', 'Silakan isi tanda tangan Anda terlebih dahulu');
+                    }
 
                     $permissions = $user->getAllPermissions()->pluck('name')->toArray();
 
@@ -83,6 +92,15 @@ class FortifyServiceProvider extends ServiceProvider
 
                     // fallback
                     return redirect('/login');
+                }
+            };
+        });
+
+        $this->app->singleton(LogoutResponse::class, function () {
+            return new class implements LogoutResponse {
+                public function toResponse($request)
+                {
+                    return redirect()->route('login');
                 }
             };
         });

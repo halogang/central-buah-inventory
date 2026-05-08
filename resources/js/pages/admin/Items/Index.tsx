@@ -179,7 +179,7 @@ export default function Index() {
                                         {i.image_url ? (
                                             <img
                                                 src={i.thumbnail_url}
-                                                alt={i.name}
+                                                alt="Kategori"
                                                 className="w-14 h-14 object-cover rounded-xl"
                                             />
                                         ) : (

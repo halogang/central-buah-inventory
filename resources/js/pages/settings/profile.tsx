@@ -1,6 +1,7 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { notify } from '@/lib/notify';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { FormSignature } from "@/components/admin"
 import DeleteUser from '@/components/delete-user';
@@ -32,9 +33,11 @@ interface User {
 export default function Profile({
     mustVerifyEmail,
     status,
+    info,
 }: {
     mustVerifyEmail: boolean;
     status?: string;
+    info?: string;
 }) {
     const { auth } = usePage<{
         auth: {
@@ -44,6 +47,12 @@ export default function Profile({
     const [signature, setSignature] = useState<string | null>(
         auth.user.signature ?? null
     )
+
+    useEffect(() => {
+        if (info) {
+            notify.info(info);
+        }
+    }, [info])
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

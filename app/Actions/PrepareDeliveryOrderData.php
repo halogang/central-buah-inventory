@@ -12,6 +12,7 @@ class PrepareDeliveryOrderData
         $user = Auth::user();
 
         if ($validated['type'] === 'in') {
+            
             return [
                 ...$validated,
                 'receiver_name' => $user->name,

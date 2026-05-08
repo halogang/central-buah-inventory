@@ -152,7 +152,7 @@ export default function Index() {
                                         cat.image ? (
                                             <img
                                                 src={cat.thumbnail_url}
-                                                alt={cat.name}
+                                                alt="Kategori"
                                                 className="w-12 h-12 object-cover rounded-lg"
                                             />
                                         ) : (

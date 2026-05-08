@@ -305,7 +305,7 @@ export default function Show({ data, onClose }: Props) {
                             {data.sender_signature && (
                                 <img
                                     src={data.sender_signature_url}
-                                    alt={data.sender_signature_url}
+                                    alt="TTD Pengirim"
                                     className="h-20 mx-auto mt-2 object-contain"
                                 />
                             )}

@@ -197,15 +197,19 @@ class DeliveryOrderController extends Controller
              * 🔥 2. HANDLE SIGNATURE (base64 → file)
              * File: app/Actions/DeliveryOrder/HandleDeliverySignature.php
              */
-            $validated['sender_signature'] = $signatureAction->handle(
-                $signatureService,
-                $validated['sender_signature'] ?? null
-            );
-
-            $validated['receiver_signature'] = $signatureAction->handle(
-                $signatureService,
-                $validated['receiver_signature'] ?? null
-            );
+           if ($validated['type'] === 'in') {
+                $validated['sender_signature'] = $signatureAction->handle(
+                    $signatureService,
+                    $validated['sender_signature'] ?? null,
+                    null
+                );
+            } else {
+                $validated['receiver_signature'] = $signatureAction->handle(
+                    $signatureService,
+                    $validated['receiver_signature'] ?? null,
+                    null
+                );
+           }          
 
             /**
              * 🔥 3. HANDLE EVIDENCE (upload image)

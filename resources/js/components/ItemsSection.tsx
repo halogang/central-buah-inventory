@@ -99,7 +99,7 @@ const ItemsSection = ({ categories = [] }: Props) => {
                   {category.image_url ? (
                     <img
                       src={category.image_url}
-                      alt={category.name}
+                      alt="Kategori"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -182,7 +182,7 @@ const ItemsSection = ({ categories = [] }: Props) => {
                     {item.image ? (
                         <img
                             src={item.image_url}
-                            alt={item.image}
+                            alt="Produk"
                             className="w-16 h-16 object-cover rounded-lg"
                         />
                     ) : (

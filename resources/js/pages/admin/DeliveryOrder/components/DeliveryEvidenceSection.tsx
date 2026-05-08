@@ -73,7 +73,7 @@ export default function DeliveryEvidenceSection({ form, setForm }: any) {
 
                                 <img
                                     src={`${src}`}
-                                    alt={`/${src}`}
+                                    alt="Bukti"
                                     className="w-full h-24 object-cover rounded border"
                                 />
 
