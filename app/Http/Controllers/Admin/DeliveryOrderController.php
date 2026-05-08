@@ -27,8 +27,6 @@ use App\Actions\HandleDeliveryEvidence;
 
 
 use Illuminate\Support\Str;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
 
 class DeliveryOrderController extends Controller
 {
@@ -554,10 +552,8 @@ class DeliveryOrderController extends Controller
             return null;
         }
 
-        /**
-         * kalau bukan webp langsung return
-         */
-        if (!Str::endsWith($fullPath, '.webp')) {
+        // kalau bukan webp langsung return
+        if (!Str::endsWith(strtolower($fullPath), '.webp')) {
             return $fullPath;
         }
 
@@ -567,15 +563,20 @@ class DeliveryOrderController extends Controller
             mkdir($tempDir, 0755, true);
         }
 
-        $fileName = Str::uuid().'.png';
+        $pngPath = $tempDir.'/'.Str::uuid().'.png';
 
-        $pngPath = $tempDir.'/'.$fileName;
+        /**
+         * 🔥 convert native GD
+         */
+        $image = imagecreatefromwebp($fullPath);
 
-        $manager = new ImageManager(new Driver());
+        if (!$image) {
+            return null;
+        }
 
-        $image = $manager->read($fullPath);
+        imagepng($image, $pngPath);
 
-        $image->toPng()->save($pngPath);
+        imagedestroy($image);
 
         return $pngPath;
     }
