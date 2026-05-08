@@ -228,7 +228,7 @@
                     <br><br>
 
                     @if($deliveryOrder->sender_signature)
-                    <img src="{{ public_path("/images/signatures/apple-touch-icon.png") }}" alt={{ public_path("/images/signatures/apple-touch-icon.png") }} height="60">
+                    <img src="{{ public_path($deliveryOrder->sender_signature) }}" alt={{ "TTD Pengirim" }} height="60">
                     @endif
 
                     <div class="sign-line"></div>

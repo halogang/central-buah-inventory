@@ -24,10 +24,11 @@ use App\Services\DeliveryOrderSyncService;
 use App\Actions\PrepareDeliveryOrderData;
 use App\Actions\HandleDeliverySignature;
 use App\Actions\HandleDeliveryEvidence;
-// use Illuminate\Support\Facades\File;
-// use Illuminate\Support\Str;
-// use Intervention\Image\Drivers\Gd\Driver;
-// use Intervention\Image\ImageManager;
+
+
+use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class DeliveryOrderController extends Controller
 {
@@ -541,22 +542,77 @@ class DeliveryOrderController extends Controller
         return back()->with('success', 'Surat jalan berhasil dihapus');
     }
 
+    private function convertImageToPng($path)
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $fullPath = public_path($path);
+
+        if (!file_exists($fullPath)) {
+            return null;
+        }
+
+        /**
+         * kalau bukan webp langsung return
+         */
+        if (!Str::endsWith($fullPath, '.webp')) {
+            return $fullPath;
+        }
+
+        $tempDir = public_path('temp');
+
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $fileName = Str::uuid().'.png';
+
+        $pngPath = $tempDir.'/'.$fileName;
+
+        $manager = new ImageManager(new Driver());
+
+        $image = $manager->read($fullPath);
+
+        $image->toPng()->save($pngPath);
+
+        return $pngPath;
+    }
+
 
     //export pdf
     public function print(DeliveryOrder $surat_jalan)
     {
-
         $deliveryOrder = DeliveryOrder::with([
             'supplier',
             'customer',
             'items.item.unit',
             'items.cart',
         ])->findOrFail($surat_jalan->id);
+
         $websiteInfo = WebsiteInfo::first();
+
+        /**
+         * 🔥 convert signature sementara ke png
+         */
+        $senderSignature = $this->convertImageToPng(
+            $deliveryOrder->sender_signature
+        );
+
+        $receiverSignature = $this->convertImageToPng(
+            $deliveryOrder->receiver_signature
+        );
 
         $pdf = Pdf::loadView('pdf.delivery-order', [
             'deliveryOrder' => $deliveryOrder,
-            'websiteInfo' => $websiteInfo
+            'websiteInfo' => $websiteInfo,
+
+            /**
+             * kirim png path
+             */
+            'senderSignature' => $senderSignature,
+            'receiverSignature' => $receiverSignature,
         ])->setPaper('A4', 'portrait');
 
         $fileName = str_replace('/', '-', $deliveryOrder->do_number);
