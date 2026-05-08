@@ -617,6 +617,8 @@ class DeliveryOrderController extends Controller
 
         $fileName = str_replace('/', '-', $deliveryOrder->do_number);
 
+        dd($senderSignature, $receiverSignature);
+
         return $pdf->stream($fileName.'.pdf');
     }
 
