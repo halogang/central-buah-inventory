@@ -246,7 +246,7 @@
                     @if($receiverSignature)
                         <img
                             src="{{ $receiverSignature }}"
-                            alt="TTD Penerima"
+                            alt="{{ $receiverSignature }}"
                             height="60"
                         >
                     @endif
