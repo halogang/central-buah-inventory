@@ -230,7 +230,7 @@
                     @if($senderSignature)
                         <img
                             src="{{ $senderSignature }}"
-                            alt="TTD Pengirim"
+                            alt="{{ $senderSignature }}"
                             height="60"
                         >
                     @endif
