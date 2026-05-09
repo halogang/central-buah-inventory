@@ -14,7 +14,7 @@ import { useCan } from "@/utils/permissions";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Master Keranjang',
+        title: 'Master Keranja',
         href: '/master/carts',
     },
 ];
