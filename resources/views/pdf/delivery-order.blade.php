@@ -227,8 +227,12 @@
                     Pengirim
                     <br><br>
 
-                    @if($senderSignature && file_exists($senderSignature))
-                        <img src="file://{{ $senderSignature }}" height="60">
+                    @if($deliveryOrder->sender_signature)
+                        <img
+                            src="{{ public_path($deliveryOrder->sender_signature) }}"
+                            alt="TTD Pengirim"
+                            height="60"
+                        >
                     @endif
 
                     <div class="sign-line"></div>
@@ -239,8 +243,12 @@
                     Penerima
                     <br><br>
 
-                    @if($receiverSignature && file_exists($receiverSignature))
-                        <img src="file://{{ $receiverSignature }}" height="60">
+                    @if($deliveryOrder->receiver_signature)
+                        <img
+                            src="{{ public_path($deliveryOrder->receiver_signature) }}"
+                            alt="TTD Penerima"
+                            height="60"
+                        >
                     @endif
 
                     <div class="sign-line"></div>
