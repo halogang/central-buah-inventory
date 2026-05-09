@@ -557,7 +557,6 @@ class DeliveryOrderController extends Controller
         $pdf = Pdf::loadView('pdf.delivery-order', [
             'deliveryOrder' => $deliveryOrder,
             'websiteInfo' => $websiteInfo,
-            'publicHtmlPath' => fn($path) => '/home/cenh8485/public_html' . $path,
             'senderSignature' => '/home/cenh8485/public_html' . $deliveryOrder->sender_signature,
             'receiverSignature' => '/home/cenh8485/public_html' . $deliveryOrder->receiver_signature,
         ])->setPaper('A4', 'portrait');

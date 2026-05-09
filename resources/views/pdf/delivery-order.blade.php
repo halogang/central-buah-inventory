@@ -227,12 +227,8 @@
                     Pengirim
                     <br><br>
 
-                    @if($senderSignature)
-                        <img
-                            src="{{ $senderSignature }}"
-                            alt="{{ $senderSignature }}"
-                            height="60"
-                        >
+                    @if($senderSignature && file_exists($senderSignature))
+                        <img src="file://{{ $senderSignature }}" height="60">
                     @endif
 
                     <div class="sign-line"></div>
@@ -243,12 +239,8 @@
                     Penerima
                     <br><br>
 
-                    @if($receiverSignature)
-                        <img
-                            src="{{ $receiverSignature }}"
-                            alt="{{ $receiverSignature }}"
-                            height="60"
-                        >
+                    @if($receiverSignature && file_exists($receiverSignature))
+                        <img src="file://{{ $receiverSignature }}" height="60">
                     @endif
 
                     <div class="sign-line"></div>
