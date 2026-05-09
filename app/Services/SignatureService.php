@@ -28,7 +28,7 @@ class SignatureService
         $image = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
         $image = str_replace(' ', '+', $image);
 
-        $fileName = 'signature_' . Str::uuid() . '.webp';
+        $fileName = 'signature_' . Str::uuid() . '.png';
 
         $destination = public_path($this->uploadPath);
 
@@ -50,7 +50,7 @@ class SignatureService
 
         /*
         =========================
-        Save WebP
+        Save PNG
         =========================
         */
 
