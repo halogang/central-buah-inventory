@@ -20,7 +20,6 @@ class SignatureService
             return $oldPath;
         }
 
-        // delete old file (both locations)
         if ($oldPath) {
             $this->deleteOld($oldPath);
         }
@@ -32,24 +31,28 @@ class SignatureService
 
         $imageData = base64_decode($image);
 
-        $img = Image::read($imageData);
+        $img = Image::read($imageData)->scale(width: 600);
 
-        // resize
-        $img->scale(width: 600);
+        // =========================
+        // PATHS (FIXED)
+        // =========================
+        $localDir = public_path('images/signatures');
+        $serverDir = base_path('../public_html/images/signatures');
 
-        // ensure directories exist
-        $this->ensureDirectory(storage_path('app/public/' . $this->localPath));
-        $this->ensureDirectory(public_path($this->serverPath));
+        $this->ensureDirectory($localDir);
+        $this->ensureDirectory($serverDir);
 
-        // save to Laravel public (storage/app/public equivalent)
-        $localFullPath = storage_path('app/public/' . $this->localPath . '/' . $fileName);
-        $img->save($localFullPath, 100);
+        // IMPORTANT: clone image
+        $imgLocal = clone $img;
+        $imgServer = clone $img;
 
-        // save to public_html
-        $serverFullPath = public_path($this->serverPath . '/' . $fileName);
-        $img->save($serverFullPath, 100);
+        // save local (Laravel public)
+        $imgLocal->save($localDir . '/' . $fileName, 100);
 
-        return $this->localPath . '/' . $fileName;
+        // save public_html
+        $imgServer->save($serverDir . '/' . $fileName, 100);
+
+        return 'images/signatures/' . $fileName;
     }
 
     private function deleteOld($oldPath)
