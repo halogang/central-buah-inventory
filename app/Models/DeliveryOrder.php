@@ -69,14 +69,14 @@ class DeliveryOrder extends Model
     public function getSenderSignatureUrlAttribute()
     {
         return $this->sender_signature
-            ? public_path($this->sender_signature)
+            ? asset($this->sender_signature)
             : null;
     }
 
     public function getReceiverSignatureUrlAttribute()
     {
         return $this->receiver_signature
-            ? public_path($this->receiver_signature)
+            ? asset($this->receiver_signature)
             : null;
     }
 }
