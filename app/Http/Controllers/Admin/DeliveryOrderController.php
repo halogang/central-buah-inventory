@@ -147,7 +147,7 @@ class DeliveryOrderController extends Controller
 
         });
 
-        dd($deliveryOrders);
+        // dd($deliveryOrders);
 
         $items = Item::with('unit', 'warehouse.branch')->whereHas('warehouse.branch', function($q){
             $q->where('name', 'Grosir');
