@@ -185,7 +185,7 @@ class DeliveryOrderController extends Controller
 
             /**
              * 🔥 1. PREPARE DATA (sender / receiver logic)
-             * File: app/Actions/DeliveryOrder/PrepareDeliveryOrderData.php
+             * File: app/Actions/DeliveryOrder/PrepareDeliveryOrderData.ph
              */
             $validated = $prepareData->handle($validated);
 
