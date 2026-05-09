@@ -537,9 +537,20 @@ class DeliveryOrderController extends Controller
         return back()->with('success', 'Surat jalan berhasil dihapus');
     }
 
-    private function publicHtmlPath($path)
+    /**
+     * Construct absolute filesystem path for DOMPDF image rendering
+     * 
+     * DOMPDF requires actual filesystem paths, not URLs.
+     * This points to the production public_html directory where
+     * uploaded signature and evidence files are stored.
+     */
+    private function getAbsolutePath($relativePath)
     {
-        return '/home/cenh8485/public_html' . $path;
+        if (!$relativePath) {
+            return null;
+        }
+
+        return '/home/cenh8485/public_html' . $relativePath;
     }
 
     // export pdf
@@ -557,8 +568,8 @@ class DeliveryOrderController extends Controller
         $pdf = Pdf::loadView('pdf.delivery-order', [
             'deliveryOrder' => $deliveryOrder,
             'websiteInfo' => $websiteInfo,
-            'senderSignature' => '/home/cenh8485/public_html' . $deliveryOrder->sender_signature,
-            'receiverSignature' => '/home/cenh8485/public_html' . $deliveryOrder->receiver_signature,
+            'senderSignature' => $this->getAbsolutePath($deliveryOrder->sender_signature),
+            'receiverSignature' => $this->getAbsolutePath($deliveryOrder->receiver_signature),
         ])->setPaper('A4', 'portrait');
 
         $fileName = str_replace('/', '-', $deliveryOrder->do_number);

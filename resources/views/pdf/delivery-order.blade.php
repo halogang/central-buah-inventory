@@ -227,9 +227,9 @@
                     Pengirim
                     <br><br>
 
-                    @if($deliveryOrder->sender_signature)
+                    @if($senderSignature && file_exists($senderSignature))
                         <img
-                            src="{{ public_path($deliveryOrder->sender_signature) }}"
+                            src="{{ $senderSignature }}"
                             alt="TTD Pengirim"
                             height="60"
                         >
@@ -243,9 +243,9 @@
                     Penerima
                     <br><br>
 
-                    @if($deliveryOrder->receiver_signature)
+                    @if($receiverSignature && file_exists($receiverSignature))
                         <img
-                            src="{{ public_path($deliveryOrder->receiver_signature) }}"
+                            src="{{ $receiverSignature }}"
                             alt="TTD Penerima"
                             height="60"
                         >

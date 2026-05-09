@@ -26,3 +26,9 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Runtime uploaded files
+/public/images/signatures/*
+!/public/images/signatures/.gitkeep
+/public/images/delivery-orders/*
+!/public/images/delivery-orders/.gitkeep
