@@ -230,7 +230,7 @@
                     @if($senderSignature && file_exists($senderSignature))
                         <img
                             src="{{ $senderSignature }}"
-                            alt="TTD Pengirim"
+                            alt={{ $senderSignature }}
                             height="60"
                         >
                     @endif
