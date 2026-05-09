@@ -8,8 +8,11 @@ use Intervention\Image\Laravel\Facades\Image;
 
 class SignatureService
 {
-    private $uploadPath = '../../public_html/images/signatures';
-    private $savePath = '/images/signatures';
+    // Laravel public storage
+    private $localPath = 'images/signatures';
+
+    // public_html (server production)
+    private $serverPath = '../../public_html/images/signatures';
 
     public function saveBase64($base64, $oldPath = null)
     {
@@ -17,12 +20,9 @@ class SignatureService
             return $oldPath;
         }
 
-        // delete signature lama
+        // delete old file (both locations)
         if ($oldPath) {
-            $oldFile = public_path($oldPath);
-            if (File::exists($oldFile)) {
-                File::delete($oldFile);
-            }
+            $this->deleteOld($oldPath);
         }
 
         $image = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
@@ -30,32 +30,41 @@ class SignatureService
 
         $fileName = 'signature_' . Str::uuid() . '.png';
 
-        $destination = public_path($this->uploadPath);
-
-        if (!File::exists($destination)) {
-            File::makeDirectory($destination, 0755, true);
-        }
-
         $imageData = base64_decode($image);
 
         $img = Image::read($imageData);
 
-        /*
-        =========================
-        Resize signature
-        =========================
-        */
-
+        // resize
         $img->scale(width: 600);
 
-        /*
-        =========================
-        Save PNG
-        =========================
-        */
+        // ensure directories exist
+        $this->ensureDirectory(storage_path('app/public/' . $this->localPath));
+        $this->ensureDirectory(public_path($this->serverPath));
 
-        $img->save($destination.'/'.$fileName, 100);
+        // save to Laravel public (storage/app/public equivalent)
+        $localFullPath = storage_path('app/public/' . $this->localPath . '/' . $fileName);
+        $img->save($localFullPath, 100);
 
-        return $this->savePath.'/'.$fileName;
+        // save to public_html
+        $serverFullPath = public_path($this->serverPath . '/' . $fileName);
+        $img->save($serverFullPath, 100);
+
+        return $this->localPath . '/' . $fileName;
+    }
+
+    private function deleteOld($oldPath)
+    {
+        $local = storage_path('app/public/' . $oldPath);
+        $server = public_path($this->serverPath . '/' . basename($oldPath));
+
+        if (File::exists($local)) File::delete($local);
+        if (File::exists($server)) File::delete($server);
+    }
+
+    private function ensureDirectory($path)
+    {
+        if (!File::exists($path)) {
+            File::makeDirectory($path, 0755, true);
+        }
     }
 }
