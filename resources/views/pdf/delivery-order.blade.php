@@ -227,9 +227,9 @@
                     Pengirim
                     <br><br>
 
-                    @if($senderSignature)
+                    @if($deliveryOrder->sender_signature)
                         <img
-                            src="{{ $senderSignature }}"
+                            src="{{ public_path($deliveryOrder->sender_signature) }}"
                             alt="TTD Pengirim"
                             height="60"
                         >
@@ -243,9 +243,9 @@
                     Penerima
                     <br><br>
 
-                    @if($receiverSignature)
+                    @if($deliveryOrder->receiver_signature)
                         <img
-                            src="{{ $receiverSignature }}"
+                            src="{{ public_path($deliveryOrder->receiver_signature) }}"
                             alt="TTD Penerima"
                             height="60"
                         >
