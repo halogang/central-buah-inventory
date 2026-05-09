@@ -28,6 +28,10 @@ class User extends Authenticatable
         'phone',
     ];
 
+    protected $appends = [
+        'signature_url',
+    ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -72,5 +76,12 @@ class User extends Authenticatable
     public function pos()
     {
         return $this->hasMany(Pos::class);
+    }
+
+    public function getSignatureUrlAttribute()
+    {
+        return $this->signature
+            ? asset($this->signature)
+            : null;
     }
 }

@@ -28,6 +28,7 @@ interface User {
     name: string
     email: string
     signature?: string | null
+    signature_url?: string | null
 }
 
 export default function Profile({
@@ -44,8 +45,9 @@ export default function Profile({
             user: User
         }
     }>().props
-    const [signature, setSignature] = useState<string | null>(
-        auth.user.signature ?? null
+    const [signature, setSignature] = useState<string | null>(null)
+    const [preview, setPreview] = useState<string | null>(
+        auth.user.signature_url ?? null
     )
 
     useEffect(() => {
@@ -119,9 +121,10 @@ export default function Profile({
                                 <div className="grid gap-2">
                                     <FormSignature
                                         label="Tanda tangan"
-                                        value={signature}
-                                        onChange={(value: string | null) => {
-                                            setSignature(value)
+                                        value={preview}
+                                        onChange={(value) => {
+                                            setSignature(value)   // base64 untuk submit
+                                            setPreview(value)     // preview realtime
                                         }}
                                     />
 
