@@ -8,7 +8,7 @@ use Intervention\Image\Laravel\Facades\Image;
 
 class SignatureService
 {
-    private $uploadPath = '/images/signatures';
+    private $uploadPath = '../../public_html/images/signatures';
     private $savePath = '/images/signatures';
 
     public function saveBase64($base64, $oldPath = null)
