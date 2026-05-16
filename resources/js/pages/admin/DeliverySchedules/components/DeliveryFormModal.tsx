@@ -165,8 +165,6 @@ const DeliveryFormModal = ({ order, defaultDate, onClose, onSave, orders, produc
       items,
     };
 
-    console.log("LINKED ID:", order?.linked_delivery_order_id);
-
     onSave(payload);
   };
 

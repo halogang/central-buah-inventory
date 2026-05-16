@@ -12,6 +12,7 @@ export interface CartItem {
   product: Product;
   qty: number;
   customPrice: number | null;
+  itemDiscount?: number;
 }
 
 export const products: Product[] = [

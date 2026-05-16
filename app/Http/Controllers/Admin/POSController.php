@@ -59,80 +59,187 @@ class POSController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $validated = $request->validate([
             'date' => 'required|date',
-            'total' => 'required|integer',
+
             'payment_method' => 'required|string',
+
             'paid_amount' => 'nullable|integer',
             'change_amount' => 'nullable|integer',
+
             'type' => 'required|string',
             'charge' => 'nullable|integer',
+
+            'subtotal' => 'required|integer|min:0',
+            'discount' => 'nullable|integer|min:0',
+            'tax' => 'nullable|integer|min:0',
+            'total' => 'required|integer|min:0',
+
+            'items' => 'required|array|min:1',
 
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.item_name' => 'required|string',
             'items.*.unit' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0',
+
+            'items.*.quantity' => 'required|numeric|min:1',
+
             'items.*.base_price' => 'required|numeric|min:0',
+
             'items.*.price' => 'required|numeric|min:0',
+
+            'items.*.discount' => 'nullable|numeric|min:0',
+
+            'items.*.subtotal' => 'required|numeric|min:0',
+
             'items.*.total' => 'required|numeric|min:0',
         ]);
 
+
         DB::transaction(function () use ($validated) {
 
-            $posData = collect($validated)->except('items')->toArray();
-            $posData['user_id'] = Auth::id();
-            $posData['pos_number'] = 'POS-' . now()->format('YmdHis');
+            // =========================
+            // POS TOTALS
+            // =========================
 
-            $pos = Pos::create($posData);
+            $subtotal = collect($validated['items'])
+                ->sum(fn ($item) =>
+                    $item['price'] * $item['quantity']
+                );
 
-            $items = $validated['items'];
+            $itemDiscountTotal = collect($validated['items'])
+                ->sum(fn ($item) =>
+                    $item['discount'] ?? 0
+                );
 
-            foreach($items as $item) {
+            $globalDiscount = $validated['discount'] ?? 0;
 
-                $total = $item['price'] * $item['quantity'];
-                
-                //save pos item
+            $tax = $validated['tax'] ?? 0;
+            $charge = $validated['charge'] ?? 0;
+
+            $grandTotal =
+                $subtotal
+                - $itemDiscountTotal
+                - $globalDiscount
+                + $tax
+                + $charge;
+
+            // =========================
+            // CREATE POS
+            // =========================
+
+            $pos = Pos::create([
+                'pos_number' => 'POS-' . now()->format('YmdHis'),
+
+                'date' => $validated['date'],
+
+                'user_id' => Auth::id(),
+
+                'subtotal' => $subtotal,
+
+                'discount' => $globalDiscount,
+
+                'tax' => $tax,
+
+                'total' => $grandTotal,
+
+                'payment_method' => $validated['payment_method'],
+
+                'paid_amount' => $validated['paid_amount'] ?? 0,
+
+                'change_amount' => $validated['change_amount'] ?? 0,
+
+                'type' => $validated['type'],
+
+                'charge' => $validated['charge'] ?? 0,
+            ]);
+
+            // =========================
+            // CREATE ITEMS
+            // =========================
+
+            foreach ($validated['items'] as $item) {
+
+                $product = Item::lockForUpdate()
+                    ->findOrFail($item['item_id']);
+
+                $itemSubtotal =
+                    $item['price'] * $item['quantity'];
+
+                $itemDiscount =
+                    $item['discount'] ?? 0;
+
+                $itemTotal =
+                    $itemSubtotal - $itemDiscount;
+
+                $newStock =
+                    $product->stock - $item['quantity'];
+
+                if ($newStock < 0) {
+                    throw ValidationException::withMessages([
+                        'items' => "Stok {$product->name} tidak cukup"
+                    ]);
+                }
+
+                // create pos item
                 $posItem = PosItem::create([
                     'pos_id' => $pos->id,
 
-                    'item_id' => $item['item_id']?? null,
+                    'item_id' => $item['item_id'],
+
                     'item_name' => $item['item_name'],
+
                     'unit' => $item['unit'],
 
                     'quantity' => $item['quantity'],
+
                     'base_price' => $item['base_price'],
+
                     'price' => $item['price'],
-                    'total' => $total,
+
+                    'discount' => $itemDiscount,
+
+                    'subtotal' => $itemSubtotal,
+
+                    'total' => $itemTotal,
                 ]);
 
-                //update stock
-                $product = Item::findOrFail($item['item_id']);
-                $newStock = $product->stock - $item['quantity'];
-
-                //create new stock movement
+                // stock movement
                 StockMovement::create([
                     'item_id' => $product->id,
+
                     'warehouse_id' => $product->warehouse_id,
+
                     'type' => 'out',
+
                     'quantity' => $item['quantity'],
+
                     'bad_stock' => 0,
+
                     'stock_before' => $product->stock,
+
                     'stock_after' => $newStock,
+
                     'reference_type' => 'pos',
+
                     'reference_id' => $posItem->id,
+
                     'user_id' => Auth::id(),
-                    'note' => 'POS Item ' . $posItem->item_name
+
+                    'note' => 'POS Item ' . $posItem->item_name,
                 ]);
 
-                $product->decrement('stock', $item['quantity']);
+                // reduce stock
+                $product->decrement(
+                    'stock',
+                    $item['quantity']
+                );
             }
-            
         });
 
-        // sementara return aja dulu
-        return back()->with('success', 'Transaksi berhasil');
+        return back()->with(
+            'success',
+            'Transaksi berhasil'
+        );
     }
 
     /**
@@ -158,91 +265,225 @@ class POSController extends Controller
     {
         $validated = $request->validate([
             'date' => 'required|date',
-            'total' => 'required|integer',
+
             'payment_method' => 'required|string',
+
             'paid_amount' => 'nullable|integer',
             'change_amount' => 'nullable|integer',
+
             'type' => 'required|string',
             'charge' => 'nullable|integer',
+
+            'subtotal' => 'required|integer|min:0',
+            'discount' => 'nullable|integer|min:0',
+            'tax' => 'nullable|integer|min:0',
+            'total' => 'required|integer|min:0',
+
+            'items' => 'required|array|min:1',
 
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.item_name' => 'required|string',
             'items.*.unit' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0',
+
+            'items.*.quantity' => 'required|numeric|min:1',
+
             'items.*.base_price' => 'required|numeric|min:0',
+
             'items.*.price' => 'required|numeric|min:0',
+
+            'items.*.discount' => 'nullable|numeric|min:0',
+
+            'items.*.subtotal' => 'required|numeric|min:0',
+
             'items.*.total' => 'required|numeric|min:0',
         ]);
 
-        $pos = Pos::with('posItems')->findOrFail($id);
+        $pos = Pos::with('posItems')
+            ->findOrFail($id);
 
-        DB::transaction(function () use ($validated, $pos) {
-            // restore stock from previous items and clear stock movements
+        DB::transaction(function () use (
+            $validated,
+            $pos
+        ) {
+
+            // =========================
+            // RESTORE OLD STOCK
+            // =========================
+
             foreach ($pos->posItems as $oldItem) {
+
                 if ($oldItem->item_id) {
-                    $product = Item::find($oldItem->item_id);
+
+                    $product = Item::lockForUpdate()
+                        ->find($oldItem->item_id);
+
                     if ($product) {
-                        $product->increment('stock', $oldItem->quantity);
+                        $product->increment(
+                            'stock',
+                            $oldItem->quantity
+                        );
                     }
                 }
 
-                StockMovement::where('reference_type', 'pos')
-                    ->where('reference_id', $oldItem->id)
+                StockMovement::where(
+                    'reference_type',
+                    'pos'
+                )
+                    ->where(
+                        'reference_id',
+                        $oldItem->id
+                    )
                     ->delete();
             }
 
             $pos->posItems()->delete();
 
-            $posData = collect($validated)->except('items')->toArray();
-            $pos->update($posData);
+            // =========================
+            // RECALCULATE TOTAL
+            // =========================
+
+            $subtotal = collect($validated['items'])
+                ->sum(fn ($item) =>
+                    $item['price'] * $item['quantity']
+                );
+
+            $itemDiscountTotal = collect($validated['items'])
+                ->sum(fn ($item) =>
+                    $item['discount'] ?? 0
+                );
+
+            $globalDiscount =
+                $validated['discount'] ?? 0;
+
+            $tax =
+                $validated['tax'] ?? 0;
+            
+            $charge =
+                $validated['charge'] ?? 0;
+
+            $grandTotal =
+                $subtotal
+                - $itemDiscountTotal
+                - $globalDiscount
+                + $tax
+                + $charge;
+
+            // =========================
+            // UPDATE POS
+            // =========================
+
+            $pos->update([
+                'date' => $validated['date'],
+
+                'subtotal' => $subtotal,
+
+                'discount' => $globalDiscount,
+
+                'tax' => $tax,
+
+                'total' => $grandTotal,
+
+                'payment_method' =>
+                    $validated['payment_method'],
+
+                'paid_amount' =>
+                    $validated['paid_amount'] ?? 0,
+
+                'change_amount' =>
+                    $validated['change_amount'] ?? 0,
+
+                'type' => $validated['type'],
+
+                'charge' =>
+                    $validated['charge'] ?? 0,
+            ]);
+
+            // =========================
+            // CREATE NEW ITEMS
+            // =========================
 
             foreach ($validated['items'] as $item) {
-                $itemTotal = $item['price'] * $item['quantity'];
+
+                $product = Item::lockForUpdate()
+                    ->findOrFail($item['item_id']);
+
+                $itemSubtotal =
+                    $item['price'] * $item['quantity'];
+
+                $itemDiscount =
+                    $item['discount'] ?? 0;
+
+                $itemTotal =
+                    $itemSubtotal - $itemDiscount;
+
+                $newStock =
+                    $product->stock - $item['quantity'];
+
+                if ($newStock < 0) {
+                    throw ValidationException::withMessages([
+                        'items' => "Stok {$product->name} tidak cukup"
+                    ]);
+                }
 
                 $posItem = PosItem::create([
                     'pos_id' => $pos->id,
-                    'item_id' => $item['item_id'] ?? null,
+
+                    'item_id' => $item['item_id'],
+
                     'item_name' => $item['item_name'],
+
                     'unit' => $item['unit'],
+
                     'quantity' => $item['quantity'],
+
                     'base_price' => $item['base_price'],
+
                     'price' => $item['price'],
+
+                    'discount' => $itemDiscount,
+
+                    'subtotal' => $itemSubtotal,
+
                     'total' => $itemTotal,
                 ]);
 
-                $product = Item::find($item['item_id']);
-                if (!$product) {
-                    throw ValidationException::withMessages([
-                        'items' => "Produk tidak ditemukan untuk item {$item['item_name']}",
-                    ]);
-                }
-
-                $newStock = $product->stock - $item['quantity'];
-                if ($newStock < 0) {
-                    throw ValidationException::withMessages([
-                        'items' => "Stok tidak cukup untuk item {$item['item_name']}",
-                    ]);
-                }
-
                 StockMovement::create([
                     'item_id' => $product->id,
+
                     'warehouse_id' => $product->warehouse_id,
+
                     'type' => 'out',
+
                     'quantity' => $item['quantity'],
+
                     'bad_stock' => 0,
+
                     'stock_before' => $product->stock,
+
                     'stock_after' => $newStock,
+
                     'reference_type' => 'pos',
+
                     'reference_id' => $posItem->id,
+
                     'user_id' => Auth::id(),
+
                     'note' => 'POS Item ' . $posItem->item_name,
                 ]);
 
-                $product->decrement('stock', $item['quantity']);
+                $product->decrement(
+                    'stock',
+                    $item['quantity']
+                );
             }
         });
 
-        return redirect()->route('pos.index')->with('success', 'Transaksi POS berhasil diperbarui');
+        return redirect()
+            ->route('pos.index')
+            ->with(
+                'success',
+                'Transaksi POS berhasil diperbarui'
+            );
     }
 
     /**

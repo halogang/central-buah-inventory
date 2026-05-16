@@ -40,15 +40,6 @@ export default function Dashboard() {
 
     const page = usePage();
 
-    console.log("Page props:"+page.props);
-
-    console.log({
-    totalProduct,
-    totalStock,
-    totalPendapatan,
-    totalStockMenipis
-    })
-
     const statsData: StatCard[] = [
         { label: "Total Produk", value: formatNumber(totalProduct), trend: "+3", icon: "package", color: "success" },
         { label: "Total Stok", value: formatNumber(totalStock), trend: "+120", icon: "boxes", color: "info" },

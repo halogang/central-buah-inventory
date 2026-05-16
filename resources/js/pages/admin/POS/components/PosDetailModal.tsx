@@ -13,16 +13,44 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
         if (!receiptWindow) 
             return;
         
-        const itemsHtml = pos
-            .pos_items
-            .map(
-                (item) => `
+        const itemsHtml = pos.pos_items
+            .map((item) => {
+                const linePrice =
+                item.price * item.quantity;
+
+                const itemDiscount =
+                item.discount ?? 0;
+
+                const finalLine =
+                linePrice - itemDiscount;
+
+                return `
                 <div class="item">
-                    <div>${item.item_name} x${item.quantity}</div>
-                    <div>${formatCurrency(item.total)}</div>
+                    <div>
+                    ${item.item_name} x${item.quantity}
+                    </div>
+                    <div>
+                    ${formatCurrency(linePrice)}
+                    </div>
                 </div>
-            `
-            )
+
+                ${
+                    itemDiscount > 0
+                    ? `
+                    <div class="sub-item discount">
+                        <div>diskon item</div>
+                        <div>- ${formatCurrency(itemDiscount)}</div>
+                    </div>
+                    `
+                    : ""
+                }
+
+                <div class="sub-item final">
+                    <div>subtotal</div>
+                    <div>${formatCurrency(finalLine)}</div>
+                </div>
+                `;
+            })
             .join("");
 
         receiptWindow
@@ -95,6 +123,17 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                         display: flex;
                         justify-content: space-between;
                     }
+
+                    .sub-item {
+                        display:flex;
+                        justify-content:space-between;
+                        font-size:30px;
+                        margin:4px 0 4px 30px;
+                    }
+
+                    .final {
+                        font-weight:bold;
+                    }
                 </style>
             </head>
 
@@ -118,10 +157,40 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                     ${itemsHtml}
 
                     <div class="divider"></div>
-                    <div class="item">
-                        <div>biaya tambahan</div>
+
+                    ${
+                    Number(pos.discount) > 0
+                        ? `
+                        <div class="item">
+                        <div>Diskon Global</div>
+                        <div>- ${formatCurrency(pos.discount)}</div>
+                        </div>
+                    `
+                        : ""
+                    }
+
+                    ${
+                    Number(pos.tax) > 0
+                        ? `
+                        <div class="item">
+                        <div>Pajak</div>
+                        <div>${formatCurrency(pos.tax)}</div>
+                        </div>
+                    `
+                        : ""
+                    }
+
+                    ${
+                    pos.type === "delivery"
+                        ? `
+                        <div class="item">
+                        <div>Biaya Antar</div>
                         <div>${formatCurrency(pos.charge)}</div>
-                    </div>
+                        </div>
+                    `
+                        : ""
+                    }
+
                     <div class="divider"></div>
 
                     <div class="item total">
@@ -234,6 +303,7 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                                 <th className="p-2 text-left">Item</th>
                                 <th className="p-2 text-center">Qty</th>
                                 <th className="p-2 text-right">Harga</th>
+                                <th className="p-2 text-right">Diskon</th>
                                 <th className="p-2 text-right">Total</th>
                             </tr>
                         </thead>
@@ -253,6 +323,11 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                                                         .toLocaleString("id-ID")
                                                 }
                                             </td>
+                                            <td className="p-2 text-right text-red-500">
+                                                {formatCurrency(
+                                                    item.discount ?? 0
+                                                )}
+                                            </td>
                                             <td className="p-2 text-right">
                                                 Rp {
                                                     item
@@ -270,56 +345,52 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                 {/* summary */}
                 <div className="text-sm space-y-2 border-t pt-3">
 
-                    {/* Subtotal */}
-                    {
-                        data.subtotal && (
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Subtotal</span>
-                                <span>{formatCurrency(data.subtotal)}</span>
-                            </div>
-                        )
-                    }
+                    <div className="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>{formatCurrency(data.subtotal)}</span>
+                    </div>
 
-                    {/* Discount */}
-                    {
-                        data.discount && (
-                            <div className="flex justify-between text-red-500">
-                                <span>Diskon</span>
-                                <span>{formatCurrency(data.discount)}</span>
-                            </div>
-                        )
-                    }
+                    {Number(data.discount) > 0 && (
+                        <div className="flex justify-between text-red-500">
+                        <span>Diskon Global</span>
+                        <span>- {formatCurrency(data.discount)}</span>
+                        </div>
+                    )}
 
-                    {/* Charge */}
-                    {
+                    {Number(data.tax) > 0 && (
                         <div className="flex justify-between">
-                                <span className="text-muted-foreground">Biaya Tambahan</span>
-                                <span>{formatCurrency(data.charge)}</span>
-                            </div>
-                    }
+                        <span>Pajak</span>
+                        <span>{formatCurrency(data.tax)}</span>
+                        </div>
+                    )}
 
-                    {/* Divider */}
-                    <div className="border-t my-2"/> {/* Total */}
+                    {data.type === "delivery" && (
+                        <div className="flex justify-between">
+                        <span>Biaya Antar</span>
+                        <span>{formatCurrency(data.charge)}</span>
+                        </div>
+                    )}
+
+                    <div className="border-t my-2"/>
+
                     <div className="flex justify-between font-semibold text-base">
                         <span>Total</span>
                         <span>{formatCurrency(data.total)}</span>
                     </div>
 
-                    {/* Payment */}
                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Bayar</span>
+                        <span>Bayar</span>
                         <span>{formatCurrency(data.paid_amount)}</span>
                     </div>
 
-                    {/* Change */}
                     <div className="flex justify-between font-semibold">
                         <span>Kembalian</span>
                         <span className="text-green-600">
-                            {formatCurrency(data.change_amount)}
+                        {formatCurrency(data.change_amount)}
                         </span>
                     </div>
 
-                </div>
+                    </div>
                 <button
                     onClick={() => printReceipt(data)}
                     className="mt-6 w-full h-11 rounded-xl bg-accent text-accent-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all cursor-pointer">

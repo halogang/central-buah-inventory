@@ -38,12 +38,40 @@ export default function PosEditModal({
     );
     const [error, setError] = useState("");
 
+    const [globalDiscount, setGlobalDiscount] = useState(
+        data.discount ?? 0
+    );
+
+    const [tax, setTax] = useState(
+        data.tax ?? 0
+    );
+
     const subtotal = useMemo(
-        () => items.reduce((sum, item) => sum + item.total, 0),
+        () =>
+            items.reduce(
+            (sum, item) =>
+                sum +
+                ((item.price * item.quantity) -
+                (item.discount ?? 0)),
+            0
+            ),
         [items]
     );
 
-    const total = useMemo(() => subtotal + (charge || 0), [subtotal, charge]);
+    const total = useMemo(
+        () =>
+            subtotal
+            - globalDiscount
+            + tax
+            + (type === "delivery" ? charge : 0),
+        [
+            subtotal,
+            globalDiscount,
+            tax,
+            charge,
+            type
+        ]
+    );
     const changeAmount = useMemo(() => {
         if (paymentMethod !== "Tunai") {
             return 0;
@@ -84,7 +112,11 @@ export default function PosEditModal({
             prev.map((item) => {
                 if (item.id !== id) return item;
                 const updated = { ...item, ...changes };
-                updated.total = Number(updated.quantity) * Number(updated.price);
+                updated.total =
+                    Number(updated.quantity) *
+                    Number(updated.price)
+                    -
+                    Number(updated.discount ?? 0);
                 return updated;
             })
         );
@@ -108,8 +140,8 @@ export default function PosEditModal({
         const payload = {
             date: data.created_at.slice(0, 10),
             subtotal,
-            discount: data.discount ?? 0,
-            tax: data.tax ?? 0,
+            discount: globalDiscount,
+            tax: tax,
             total,
             payment_method: paymentMethod,
             paid_amount: paymentMethod === "Tunai" ? paidAmount : total,
@@ -123,7 +155,13 @@ export default function PosEditModal({
                 quantity: item.quantity,
                 base_price: item.base_price,
                 price: item.price,
-                total: item.total,
+                discount: item.discount ?? 0,
+                subtotal:
+                    (item.price * item.quantity)
+                    - (item.discount ?? 0),
+                total:
+                    (item.price * item.quantity)
+                    - (item.discount ?? 0),
             })),
         };
 
@@ -180,15 +218,50 @@ export default function PosEditModal({
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
-                        <div>
-                            <label className="text-xs font-semibold uppercase text-muted-foreground">Biaya Tambahan</label>
-                            <input
-                                type="text"
-                                value={chargeInput}
-                                onChange={(e) => handleChargeChange(e.target.value)}
-                                placeholder="0"
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label className="text-xs font-semibold uppercase text-muted-foreground">Biaya Tambahan</label>
+                                <input
+                                    type="text"
+                                    value={chargeInput}
+                                    onChange={(e) => handleChargeChange(e.target.value)}
+                                    placeholder="0"
+                                    className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold uppercase text-muted-foreground">
+                                Diskon Global
+                                </label>
+                                <input
+                                type="number"
+                                min={0}
+                                value={globalDiscount}
+                                onChange={(e)=>
+                                    setGlobalDiscount(
+                                    Number(e.target.value)
+                                    )
+                                }
                                 className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
-                            />
+                                />
+                            </div>
+
+                            {/* <div>
+                                <label className="text-xs font-semibold uppercase text-muted-foreground">
+                                Pajak
+                                </label>
+                                <input
+                                type="number"
+                                min={0}
+                                value={tax}
+                                onChange={(e)=>
+                                    setTax(
+                                    Number(e.target.value)
+                                    )
+                                }
+                                className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+                                />
+                            </div> */}
                         </div>
                         {paymentMethod === "Tunai" ? (
                             <div>
@@ -213,7 +286,7 @@ export default function PosEditModal({
                         <div className="bg-muted/50 px-4 py-3 text-sm font-semibold uppercase">Item POS</div>
                         <div className="divide-y divide-border">
                             {items.map((item) => (
-                                <div key={item.id} className="grid gap-3 px-4 py-4 sm:grid-cols-[1.5fr_1fr_1fr_1fr_auto] items-center">
+                                <div key={item.id} className="grid gap-3 px-4 py-4 sm:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_auto] items-center">
                                     <div>
                                         <div className="font-medium">{item.item_name}</div>
                                         <div className="text-xs text-muted-foreground">{item.unit}</div>
@@ -238,6 +311,24 @@ export default function PosEditModal({
                                             className="mt-1 w-full rounded-xl border border-border bg-background px-2 py-2 text-sm"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="text-[10px] uppercase text-muted-foreground">
+                                            Diskon
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            value={item.discount ?? 0}
+                                            onChange={(e)=>
+                                            updateItem(item.id,{
+                                                discount:Number(
+                                                e.target.value
+                                                )
+                                            })
+                                            }
+                                            className="mt-1 w-full rounded-xl border border-border bg-background px-2 py-2 text-sm"
+                                        />
+                                    </div>
                                     <div className="text-right text-sm font-semibold">
                                         {formatCurrency(item.total)}
                                     </div>
@@ -254,25 +345,38 @@ export default function PosEditModal({
                     </div>
 
                     <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4 text-sm">
+
                         <div className="flex justify-between">
                             <span>Subtotal</span>
                             <span>{formatCurrency(subtotal)}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Biaya Tambahan</span>
+
+                        {globalDiscount > 0 && (
+                            <div className="flex justify-between text-red-500">
+                            <span>Diskon Global</span>
+                            <span>- {formatCurrency(globalDiscount)}</span>
+                            </div>
+                        )}
+
+                        {tax > 0 && (
+                            <div className="flex justify-between">
+                            <span>Pajak</span>
+                            <span>{formatCurrency(tax)}</span>
+                            </div>
+                        )}
+
+                        {type === "delivery" && (
+                            <div className="flex justify-between">
+                            <span>Biaya Antar</span>
                             <span>{formatCurrency(charge)}</span>
-                        </div>
-                        <div className="flex justify-between font-semibold text-foreground">
+                            </div>
+                        )}
+
+                        <div className="flex justify-between font-semibold text-lg">
                             <span>Total</span>
                             <span>{formatCurrency(total)}</span>
                         </div>
-                        {paymentMethod === "Tunai" && (
-                            <div className="flex justify-between">
-                                <span>Kembalian</span>
-                                <span>{formatCurrency(changeAmount)}</span>
-                            </div>
-                        )}
-                    </div>
+                        </div>
 
                     {error && <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 

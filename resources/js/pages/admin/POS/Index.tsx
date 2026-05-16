@@ -30,16 +30,30 @@ const breadcrumbs: BreadcrumbItem[] = [
     image_url: item.image_url ?? null,
   }));
 
-  console.log("POS Data:", posData);
-
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Tunai");
   const [showPayment, setShowPayment] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0, charge: 0 });
+  const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0, charge: 0, globalDiscount: 0 });
   const [showCartMobile, setShowCartMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<"pos" | "riwayat">("pos");
+
+  const handleItemDiscount = (
+    productId: string,
+    discount: number
+  ) => {
+    setCart(prev =>
+      prev.map(item =>
+        item.product.id === productId
+          ? {
+              ...item,
+              itemDiscount: discount
+            }
+          : item
+      )
+    );
+  };
 
   const addToCart = useCallback((product: Product) => {
     let shouldNotify = false;
@@ -103,8 +117,21 @@ const breadcrumbs: BreadcrumbItem[] = [
     );
   }, []);
 
-  const handlePaySuccess = (cashReceived: number, change: number, charge: number, finalTotal: number) => {
-    setLastTransaction({ total: finalTotal, cashReceived, change, charge });
+  const handlePaySuccess = (
+    cashReceived: number,
+    change: number,
+    charge: number,
+    finalTotal: number,
+    globalDiscount: number
+  ) => {
+    setLastTransaction({
+      total: finalTotal,
+      cashReceived,
+      change,
+      charge,
+      globalDiscount,
+    });
+
     setShowPayment(false);
     setShowSuccess(true);
   };
@@ -133,15 +160,73 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     const itemsHtml = cart
       .map((item) => {
-        const price = item.customPrice ?? item.product.price;
+        const price =
+          item.customPrice ??
+          item.product.price;
+
+        const linePrice =
+          price * item.qty;
+
+        const itemDiscount =
+          item.itemDiscount ?? 0;
+
+        const finalLine =
+          linePrice - itemDiscount;
+
         return `
           <div class="item">
-            <div>${item.product.name} x${item.qty}</div>
-            <div>${formatCurrency(price * item.qty)}</div>
+              <div>
+                  ${item.product.name} x${item.qty}
+              </div>
+              <div>
+                  ${formatCurrency(linePrice)}
+              </div>
+          </div>
+
+          ${
+            itemDiscount > 0
+              ? `
+              <div class="sub-item discount">
+                  <div>diskon item</div>
+                  <div>- ${formatCurrency(itemDiscount)}</div>
+              </div>
+            `
+              : ""
+          }
+
+          <div class="sub-item final">
+              <div>subtotal</div>
+              <div>${formatCurrency(finalLine)}</div>
           </div>
         `;
       })
       .join("");
+
+    const subtotal = cart.reduce(
+      (sum, item) => {
+        const price =
+          item.customPrice ??
+          item.product.price;
+
+        return (
+          sum +
+          price * item.qty -
+          (item.itemDiscount ?? 0)
+        );
+      },
+      0
+    );
+
+    const globalDiscount =
+      lastTransaction.globalDiscount ?? 0;
+
+    const charge =
+      lastTransaction.charge ?? 0;
+
+    const total =
+      subtotal -
+      globalDiscount +
+      charge;
 
     receiptWindow.document.write(`
       <html>
@@ -163,6 +248,21 @@ const breadcrumbs: BreadcrumbItem[] = [
               body {
                   font-family: monospace;
                   background: white;
+              }
+
+              .sub-item {
+                  display:flex;
+                  justify-content:space-between;
+                  font-size:30px;
+                  margin:4px 0 4px 30px;
+              }
+
+              .discount {
+                  color:red;
+              }
+
+              .final {
+                  font-weight:bold;
               }
 
               .container {
@@ -234,16 +334,25 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                 <div class="divider"></div>
 
+                ${globalDiscount > 0 ? `
                 <div class="item">
-                    <div>biaya tambahan</div>
-                    <div>${formatCurrency(lastTransaction.charge)}</div>
+                    <div>Diskon Global</div>
+                    <div>- ${formatCurrency(globalDiscount)}</div>
                 </div>
+                ` : ""}
+
+                ${charge > 0 ? `
+                <div class="item">
+                    <div>Biaya Antar</div>
+                    <div>${formatCurrency(charge)}</div>
+                </div>
+                ` : ""}
 
                 <div class="divider"></div>
 
                 <div class="item total">
                     <div>Total</div>
-                    <div>${formatCurrency(lastTransaction.total)}</div>
+                    <div>${formatCurrency(total)}</div>
                 </div>
 
                 <div class="item">
@@ -322,6 +431,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                     onQtyChange={changeQty}
                     onRemove={removeFromCart}
                     onCustomPrice={setCustomPrice}
+                    onItemDiscount={
+                        handleItemDiscount
+                    }
                     onPay={() => setShowPayment(true)}
                   />
                 </div>
@@ -352,6 +464,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                         onQtyChange={changeQty}
                         onRemove={removeFromCart}
                         onCustomPrice={setCustomPrice}
+                        onItemDiscount={
+                            handleItemDiscount
+                        }
                         onPay={() => {
                           setShowCartMobile(false);
                           setShowPayment(true);

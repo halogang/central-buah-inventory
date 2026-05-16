@@ -38,8 +38,6 @@ export default function Show({ data, onClose }: Props) {
         return sum + net + (cartQty * cartWeight)
     }, 0)
 
-    console.log(data)
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-6">
 

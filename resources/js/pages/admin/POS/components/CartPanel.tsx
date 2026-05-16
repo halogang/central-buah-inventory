@@ -13,6 +13,10 @@ interface CartPanelProps {
   onRemove: (productId: string) => void;
   onCustomPrice: (productId: string, price: number) => void;
   onPay: () => void;
+  onItemDiscount: (
+    productId: string,
+    discount: number
+  ) => void;
 }
 
 const CartPanel = ({
@@ -23,33 +27,54 @@ const CartPanel = ({
   onQtyChange,
   onRemove,
   onCustomPrice,
+  onItemDiscount,
   onPay,
 }: CartPanelProps) => {
   const can = useCan();
 
   const subtotal = cart.reduce(
-    (sum, item) => sum + (item.customPrice ?? item.product.price) * item.qty,
+    (sum, item) => {
+      const line =
+        (item.customPrice ??
+          item.product.price)
+        * item.qty;
+
+      return (
+        sum +
+        line -
+        (item.itemDiscount ?? 0)
+      );
+    },
     0
   );
+
   const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState("");
 
-  const handleEditStart = (item: CartItem) => {
-    setEditingId(item.product.id);
-    setEditValue(String(item.customPrice ?? item.product.price));
+  const [editingDiscountId, setEditingDiscountId] =
+    useState<string | null>(null);
+
+  const [discountValue, setDiscountValue] =
+    useState('');
+
+  const handleDiscountStart = (
+    item: CartItem
+  ) => {
+    setEditingDiscountId(item.product.id);
+    setDiscountValue(
+      String(item.itemDiscount ?? 0)
+    );
   };
 
-  const handleEditConfirm = (productId: string) => {
-    const val = parseInt(editValue);
-    if (!isNaN(val) && val > 0) {
-      onCustomPrice(productId, val);
+  const handleDiscountConfirm = (
+    productId: string
+  ) => {
+    const val = parseInt(discountValue);
+
+    if (!isNaN(val) && val >= 0) {
+      onItemDiscount(productId, val);
     }
-    setEditingId(null);
-  };
 
-  const handleEditCancel = () => {
-    setEditingId(null);
+    setEditingDiscountId(null);
   };
 
   const methods = paymentMethods.map((pm: any) => ({
@@ -76,91 +101,107 @@ const CartPanel = ({
             Keranjang kosong
           </div>
         )}
-        {cart.map((item) => (
-          <div
-            key={item.product.id}
-            className="bg-background rounded-xl border border-border p-3 animate-in fade-in-0 zoom-in-95 duration-150"
-          >
-            <div className="flex items-start gap-3">
-              {item.product.image ? (
-                  <img
-                    src={item.product.image}
-                    alt="Produk"
-                    className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-150"
-                  />
-                ) : (
-                  <Apple className="w-10 h-10 text-muted-foreground" />
-                )}
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm text-foreground truncate">{item.product.name}</div>
-                {editingId === item.product.id ? (
-                  <div className="flex items-center gap-1 mt-1">
-                    <input
-                      type="number"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleEditConfirm(item.product.id);
-                        if (e.key === "Escape") handleEditCancel();
-                      }}
-                      className="w-24 h-7 px-2 text-sm border border-accent rounded-md bg-card text-foreground focus:outline-none focus:ring-1 focus:ring-accent tabular-nums"
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => handleEditConfirm(item.product.id)}
-                      className="text-xs font-semibold pos-success-text px-1"
-                    >
-                      OK
-                    </button>
-                    <button
-                      onClick={handleEditCancel}
-                      className="text-xs text-muted-foreground px-1"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-sm pos-price-text font-semibold tabular-nums">
-                      {formatRupiah(item.customPrice ?? item.product.price)}
-                    </span>
-                    <button onClick={() => handleEditStart(item)} className="text-muted-foreground hover:text-foreground">
-                      <Pencil size={12} />
-                    </button>
-                    {item.customPrice !== null && (
-                      <span className="text-[10px] bg-accent/10 text-accent px-1.5 py-0.5 rounded font-medium">
-                        Custom
-                      </span>
+        {cart.map((item) => {
+          const price =
+            item.customPrice ?? item.product.price;
+
+          const lineTotal =
+            price * item.qty -
+            (item.itemDiscount ?? 0);
+
+          return (
+            (
+              <div
+                key={item.product.id}
+                className="bg-background rounded-xl border border-border p-3 animate-in fade-in-0 zoom-in-95 duration-150"
+              >
+                <div className="flex items-start gap-3">
+                  {item.product.image ? (
+                      <img
+                        src={item.product.image}
+                        alt="Produk"
+                        className="w-10 h-10 object-contain group-hover:scale-105 transition-transform duration-150"
+                      />
+                    ) : (
+                      <Apple className="w-10 h-10 text-muted-foreground" />
                     )}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm text-foreground truncate">{item.product.name}</div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-sm pos-price-text font-semibold tabular-nums">
+                        {formatRupiah(item.customPrice ?? item.product.price)}
+                      </span>
+                    </div>
+                    <div className="text-sm text-green-600 font-semibold">
+                        Total: {formatRupiah(lineTotal)}
+                      </div>
+                    <div className="">
+                      {editingDiscountId === item.product.id ? (
+                        <div className="flex gap-1">
+                          <input
+                            type="number"
+                            value={discountValue}
+                            onChange={(e)=>
+                              setDiscountValue(
+                                e.target.value
+                              )
+                            }
+                            className="w-20 h-7 border rounded px-2"
+                          />
+
+                          <button
+                            onClick={() =>
+                              handleDiscountConfirm(
+                                item.product.id
+                              )
+                            }
+                          >
+                            OK
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            handleDiscountStart(item)
+                          }
+                          className="text-xs text-blue-600 cursor-pointer"
+                        >
+                          Diskon:
+                          {formatRupiah(
+                            item.itemDiscount ?? 0
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => onQtyChange(item.product.id, -1)}
+                      className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-6 text-center font-semibold text-sm text-foreground tabular-nums">
+                      {item.qty}
+                    </span>
+                    <button
+                      onClick={() => onQtyChange(item.product.id, 1)}
+                      className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                    >
+                      <Plus size={14} />
+                    </button>
+                    <button
+                      onClick={() => onRemove(item.product.id)}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 transition-colors ml-1"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => onQtyChange(item.product.id, -1)}
-                  className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="w-6 text-center font-semibold text-sm text-foreground tabular-nums">
-                  {item.qty}
-                </span>
-                <button
-                  onClick={() => onQtyChange(item.product.id, 1)}
-                  className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
-                >
-                  <Plus size={14} />
-                </button>
-                <button
-                  onClick={() => onRemove(item.product.id)}
-                  className="w-7 h-7 rounded-md flex items-center justify-center text-destructive/70 hover:text-destructive hover:bg-destructive/10 transition-colors ml-1"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+            )
+          )
+        })}
       </div>
 
       {/* Footer */}

@@ -15,6 +15,8 @@ class PosItem extends Model
         'item_id',
         'item_name',
         'unit',
+        'discount',
+        'subtotal',
         
         'quantity',
         'base_price',

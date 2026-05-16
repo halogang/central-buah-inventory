@@ -12,7 +12,13 @@ interface PaymentModalProps {
   onPaymentMethodChange: (m: PaymentMethod) => void;
   paymentMethods: any[];
   onClose: () => void;
-  onSuccess: (cashReceived: number, change: number, charger: number, finalTotal: number) => void;
+  onSuccess: (
+    cashReceived: number,
+    change: number,
+    charger: number,
+    finalTotal: number,
+    globalDiscount: number
+  ) => void;
 }
 
 const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMethods, onClose, onSuccess }: PaymentModalProps) => {
@@ -21,6 +27,28 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
   const [purchaseType, setPurchaseType] = useState<"self-buying" | "delivery">("self-buying");
   const [charge, setCharge] = useState<number>(10000);
   const [chargeInput, setChargeInput] = useState("10.000");
+
+  const [globalDiscount,
+    setGlobalDiscount] =
+    useState(0);
+
+  const [tax,
+    setTax] =
+    useState(0);
+
+  const subtotal = cart.reduce((sum, item) => {
+    const line =
+      (item.customPrice ?? item.product.price)
+      * item.qty;
+
+    return sum + line - (item.itemDiscount ?? 0);
+  }, 0);
+
+  const finalTotal =
+    subtotal
+    - globalDiscount
+    + tax
+    + (purchaseType === "delivery" ? charge : 0);
 
   const handleChargeChange = (value: string) => {
     const raw = value.replace(/\D/g, "");
@@ -61,10 +89,6 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
     setCashInput(numberValue.toLocaleString("id-ID"));
   };
 
-  
-
-  const finalTotal = total + (purchaseType === "delivery" ? charge : 0);
-
   const quickAmounts = [
     finalTotal,
     Math.ceil(finalTotal / 10000) * 10000 + 10000,
@@ -97,21 +121,38 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
     }
 
     // 🔥 mapping cart → payload items
-    const items = cart.map((item) => ({
-      item_id: item.product.id,
-      item_name: item.product.name,
-      unit: item.product.unit ?? "pcs",
-      quantity: item.qty,
-      base_price: item.product.price,
-      price: item.customPrice ?? item.product.price,
-      total: (item.customPrice ?? item.product.price) * item.qty,
-    }));
+    const items = cart.map((item) => {
+      const price =
+        item.customPrice ?? item.product.price;
+
+      const subtotal =
+        price * item.qty;
+
+      const discount =
+        item.itemDiscount ?? 0;
+
+      return {
+        item_id: item.product.id,
+        item_name: item.product.name,
+        unit: item.product.unit ?? "pcs",
+        quantity: item.qty,
+        base_price: item.product.price,
+        price,
+        discount,
+        subtotal,
+        total: subtotal - discount,
+      };
+    });
 
     const payload = {
-      date: new Date().toISOString().slice(0, 10),
-      subtotal: total,
-      discount: 0,
-      tax: 0,
+      date: new Date()
+        .toISOString()
+        .slice(0, 10),
+
+      subtotal,
+      discount: globalDiscount,
+      tax,
+
       total: finalTotal,
 
       payment_method: paymentMethod,
@@ -119,15 +160,17 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
       change_amount: changeAmount,
 
       type: purchaseType,
-      charge: purchaseType === "delivery" ? charge : 0,
+      charge:
+        purchaseType === "delivery"
+          ? charge
+          : 0,
 
-      status: 1,
       items,
     };
 
     router.post(store(), payload, {
       onSuccess: () => {
-        onSuccess(paid, changeAmount, charge, finalTotal);
+        onSuccess(paid, changeAmount, charge, finalTotal, globalDiscount);
       },
       onError: (errors) => {
         console.error(errors);
@@ -150,17 +193,60 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
         <div className="px-6 py-4 space-y-4 overflow-y-auto">
           {/* Items */}
           <div className="bg-background rounded-xl p-4 space-y-2">
-            {cart.map((item) => (
-              <div key={item.product.id} className="flex items-center justify-between text-sm">
-                <span className="text-foreground">
-                  <Apple className="w-4 h-4 inline mr-1.5"/>
-                  {item.product.name} x{item.qty}
-                </span>
-                <span className="font-medium text-foreground tabular-nums">
-                  {formatRupiah((item.customPrice ?? item.product.price) * item.qty)}
-                </span>
-              </div>
-            ))}
+            {cart.map((item) => {
+              const price =
+                item.customPrice ??
+                item.product.price;
+
+              const itemSubtotal =
+                price * item.qty;
+
+              const itemDiscount =
+                item.itemDiscount ?? 0;
+
+              const itemTotal =
+                itemSubtotal - itemDiscount;
+
+              return (
+                <div
+                  key={item.product.id}
+                  className="space-y-1 text-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-foreground">
+                      <Apple className="w-4 h-4 inline mr-1.5" />
+                      {item.product.name} x{item.qty}
+                    </span>
+
+                    <span className="font-medium text-foreground tabular-nums">
+                      {formatRupiah(itemSubtotal)}
+                    </span>
+                  </div>
+
+                  {itemDiscount > 0 && (
+                    <div className="flex items-center justify-between pl-6 text-xs">
+                      <span className="text-destructive">
+                        Diskon Item
+                      </span>
+
+                      <span className="text-destructive tabular-nums">
+                        - {formatRupiah(itemDiscount)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pl-6 text-xs">
+                    <span className="text-muted-foreground">
+                      Subtotal
+                    </span>
+
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {formatRupiah(itemTotal)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
             {purchaseType === "delivery" && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-foreground">
@@ -169,6 +255,17 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
                 </span>
                 <span className="font-medium text-foreground tabular-nums">
                   {formatRupiah(charge)}
+                </span>
+              </div>
+            )}
+            {globalDiscount > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-destructive">
+                  Diskon Global
+                </span>
+
+                <span className="font-medium text-destructive tabular-nums">
+                  - {formatRupiah(globalDiscount)}
                 </span>
               </div>
             )}
@@ -238,6 +335,32 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
               </div>
             )}
           </div>
+
+          <div>
+            <FormInput
+              label="Diskon Global"
+              type="number"
+              value={globalDiscount}
+              onChange={(e)=>
+                setGlobalDiscount(
+                  Number(e.target.value)
+                )
+              }
+            />
+          </div>
+
+          {/* <div>
+            <FormInput
+              label="Pajak"
+              type="number"
+              value={tax}
+              onChange={(e)=>
+                setTax(
+                  Number(e.target.value)
+                )
+              }
+            />
+          </div> */}
 
           {/* Cash input */}
           {paymentMethod === "Tunai" && (
@@ -316,7 +439,7 @@ export const SuccessModal = ({ total, cashReceived, change, paymentMethod, onNew
           </div>
           <h2 className="text-xl font-bold text-foreground">Pembayaran Berhasil!</h2>
 
-          <div className="bg-background rounded-xl p-4 space-y-2 text-sm text-left">
+          <div className="bg-background rounded-xl p-4 space-y-2 text-sm text-left">  
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Belanja</span>
               <span className="font-semibold text-foreground tabular-nums">{formatRupiah(total)}</span>

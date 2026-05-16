@@ -5,6 +5,8 @@ export interface PosItem {
     unit: string;
     quantity: number;
     base_price: number;
+    discount: number;
+    subtotal: number;
     price: number;
     total: number;
 }

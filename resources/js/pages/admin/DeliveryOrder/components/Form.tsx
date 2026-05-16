@@ -224,7 +224,6 @@ export default function Form({
     const submitForm = (e: React.FormEvent) => {
 
         e.preventDefault()
-        console.log(form) // cek ini
 
         const payload = new FormData();
 
@@ -300,7 +299,6 @@ export default function Form({
 
     }
 
-    console.log(data) // cek ini
 
     return (
 
