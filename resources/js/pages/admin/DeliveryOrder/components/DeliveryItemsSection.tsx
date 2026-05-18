@@ -288,7 +288,7 @@ export default function DeliveryItemsSection({
                                         <span className="text-sm font-medium">{item.name}</span>
                                         <div className="flex gap-2 items-center text-xs text-muted-foreground">
                                             <span>
-                                                {item.stock + " " + item.unit?.unit_code}
+                                                {formatDecimal(item.stock) + " " + item.unit?.unit_code}
                                             </span>
                                             <Dot className="-mx-2" />
                                             <span className="text-orange-500">
