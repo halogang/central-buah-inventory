@@ -292,7 +292,7 @@
             
             @if($invoice->signature)
             <img 
-                src="{{ public_path($signaturePath) }}" 
+                src="{{ public_path($invoice->signature) }}" 
                 alt="Signature"
                 style="height: 50px; margin-bottom: 10px; object-fit: contain;"
             >
