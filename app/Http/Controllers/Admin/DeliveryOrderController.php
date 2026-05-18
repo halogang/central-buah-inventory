@@ -172,7 +172,7 @@ class DeliveryOrderController extends Controller
         HandleDeliveryEvidence $evidenceAction,
     ) {
         $validated = $this->validateRequest($request);
-
+            $validated['loading_cost'] = $validated['loading_cost'] ?? 0;
         $deliveryOrder = DB::transaction(function () use (
             &$validated,
             $request,
@@ -352,6 +352,8 @@ class DeliveryOrderController extends Controller
             /**
              * 🔥 5. UPDATE DELIVERY ORDER
              */
+            $validated['loading_cost'] = $validated['loading_cost'] ?? 0;
+
             $deliveryOrder->update([
                 ...$validated,
                 'evidence' => $validated['evidence'] ?? $deliveryOrder->evidence,
@@ -452,6 +454,8 @@ class DeliveryOrderController extends Controller
 
     private function createInvoice($deliveryOrder)
     {
+        $owner = User::role('Owner')->first();
+
         $invoice = Invoice::firstOrCreate(
             [
                 'delivery_order_id' => $deliveryOrder->id
@@ -463,7 +467,9 @@ class DeliveryOrderController extends Controller
                 'customer_id' => $deliveryOrder->customer_id,
                 'supplier_id' => $deliveryOrder->supplier_id,
 
-                'type' => $deliveryOrder->type
+                'type' => $deliveryOrder->type,
+                'signer_name' => $owner?->name,
+                'signature' => $owner?->signature,
             ]
         );
 
@@ -498,7 +504,9 @@ class DeliveryOrderController extends Controller
         $invoice->update([
             'loading_cost' => $loadingCost,
             'total' => $grandTotal,
-            'remaining' => $grandTotal
+            'remaining' => $grandTotal,
+            'signer_name' => $owner?->name,
+            'signature' => $owner?->signature,
         ]);
     }
 
