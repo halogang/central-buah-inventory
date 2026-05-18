@@ -1,4 +1,4 @@
-import {formatCurrency} from "@/helpers/format";
+import {formatCurrency, formatDecimal} from "@/helpers/format";
 import {Printer, X} from "lucide-react";
 import type { PosData } from "@/types/pos";
 
@@ -16,21 +16,27 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
         const itemsHtml = pos.pos_items
             .map((item) => {
                 const linePrice =
-                item.price * item.quantity;
+                    item.price * item.quantity;
 
                 const itemDiscount =
-                item.discount ?? 0;
+                    item.discount ?? 0;
+
+                const finalPrice =
+                    Math.max(
+                        item.price - itemDiscount,
+                        0
+                    );
 
                 const finalLine =
-                linePrice - itemDiscount;
+                    finalPrice * item.quantity;
 
                 return `
                 <div class="item">
                     <div>
-                    ${item.item_name} x${item.quantity}
+                        ${item.item_name} x${formatDecimal(item.quantity)}
                     </div>
                     <div>
-                    ${formatCurrency(linePrice)}
+                        ${formatCurrency(linePrice)}
                     </div>
                 </div>
 
