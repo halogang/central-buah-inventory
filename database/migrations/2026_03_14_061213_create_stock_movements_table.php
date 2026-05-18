@@ -30,14 +30,14 @@ return new class extends Migration
             ]);
 
             // perubahan stok
-            $table->integer('quantity');
+            $table->decimal('quantity', 15, 2);
 
             // stok sebelum dan sesudah
-            $table->integer('stock_before');
-            $table->integer('stock_after');
+            $table->decimal('stock_before', 15, 2);
+            $table->decimal('stock_after', 15, 2);
 
             // bad stock movement
-            $table->integer('bad_stock')->default(0);
+            $table->decimal('bad_stock', 15, 2)->default(0);
 
             $table->text('note')->nullable();
 
