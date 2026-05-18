@@ -1,1 +1,0 @@
-import{c as t,j as s}from"./app-Bt_rMt5F.js";function r(){const e=t.c(1);let o;return e[0]===Symbol.for("react.memo_cache_sentinel")?(o=s.jsx("img",{src:"/logo.webp",alt:"Logo",className:""}),e[0]=o):o=e[0],o}export{r as A};

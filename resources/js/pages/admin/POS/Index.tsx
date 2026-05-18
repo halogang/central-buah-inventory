@@ -35,7 +35,13 @@ const breadcrumbs: BreadcrumbItem[] = [
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("Tunai");
   const [showPayment, setShowPayment] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [lastTransaction, setLastTransaction] = useState({ total: 0, cashReceived: 0, change: 0, charge: 0, globalDiscount: 0 });
+  const [lastTransaction, setLastTransaction] =
+    useState({
+      total: 0,
+      cashReceived: 0,
+      change: 0,
+      charge: 0,
+    });
   const [showCartMobile, setShowCartMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<"pos" | "riwayat">("pos");
 
@@ -105,6 +111,22 @@ const breadcrumbs: BreadcrumbItem[] = [
     );
   }, []);
 
+  const handleQtyInputChange = (
+    productId: string,
+    qty: number
+  ) => {
+    setCart((prev) =>
+      prev.map((item) =>
+        item.product.id === productId
+          ? {
+              ...item,
+              qty,
+            }
+          : item
+      )
+    );
+  };
+
   const removeFromCart = useCallback((productId: string) => {
     setCart((prev) => prev.filter((item) => item.product.id !== productId));
   }, []);
@@ -122,14 +144,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     change: number,
     charge: number,
     finalTotal: number,
-    globalDiscount: number
   ) => {
     setLastTransaction({
       total: finalTotal,
       cashReceived,
       change,
       charge,
-      globalDiscount,
     });
 
     setShowPayment(false);
@@ -170,8 +190,14 @@ const breadcrumbs: BreadcrumbItem[] = [
         const itemDiscount =
           item.itemDiscount ?? 0;
 
+        const finalPrice =
+          Math.max(
+            price - itemDiscount,
+            0
+          );
+
         const finalLine =
-          linePrice - itemDiscount;
+          finalPrice * item.qty;
 
         return `
           <div class="item">
@@ -208,24 +234,29 @@ const breadcrumbs: BreadcrumbItem[] = [
           item.customPrice ??
           item.product.price;
 
+        const discountPerQty =
+          item.itemDiscount ?? 0;
+
+        const finalPrice =
+          Math.max(
+            price - discountPerQty,
+            0
+          );
+
         return (
           sum +
-          price * item.qty -
-          (item.itemDiscount ?? 0)
+          finalPrice * item.qty
         );
       },
       0
     );
 
-    const globalDiscount =
-      lastTransaction.globalDiscount ?? 0;
 
     const charge =
       lastTransaction.charge ?? 0;
 
     const total =
-      subtotal -
-      globalDiscount +
+      subtotal +
       charge;
 
     receiptWindow.document.write(`
@@ -334,13 +365,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                 <div class="divider"></div>
 
-                ${globalDiscount > 0 ? `
-                <div class="item">
-                    <div>Diskon Global</div>
-                    <div>- ${formatCurrency(globalDiscount)}</div>
-                </div>
-                ` : ""}
-
                 ${charge > 0 ? `
                 <div class="item">
                     <div>Biaya Antar</div>
@@ -434,6 +458,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                     onItemDiscount={
                         handleItemDiscount
                     }
+                    onQtyInputChange={
+                      handleQtyInputChange
+                    }
                     onPay={() => setShowPayment(true)}
                   />
                 </div>
@@ -464,6 +491,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                         onQtyChange={changeQty}
                         onRemove={removeFromCart}
                         onCustomPrice={setCustomPrice}
+                        onQtyInputChange={handleQtyInputChange}
                         onItemDiscount={
                             handleItemDiscount
                         }

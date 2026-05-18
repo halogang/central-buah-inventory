@@ -15,12 +15,31 @@ export default function PosEditModal({
     onSuccess?: () => void;
 }) {
     const [items, setItems] = useState<PosItem[]>(
-        data.pos_items.map((item) => ({
-            ...item,
-            quantity: Number(item.quantity),
-            price: Number(item.price),
-            total: Number(item.total),
-        }))
+        data.pos_items.map((item) => {
+            const quantity =
+                Number(item.quantity);
+
+            const price =
+                Number(item.price);
+
+            const discount =
+                Number(item.discount ?? 0);
+
+            const finalPrice =
+                Math.max(
+                    price - discount,
+                    0
+                );
+
+            return {
+                ...item,
+                quantity,
+                price,
+                discount,
+                total:
+                    finalPrice * quantity,
+            };
+        })
     );
     const [paymentMethod, setPaymentMethod] = useState(data.payment_method);
     const [type, setType] = useState(data.type);
@@ -38,36 +57,38 @@ export default function PosEditModal({
     );
     const [error, setError] = useState("");
 
-    const [globalDiscount, setGlobalDiscount] = useState(
-        data.discount ?? 0
-    );
-
     const [tax, setTax] = useState(
         data.tax ?? 0
     );
 
     const subtotal = useMemo(
         () =>
-            items.reduce(
-            (sum, item) =>
-                sum +
-                ((item.price * item.quantity) -
-                (item.discount ?? 0)),
-            0
-            ),
+            items.reduce((sum, item) => {
+                const discountPerQty =
+                    item.discount ?? 0;
+
+                const finalPrice =
+                    Math.max(
+                        item.price - discountPerQty,
+                        0
+                    );
+
+                return (
+                    sum +
+                    finalPrice * item.quantity
+                );
+            }, 0),
         [items]
     );
 
     const total = useMemo(
         () =>
-            subtotal
-            - globalDiscount
-            + tax
-            + (type === "delivery" ? charge : 0),
+            subtotal +
+            (type === "delivery"
+                ? charge
+                : 0),
         [
             subtotal,
-            globalDiscount,
-            tax,
             charge,
             type
         ]
@@ -112,11 +133,19 @@ export default function PosEditModal({
             prev.map((item) => {
                 if (item.id !== id) return item;
                 const updated = { ...item, ...changes };
+                const discountPerQty =
+                    Number(updated.discount ?? 0);
+
+                const finalPrice =
+                    Math.max(
+                        Number(updated.price) -
+                        discountPerQty,
+                        0
+                    );
+
                 updated.total =
                     Number(updated.quantity) *
-                    Number(updated.price)
-                    -
-                    Number(updated.discount ?? 0);
+                    finalPrice;
                 return updated;
             })
         );
@@ -140,7 +169,6 @@ export default function PosEditModal({
         const payload = {
             date: data.created_at.slice(0, 10),
             subtotal,
-            discount: globalDiscount,
             tax: tax,
             total,
             payment_method: paymentMethod,
@@ -148,21 +176,34 @@ export default function PosEditModal({
             change_amount: paymentMethod === "Tunai" ? changeAmount : 0,
             type,
             charge: charge || 0,
-            items: items.map((item) => ({
-                item_id: item.item_id,
-                item_name: item.item_name,
-                unit: item.unit,
-                quantity: item.quantity,
-                base_price: item.base_price,
-                price: item.price,
-                discount: item.discount ?? 0,
-                subtotal:
-                    (item.price * item.quantity)
-                    - (item.discount ?? 0),
-                total:
-                    (item.price * item.quantity)
-                    - (item.discount ?? 0),
-            })),
+            items: items.map((item) => {
+                const discountPerQty =
+                    item.discount ?? 0;
+
+                const finalPrice =
+                    Math.max(
+                        item.price - discountPerQty,
+                        0
+                    );
+
+                const subtotal =
+                    item.price * item.quantity;
+
+                const total =
+                    finalPrice * item.quantity;
+
+                return {
+                    item_id: item.item_id,
+                    item_name: item.item_name,
+                    unit: item.unit,
+                    quantity: item.quantity,
+                    base_price: item.base_price,
+                    price: item.price,
+                    discount: discountPerQty,
+                    subtotal,
+                    total,
+                };
+            }),
         };
 
         router.put(update(data.id), payload, {
@@ -229,22 +270,6 @@ export default function PosEditModal({
                                     className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
                                 />
                             </div>
-                            <div>
-                                <label className="text-xs font-semibold uppercase text-muted-foreground">
-                                Diskon Global
-                                </label>
-                                <input
-                                type="number"
-                                min={0}
-                                value={globalDiscount}
-                                onChange={(e)=>
-                                    setGlobalDiscount(
-                                    Number(e.target.value)
-                                    )
-                                }
-                                className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
-                                />
-                            </div>
 
                             {/* <div>
                                 <label className="text-xs font-semibold uppercase text-muted-foreground">
@@ -296,7 +321,8 @@ export default function PosEditModal({
                                         <input
                                             type="number"
                                             value={item.quantity}
-                                            min={1}
+                                            step="1"
+                                            min="0"
                                             onChange={(e) => updateItem(item.id, { quantity: Number(e.target.value) })}
                                             className="mt-1 w-full rounded-xl border border-border bg-background px-2 py-2 text-sm"
                                         />
@@ -313,7 +339,7 @@ export default function PosEditModal({
                                     </div>
                                     <div>
                                         <label className="text-[10px] uppercase text-muted-foreground">
-                                            Diskon
+                                            Diskon / Qty
                                         </label>
                                         <input
                                             type="number"
@@ -350,13 +376,6 @@ export default function PosEditModal({
                             <span>Subtotal</span>
                             <span>{formatCurrency(subtotal)}</span>
                         </div>
-
-                        {globalDiscount > 0 && (
-                            <div className="flex justify-between text-red-500">
-                            <span>Diskon Global</span>
-                            <span>- {formatCurrency(globalDiscount)}</span>
-                            </div>
-                        )}
 
                         {tax > 0 && (
                             <div className="flex justify-between">

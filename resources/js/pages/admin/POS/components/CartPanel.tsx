@@ -9,10 +9,26 @@ interface CartPanelProps {
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (m: PaymentMethod) => void;
   paymentMethods: any[];
-  onQtyChange: (productId: string, delta: number) => void;
+
+  onQtyChange: (
+    productId: string,
+    delta: number
+  ) => void;
+
+  onQtyInputChange: (
+    productId: string,
+    qty: number
+  ) => void;
+
   onRemove: (productId: string) => void;
-  onCustomPrice: (productId: string, price: number) => void;
+
+  onCustomPrice: (
+    productId: string,
+    price: number
+  ) => void;
+
   onPay: () => void;
+
   onItemDiscount: (
     productId: string,
     discount: number
@@ -25,6 +41,7 @@ const CartPanel = ({
   onPaymentMethodChange,
   paymentMethods,
   onQtyChange,
+  onQtyInputChange,
   onRemove,
   onCustomPrice,
   onItemDiscount,
@@ -34,15 +51,22 @@ const CartPanel = ({
 
   const subtotal = cart.reduce(
     (sum, item) => {
-      const line =
-        (item.customPrice ??
-          item.product.price)
-        * item.qty;
+      const price =
+        item.customPrice ??
+        item.product.price;
+
+      const discountPerQty =
+        item.itemDiscount ?? 0;
+
+      const finalPrice =
+        Math.max(
+          price - discountPerQty,
+          0
+        );
 
       return (
         sum +
-        line -
-        (item.itemDiscount ?? 0)
+        finalPrice * item.qty
       );
     },
     0
@@ -105,9 +129,17 @@ const CartPanel = ({
           const price =
             item.customPrice ?? item.product.price;
 
+          const discountPerQty =
+            item.itemDiscount ?? 0;
+
+          const finalPrice =
+            Math.max(
+              price - discountPerQty,
+              0
+            );
+
           const lineTotal =
-            price * item.qty -
-            (item.itemDiscount ?? 0);
+            finalPrice * item.qty;
 
           return (
             (
@@ -181,9 +213,23 @@ const CartPanel = ({
                     >
                       <Minus size={14} />
                     </button>
-                    <span className="w-6 text-center font-semibold text-sm text-foreground tabular-nums">
-                      {item.qty}
-                    </span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      value={item.qty}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+
+                        if (!isNaN(val) && val > 0) {
+                          onQtyInputChange(
+                            item.product.id,
+                            val
+                          );
+                        }
+                      }}
+                      className="w-16 h-7 border rounded-md text-center text-sm"
+                    />
                     <button
                       onClick={() => onQtyChange(item.product.id, 1)}
                       className="w-7 h-7 rounded-md border border-border flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"

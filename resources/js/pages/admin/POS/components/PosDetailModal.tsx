@@ -159,17 +159,6 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                     <div class="divider"></div>
 
                     ${
-                    Number(pos.discount) > 0
-                        ? `
-                        <div class="item">
-                        <div>Diskon Global</div>
-                        <div>- ${formatCurrency(pos.discount)}</div>
-                        </div>
-                    `
-                        : ""
-                    }
-
-                    ${
                     Number(pos.tax) > 0
                         ? `
                         <div class="item">
@@ -349,13 +338,6 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                         <span>Subtotal</span>
                         <span>{formatCurrency(data.subtotal)}</span>
                     </div>
-
-                    {Number(data.discount) > 0 && (
-                        <div className="flex justify-between text-red-500">
-                        <span>Diskon Global</span>
-                        <span>- {formatCurrency(data.discount)}</span>
-                        </div>
-                    )}
 
                     {Number(data.tax) > 0 && (
                         <div className="flex justify-between">

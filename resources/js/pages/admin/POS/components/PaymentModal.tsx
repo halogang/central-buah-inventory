@@ -17,7 +17,6 @@ interface PaymentModalProps {
     change: number,
     charger: number,
     finalTotal: number,
-    globalDiscount: number
   ) => void;
 }
 
@@ -28,27 +27,39 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
   const [charge, setCharge] = useState<number>(10000);
   const [chargeInput, setChargeInput] = useState("10.000");
 
-  const [globalDiscount,
-    setGlobalDiscount] =
-    useState(0);
-
   const [tax,
     setTax] =
     useState(0);
 
-  const subtotal = cart.reduce((sum, item) => {
-    const line =
-      (item.customPrice ?? item.product.price)
-      * item.qty;
+  const subtotal = cart.reduce(
+    (sum, item) => {
+      const price =
+        item.customPrice ??
+        item.product.price;
 
-    return sum + line - (item.itemDiscount ?? 0);
-  }, 0);
+      const discountPerQty =
+        item.itemDiscount ?? 0;
+
+      const finalPrice =
+        Math.max(
+          price - discountPerQty,
+          0
+        );
+
+      return (
+        sum +
+        finalPrice * item.qty
+      );
+    },
+    0
+  );
 
   const finalTotal =
-    subtotal
-    - globalDiscount
-    + tax
-    + (purchaseType === "delivery" ? charge : 0);
+    subtotal +
+    tax +
+    (purchaseType === "delivery"
+      ? charge
+      : 0);
 
   const handleChargeChange = (value: string) => {
     const raw = value.replace(/\D/g, "");
@@ -125,22 +136,36 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
       const price =
         item.customPrice ?? item.product.price;
 
+      const discountPerQty =
+        item.itemDiscount ?? 0;
+
+      const finalPrice =
+        Math.max(
+          price - discountPerQty,
+          0
+        );
+
       const subtotal =
         price * item.qty;
 
-      const discount =
-        item.itemDiscount ?? 0;
+      const total =
+        finalPrice * item.qty;
 
       return {
         item_id: item.product.id,
         item_name: item.product.name,
         unit: item.product.unit ?? "pcs",
         quantity: item.qty,
+
         base_price: item.product.price,
+
         price,
-        discount,
+
+        discount: discountPerQty,
+
         subtotal,
-        total: subtotal - discount,
+
+        total,
       };
     });
 
@@ -150,7 +175,6 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
         .slice(0, 10),
 
       subtotal,
-      discount: globalDiscount,
       tax,
 
       total: finalTotal,
@@ -170,7 +194,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
 
     router.post(store(), payload, {
       onSuccess: () => {
-        onSuccess(paid, changeAmount, charge, finalTotal, globalDiscount);
+        onSuccess(paid, changeAmount, charge, finalTotal);
       },
       onError: (errors) => {
         console.error(errors);
@@ -198,14 +222,20 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
                 item.customPrice ??
                 item.product.price;
 
-              const itemSubtotal =
-                price * item.qty;
-
               const itemDiscount =
                 item.itemDiscount ?? 0;
 
+              const finalPrice =
+                Math.max(
+                  price - itemDiscount,
+                  0
+                );
+
+              const itemSubtotal =
+                price * item.qty;
+
               const itemTotal =
-                itemSubtotal - itemDiscount;
+                finalPrice * item.qty;
 
               return (
                 <div
@@ -226,7 +256,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
                   {itemDiscount > 0 && (
                     <div className="flex items-center justify-between pl-6 text-xs">
                       <span className="text-destructive">
-                        Diskon Item
+                        Diskon per Qty
                       </span>
 
                       <span className="text-destructive tabular-nums">
@@ -255,17 +285,6 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
                 </span>
                 <span className="font-medium text-foreground tabular-nums">
                   {formatRupiah(charge)}
-                </span>
-              </div>
-            )}
-            {globalDiscount > 0 && (
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-destructive">
-                  Diskon Global
-                </span>
-
-                <span className="font-medium text-destructive tabular-nums">
-                  - {formatRupiah(globalDiscount)}
                 </span>
               </div>
             )}
@@ -334,19 +353,6 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
                 </div>
               </div>
             )}
-          </div>
-
-          <div>
-            <FormInput
-              label="Diskon Global"
-              type="number"
-              value={globalDiscount}
-              onChange={(e)=>
-                setGlobalDiscount(
-                  Number(e.target.value)
-                )
-              }
-            />
           </div>
 
           {/* <div>

@@ -1,9 +1,8 @@
 import { CircleCheck, CreditCard, Image, PenBox, Printer, Trash2, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { formatCurrency } from "@/helpers/format"
+import { formatCurrency, formatDecimal } from "@/helpers/format"
 import { useCan } from "@/utils/permissions"
-import { router } from "@inertiajs/react"
 import { notify } from "@/lib/notify"
 
 
@@ -27,19 +26,6 @@ export default function Show({
         setOpenPayment()
     }
 
-    // const handleDeletePayment = (payment: any) => {
-    //     if (!confirm("Yakin ingin menghapus pembayaran ini?")) return
-
-    //     router.delete(route('payments.destroy', payment.id), {
-    //         onSuccess: (page) => {
-    //             const updatedInvoice = page.props.invoice
-    //             if (updatedInvoice) {
-    //                 setInvoice(updatedInvoice)
-    //             }
-    //         }
-    //     })
-    // }
-
     const confirmDelete = (payment: any) => {
         notify.confirmDelete({
             message: `Hapus pembayaran ini?`,
@@ -52,20 +38,6 @@ export default function Show({
             },
         })
     }
-    // const performDelete = (payment: any) => {
-    //     const loading = notify.loading("Menghapus pembayaran...")
-
-    //     router.delete(destroy(payment.id), {
-    //         onSuccess: () => {
-    //             notify.dismiss(loading)
-    //             notify.success(`Pembayaran berhasil dihapus`)
-    //         },
-    //         onError: () => {
-    //             notify.dismiss(loading)
-    //             notify.error(`Gagal menghapus pembayaran`)
-    //         },
-    //     })
-    // }
 
     return (
         <>
@@ -159,7 +131,8 @@ export default function Show({
 
                                         <th className="p-3">Barang</th>
                                         <th className="p-3 text-center">Qty</th>
-                                        <th className="p-3 text-right">Total Item</th>
+                                        <th className="p-3 text-center">Harga Satuan</th>
+                                        <th className="p-3 text-right">Total Harga</th>
 
                                     </tr>
 
@@ -185,7 +158,7 @@ export default function Show({
                                                         </span>
 
                                                         <span className="text-xs text-muted-foreground">
-                                                            Qty: {item.quantity}
+                                                            Qty: {formatDecimal(item.quantity)}
                                                         </span>
 
                                                     </div>
@@ -193,7 +166,11 @@ export default function Show({
                                                 </td>
 
                                                 <td className="p-3 text-center">
-                                                    {item.quantity}
+                                                    {formatDecimal(item.quantity)}
+                                                </td>
+                                                
+                                                <td className="p-3 text-center">
+                                                    {formatCurrency(item.price)}
                                                 </td>
 
                                                 <td className="p-3 text-right font-semibold text-primary">
