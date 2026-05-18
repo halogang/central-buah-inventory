@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { router, usePage } from "@inertiajs/react";
 import axios from "axios";
 import { notify } from "@/lib/notify";
+import { formatDecimal } from "@/helpers/format";
 
 interface Warehouse {
   id: number;
@@ -183,7 +184,7 @@ export default function MoveStockModal({ warehouses, onClose }: MoveStockModalPr
               <SelectContent>
                 {sourceItems.map((item) => (
                   <SelectItem key={item.id} value={item.id.toString()}>
-                    {item.name} (Stock: {item.stock})
+                    {item.name} (Stock: {formatDecimal(item.stock)})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -242,7 +243,7 @@ export default function MoveStockModal({ warehouses, onClose }: MoveStockModalPr
                   <SelectContent>
                     {searchResults.map((item) => (
                       <SelectItem key={item.id} value={item.id.toString()}>
-                        {item.name} (Stock: {item.stock})
+                        {item.name} (Stock: {formatDecimal(item.stock)})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -276,7 +277,7 @@ export default function MoveStockModal({ warehouses, onClose }: MoveStockModalPr
             />
             {selectedSourceItem && (
               <p className="text-xs text-gray-500 mt-1">
-                Available: {selectedSourceItem.stock}
+                Available: {formatDecimal(selectedSourceItem.stock)}
               </p>
             )}
           </div>

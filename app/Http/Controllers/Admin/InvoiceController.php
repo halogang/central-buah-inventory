@@ -78,6 +78,22 @@ class InvoiceController extends Controller
         ]);
     }
 
+    /**
+     * Construct absolute filesystem path for DOMPDF image rendering
+     * 
+     * DOMPDF requires actual filesystem paths, not URLs.
+     * This points to the production public_html directory where
+     * uploaded signature and evidence files are stored.
+     */
+    private function getAbsolutePath($relativePath)
+    {
+        if (!$relativePath) {
+            return null;
+        }
+
+        return '/home/cenh8485/public_html' . $relativePath;
+    }
+
     public function print(Invoice $invoice)
     {
 
@@ -92,7 +108,8 @@ class InvoiceController extends Controller
 
         $pdf = Pdf::loadView('pdf.invoice', [
             'invoice' => $invoice,
-            'websiteInfo' => $websiteInfo
+            'websiteInfo' => $websiteInfo,
+            'signaturePath' => $this->getAbsolutePath($invoice->signature),
         ])->setPaper('A4', 'portrait');
 
         $fileName = str_replace('/', '-', $invoice->invoice_number);
