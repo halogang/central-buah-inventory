@@ -15,8 +15,9 @@ interface PaymentModalProps {
   onSuccess: (
     cashReceived: number,
     change: number,
-    charger: number,
+    charge: number,
     finalTotal: number,
+    globalDiscount: number
   ) => void;
 }
 
@@ -26,6 +27,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
   const [purchaseType, setPurchaseType] = useState<"self-buying" | "delivery">("self-buying");
   const [charge, setCharge] = useState<number>(10000);
   const [chargeInput, setChargeInput] = useState("10.000");
+  const [globalDiscount, setGlobalDiscount] = useState(0);
 
   const [tax,
     setTax] =
@@ -59,7 +61,8 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
     tax +
     (purchaseType === "delivery"
       ? charge
-      : 0);
+      : 0) -
+    globalDiscount;
 
   const handleChargeChange = (value: string) => {
     const raw = value.replace(/\D/g, "");
@@ -161,7 +164,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
 
         price,
 
-        discount: discountPerQty,
+        discount: item.itemDiscount ?? 0,
 
         subtotal,
 
@@ -175,6 +178,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
         .slice(0, 10),
 
       subtotal,
+      discount: globalDiscount,
       tax,
 
       total: finalTotal,
@@ -194,7 +198,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
 
     router.post(store(), payload, {
       onSuccess: () => {
-        onSuccess(paid, changeAmount, charge, finalTotal);
+        onSuccess(paid, changeAmount, charge, finalTotal, globalDiscount);
       },
       onError: (errors) => {
         console.error(errors);
@@ -288,6 +292,17 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
                 </span>
               </div>
             )}
+            {globalDiscount > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-destructive">
+                  Diskon Global
+                </span>
+
+                <span className="font-medium text-destructive tabular-nums">
+                  - {formatRupiah(globalDiscount)}
+                </span>
+              </div>
+            )}
             <div className="border-t border-border pt-2 flex items-center justify-between">
               <span className="font-bold text-foreground">TOTAL</span>
               <span className="font-bold text-lg pos-price-text tabular-nums">{formatRupiah(finalTotal)}</span>
@@ -355,18 +370,18 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
             )}
           </div>
 
-          {/* <div>
+          <div>
             <FormInput
-              label="Pajak"
+              label="Diskon Global"
               type="number"
-              value={tax}
+              value={globalDiscount}
               onChange={(e)=>
-                setTax(
+                setGlobalDiscount(
                   Number(e.target.value)
                 )
               }
             />
-          </div> */}
+          </div>
 
           {/* Cash input */}
           {paymentMethod === "Tunai" && (

@@ -25,7 +25,7 @@ export default function DeliveryItemsSection({
 }: any) {
     const [errors, setErrors] = useState({});
 
-    const handleNumberInput = (index, field, value, max) => {
+    const handleNumberInput = (index: number, field: string, value: string, max?: number) => {
 
         const num = Number(value);
 

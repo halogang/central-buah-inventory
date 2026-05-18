@@ -115,7 +115,7 @@ const CartPanel = ({
           <ShoppingCart size={18} className="text-foreground" />
           <span className="font-bold text-foreground">Keranjang</span>
         </div>
-        <span className="text-sm pos-price-text font-semibold">{totalItems} item</span>
+        <span className="text-sm pos-price-text font-semibold">{totalItems} kg</span>
       </div>
 
       {/* Cart items */}
@@ -217,6 +217,7 @@ const CartPanel = ({
                       type="number"
                       step="0.01"
                       min="0.01"
+                      max={item.product.stock}
                       value={item.qty}
                       onChange={(e) => {
                         const val = parseFloat(e.target.value);

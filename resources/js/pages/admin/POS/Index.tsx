@@ -41,6 +41,7 @@ const breadcrumbs: BreadcrumbItem[] = [
       cashReceived: 0,
       change: 0,
       charge: 0,
+      globalDiscount: 0,
     });
   const [showCartMobile, setShowCartMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<"pos" | "riwayat">("pos");
@@ -144,12 +145,14 @@ const breadcrumbs: BreadcrumbItem[] = [
     change: number,
     charge: number,
     finalTotal: number,
+    globalDiscount: number
   ) => {
     setLastTransaction({
       total: finalTotal,
       cashReceived,
       change,
       charge,
+      globalDiscount,
     });
 
     setShowPayment(false);
@@ -251,13 +254,17 @@ const breadcrumbs: BreadcrumbItem[] = [
       0
     );
 
+    const globalDiscount =
+      lastTransaction.globalDiscount ?? 0;
+
 
     const charge =
       lastTransaction.charge ?? 0;
 
     const total =
       subtotal +
-      charge;
+      charge -
+      globalDiscount;
 
     receiptWindow.document.write(`
       <html>
@@ -364,6 +371,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                 ${itemsHtml}
 
                 <div class="divider"></div>
+
+                ${globalDiscount > 0 ? `
+                <div class="item">
+                    <div>Diskon Global</div>
+                    <div>- ${formatCurrency(globalDiscount)}</div>
+                </div>
+                ` : ""}
 
                 ${charge > 0 ? `
                 <div class="item">

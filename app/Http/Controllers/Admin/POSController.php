@@ -109,8 +109,11 @@ class POSController extends Controller
             $tax = $validated['tax'] ?? 0;
             $charge = $validated['charge'] ?? 0;
 
+            $discount = $validated['discount'] ?? 0;
+
             $grandTotal =
                 $subtotal
+                - $discount
                 + $tax
                 + $charge;
 
@@ -127,7 +130,7 @@ class POSController extends Controller
 
                 'subtotal' => $subtotal,
 
-                'discount' => 0,
+                'discount' => $validated['discount'] ?? 0,
 
                 'tax' => $tax,
 
@@ -343,8 +346,11 @@ class POSController extends Controller
             $charge =
                 $validated['charge'] ?? 0;
 
+            $discount = $validated['discount'] ?? 0;
+
             $grandTotal =
                 $subtotal
+                - $discount
                 + $tax
                 + $charge;
 
@@ -357,7 +363,7 @@ class POSController extends Controller
 
                 'subtotal' => $subtotal,
 
-                'discount' => 0,
+                'discount' => $validated['discount'] ?? 0,
 
                 'tax' => $tax,
 

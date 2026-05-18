@@ -57,6 +57,10 @@ export default function PosEditModal({
     );
     const [error, setError] = useState("");
 
+    const [globalDiscount, setGlobalDiscount] = useState(
+        data.discount ?? 0
+    );
+
     const [tax, setTax] = useState(
         data.tax ?? 0
     );
@@ -86,11 +90,14 @@ export default function PosEditModal({
             Number(subtotal) +
             (type === "delivery"
                 ? Number(charge)
-                : 0),
+                : 0)
+            + Number(tax) - Number(globalDiscount),
         [
             subtotal,
             charge,
-            type
+            type,
+            tax,
+            globalDiscount
         ]
     );
     const changeAmount = useMemo(() => {
@@ -169,6 +176,7 @@ export default function PosEditModal({
         const payload = {
             date: data.created_at.slice(0, 10),
             subtotal,
+            discount: globalDiscount,
             tax: tax,
             total,
             payment_method: paymentMethod,
@@ -268,6 +276,23 @@ export default function PosEditModal({
                                     onChange={(e) => handleChargeChange(e.target.value)}
                                     placeholder="0"
                                     className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-semibold uppercase text-muted-foreground">
+                                Diskon Global
+                                </label>
+                                <input
+                                type="number"
+                                min={0}
+                                value={globalDiscount}
+                                onChange={(e)=>
+                                    setGlobalDiscount(
+                                    Number(e.target.value)
+                                    )
+                                }
+                                className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
                                 />
                             </div>
 
@@ -376,6 +401,13 @@ export default function PosEditModal({
                             <span>Subtotal</span>
                             <span>{formatCurrency(subtotal)}</span>
                         </div>
+
+                        {globalDiscount > 0 && (
+                            <div className="flex justify-between text-red-500">
+                            <span>Diskon Global</span>
+                            <span>- {formatCurrency(globalDiscount)}</span>
+                            </div>
+                        )}
 
                         {tax > 0 && (
                             <div className="flex justify-between">
