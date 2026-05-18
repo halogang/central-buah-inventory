@@ -320,14 +320,10 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                                     .map((item) => (
                                         <tr key={item.id} className="border-t">
                                             <td className="p-2">{item.item_name}</td>
-                                            <td className="p-2 text-center">{item.quantity}
+                                            <td className="p-2 text-center">{formatDecimal(item.quantity)}
                                                 {item.unit}</td>
                                             <td className="p-2 text-right">
-                                                Rp {
-                                                    item
-                                                        .price
-                                                        .toLocaleString("id-ID")
-                                                }
+                                                {formatCurrency(item.price)}
                                             </td>
                                             <td className="p-2 text-right text-red-500">
                                                 {formatCurrency(
@@ -335,11 +331,7 @@ export default function PosDetailModal({data, onClose, onEdit, onDelete} : {
                                                 )}
                                             </td>
                                             <td className="p-2 text-right">
-                                                Rp {
-                                                    item
-                                                        .total
-                                                        .toLocaleString("id-ID")
-                                                }
+                                                {formatCurrency(item.total)}
                                             </td>
                                         </tr>
                                     ))
