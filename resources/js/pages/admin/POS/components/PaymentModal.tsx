@@ -26,7 +26,7 @@ const PaymentModal = ({ cart, paymentMethod, onPaymentMethodChange, paymentMetho
 
   const [purchaseType, setPurchaseType] = useState<"self-buying" | "delivery">("self-buying");
   const [charge, setCharge] = useState<number>(10000);
-  const [chargeInput, setChargeInput] = useState("10.000");
+  const [chargeInput, setChargeInput] = useState(0);
   const [globalDiscount, setGlobalDiscount] = useState(0);
 
   const [tax,
