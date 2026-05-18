@@ -83,9 +83,9 @@ export default function PosEditModal({
 
     const total = useMemo(
         () =>
-            subtotal +
+            Number(subtotal) +
             (type === "delivery"
-                ? charge
+                ? Number(charge)
                 : 0),
         [
             subtotal,
