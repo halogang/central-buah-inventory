@@ -23,6 +23,13 @@ class StockMovement extends Model
         'user_id'
     ];
 
+    protected $casts = [
+        'quantity' => 'decimal:3',
+        'stock_before' => 'decimal:3',
+        'stock_after' => 'decimal:3',
+        'bad_stock' => 'decimal:3',
+    ];
+
     public function item()
     {
         return $this->belongsTo(Item::class);

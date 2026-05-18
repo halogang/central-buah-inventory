@@ -95,7 +95,7 @@ class StockMovementController extends Controller
         $validated = $request->validate([
             'source_item_id' => 'required|exists:items,id',
             'destination_item_id' => 'required|exists:items,id',
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|numeric|min:0.01',
             'source_warehouse_id' => 'required|exists:warehouses,id',
             'destination_warehouse_id' => 'required|exists:warehouses,id',
         ]);
