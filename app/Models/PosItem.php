@@ -24,6 +24,15 @@ class PosItem extends Model
         'total'
     ];
 
+    protected $casts = [
+        'quantity' => 'decimal:3',
+        'base_price' => 'decimal:2',
+        'price' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+        'total' => 'decimal:2',
+    ];
+
     public function pos()
     {
         return $this->belongsTo(Pos::class);

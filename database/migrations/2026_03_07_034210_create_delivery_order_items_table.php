@@ -19,8 +19,8 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->integer('quantity')->default(0);
-            $table->integer('bad_stock')->default(0);
+            $table->decimal('quantity', 15, 2)->default(0);
+            $table->decimal('bad_stock', 15, 2)->default(0);
 
             $table->decimal('price', 15, 2)->default(0);
 
@@ -28,8 +28,8 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
-            $table->integer('cart_weight')->nullable();
-            $table->integer('cart_qty')->nullable();
+            $table->decimal('cart_weight', 15, 2)->nullable();
+            $table->decimal('cart_qty', 15, 2)->nullable();
 
             $table->timestamps();
         });

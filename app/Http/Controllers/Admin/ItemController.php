@@ -53,9 +53,9 @@ class ItemController extends Controller
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'purchase_price' => 'nullable|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'min_stock' => 'nullable|integer|min:0',
-            'bad_stock' => 'nullable|integer|min:0',
+            'stock' => 'nullable|numeric|min:0',
+            'min_stock' => 'nullable|numeric|min:0',
+            'bad_stock' => 'nullable|numeric|min:0',
         ]);
 
         // upload image
@@ -162,9 +162,9 @@ class ItemController extends Controller
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'purchase_price' => 'nullable|numeric|min:0',
             'selling_price' => 'nullable|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'min_stock' => 'nullable|integer|min:0',
-            'bad_stock' => 'nullable|integer|min:0',
+            'stock' => 'nullable|numeric|min:0',
+            'min_stock' => 'nullable|numeric|min:0',
+            'bad_stock' => 'nullable|numeric|min:0',
         ]);
 
         $destination = public_path($this->uploadPath);

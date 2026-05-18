@@ -17,7 +17,17 @@ class Invoice extends Model
         'loading_cost',
         'paid',
         'remaining',
-        'status'
+        'status',
+        'signer_name',
+        'signature'
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+        'total' => 'decimal:2',
+        'loading_cost' => 'decimal:2',
+        'paid' => 'decimal:2',
+        'remaining' => 'decimal:2',
     ];
 
     public function deliveryOrder()

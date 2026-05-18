@@ -20,7 +20,8 @@ class InvoiceController extends Controller
 
         $invoices = Invoice::with([
             'items.item',
-            'payments'
+            'payments',
+            'deliveryOrder'
         ])
         ->latest()
         ->get()
@@ -48,6 +49,9 @@ class InvoiceController extends Controller
 
                 'customer' => $invoice->deliveryOrder?->customer?->name,
                 'supplier' => $invoice->deliveryOrder?->supplier?->name,
+
+                'signerName' => $invoice->signer_name,
+                'signature' => $invoice->signature,
 
             ];
 

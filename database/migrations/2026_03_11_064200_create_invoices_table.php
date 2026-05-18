@@ -29,6 +29,8 @@ return new class extends Migration
             $table->decimal('remaining', 15, 2)->default(0);
 
             $table->enum('status',['unpaid','partial','paid'])->default('unpaid');
+            $table->string('signer_name')->nullable();
+            $table->text('signature')->nullable();
 
             $table->timestamps();
         });

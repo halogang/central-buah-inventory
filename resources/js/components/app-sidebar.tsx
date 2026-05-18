@@ -110,7 +110,7 @@ export function AppSidebar() {
                             title="Manajemen Stok"
                             icon={Warehouse}
                             items={stockLinks}
-                        />
+                        />  
                     )}
 
                     {showInvoiceDropdown && (

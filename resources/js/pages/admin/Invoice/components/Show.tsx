@@ -325,6 +325,24 @@ export default function Show({
                     </p>
                 </div>
 
+                {(invoice.signerName || invoice.signature) && (
+                    <div className="px-4 pb-4 border-t pt-4 flex gap-6">
+                        {invoice.signerName && (
+                            <div className="flex flex-col items-center gap-2">
+                                <p className="text-xs text-muted-foreground font-medium">PENANDA TANGAN</p>
+                                {invoice.signature && (
+                                    <img 
+                                        src={invoice.signature} 
+                                        alt="Signature"
+                                        className="h-16 object-contain"
+                                    />
+                                )}
+                                <p className="text-sm font-semibold text-center">{invoice.signerName}</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <div className="flex gap-2 p-4">
 
                     {/* {delivery.status === "draft" && ( */}

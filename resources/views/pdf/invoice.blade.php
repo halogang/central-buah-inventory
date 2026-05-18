@@ -286,5 +286,23 @@
 
         </div>
 
+        @if($invoice->signer_name || $invoice->signature)
+        <div style="margin-top: 40px; text-align: center;">
+            <strong style="display: block; margin-bottom: 50px;">Penanda Tangan</strong>
+            
+            @if($invoice->signature)
+            <img 
+                src="{{ $invoice->signature }}" 
+                alt="Signature"
+                style="height: 50px; margin-bottom: 10px; object-fit: contain;"
+            >
+            @endif
+
+            <div style="margin-top: 20px; font-weight: bold;">
+                {{ $invoice->signer_name }}
+            </div>
+        </div>
+        @endif
+
     </body>
 </html>

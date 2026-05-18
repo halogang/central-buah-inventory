@@ -20,9 +20,9 @@ return new class extends Migration
             $table->unsignedBigInteger('warehouse_id')->nullable();
             $table->decimal('purchase_price', 15, 2)->default(0);
             $table->decimal('selling_price', 15, 2)->default(0);
-            $table->integer('stock')->default(0);
-            $table->integer('min_stock')->default(0);
-            $table->integer('bad_stock')->default(0);
+            $table->decimal('stock', 15, 2)->default(0);
+            $table->decimal('min_stock', 15, 2)->default(0);
+            $table->decimal('bad_stock', 15, 2)->default(0);
             $table->timestamps();
         });
     }

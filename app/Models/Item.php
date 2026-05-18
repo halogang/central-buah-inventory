@@ -25,11 +25,11 @@ class Item extends Model
     ];
     
     protected $casts = [
-        'purchase_price' => 'integer',
-        'selling_price' => 'integer',
-        'stock' => 'integer',
-        'min_stock' => 'integer',
-        'bad_stock' => 'integer',
+        'purchase_price' => 'decimal:2',
+        'selling_price' => 'decimal:2',
+        'stock' => 'decimal:3',
+        'min_stock' => 'decimal:3',
+        'bad_stock' => 'decimal:3',
     ];
 
     protected $appends = ['image_url', 'thumbnail_url'];

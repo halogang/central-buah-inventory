@@ -17,6 +17,12 @@ class OpnameStockItem extends Model
         'difference'
     ];
 
+    protected $casts = [
+        'system_stock' => 'decimal:3',
+        'physical_stock' => 'decimal:3',
+        'difference' => 'decimal:3',
+    ];
+
     public function opnameStock()
     {
         return $this->belongsTo(OpnameStock::class);

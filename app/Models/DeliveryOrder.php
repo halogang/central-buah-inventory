@@ -34,6 +34,11 @@ class DeliveryOrder extends Model
     protected $casts = [
         'date' => 'date',
         'evidence' => 'array',
+        'cart_weight' => 'decimal:3',
+        'cart_qty' => 'decimal:3',
+        'total_amount' => 'decimal:2',
+        'total_weight' => 'decimal:3',
+        'loading_cost' => 'decimal:2',
     ];
 
     public function supplier()

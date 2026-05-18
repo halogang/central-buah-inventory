@@ -21,21 +21,21 @@ return new class extends Migration
             $table->string('item_name')->nullable();
             $table->string('unit')->nullable();
 
-            $table->integer('quantity');
+            $table->decimal('quantity', 15, 2)->default(0);
 
-            $table->integer('base_price');
+            $table->decimal('base_price', 15, 2)->default(0);
 
             // harga jual final sebelum qty
-            $table->integer('price');
+            $table->decimal('price', 15, 2)->default(0);
 
-            // diskon per item
-            $table->integer('discount')->default(0);
+            // diskon per qty
+            $table->decimal('discount', 15, 2)->default(0);
 
             // price * qty
-            $table->integer('subtotal')->default(0);
+            $table->decimal('subtotal', 15, 2)->default(0);
 
             // subtotal - discount
-            $table->integer('total');
+            $table->decimal('total', 15, 2);
 
             $table->timestamps();
         });

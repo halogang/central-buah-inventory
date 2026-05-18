@@ -14,6 +14,12 @@ class InvoiceItem extends Model
         'total'
     ];
 
+    protected $casts = [
+        'quantity' => 'decimal:3',
+        'price' => 'decimal:2',
+        'total' => 'decimal:2',
+    ];
+
     public function item()
     {
         return $this->belongsTo(Item::class);

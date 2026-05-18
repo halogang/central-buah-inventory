@@ -15,6 +15,11 @@ class Payment extends Model
         'date'
     ];
 
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'date' => 'date',
+    ];
+
     protected $appends = ['evidence_url'];
 
     public function invoice()

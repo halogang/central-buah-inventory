@@ -64,16 +64,16 @@ class POSController extends Controller
 
             'payment_method' => 'required|string',
 
-            'paid_amount' => 'nullable|integer',
-            'change_amount' => 'nullable|integer',
+            'paid_amount' => 'nullable|numeric',
+            'change_amount' => 'nullable|numeric',
 
             'type' => 'required|string',
-            'charge' => 'nullable|integer',
+            'charge' => 'nullable|numeric',
 
-            'subtotal' => 'required|integer|min:0',
-            'discount' => 'nullable|integer|min:0',
-            'tax' => 'nullable|integer|min:0',
-            'total' => 'required|integer|min:0',
+            'subtotal' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'total' => 'required|numeric|min:0',
 
             'items' => 'required|array|min:1',
 
@@ -103,23 +103,14 @@ class POSController extends Controller
 
             $subtotal = collect($validated['items'])
                 ->sum(fn ($item) =>
-                    $item['price'] * $item['quantity']
+                    ($item['price'] - ($item['discount'] ?? 0)) * $item['quantity']
                 );
-
-            $itemDiscountTotal = collect($validated['items'])
-                ->sum(fn ($item) =>
-                    $item['discount'] ?? 0
-                );
-
-            $globalDiscount = $validated['discount'] ?? 0;
 
             $tax = $validated['tax'] ?? 0;
             $charge = $validated['charge'] ?? 0;
 
             $grandTotal =
                 $subtotal
-                - $itemDiscountTotal
-                - $globalDiscount
                 + $tax
                 + $charge;
 
@@ -136,7 +127,7 @@ class POSController extends Controller
 
                 'subtotal' => $subtotal,
 
-                'discount' => $globalDiscount,
+                'discount' => 0,
 
                 'tax' => $tax,
 
@@ -163,13 +154,12 @@ class POSController extends Controller
                     ->findOrFail($item['item_id']);
 
                 $itemSubtotal =
-                    $item['price'] * $item['quantity'];
+                    ($item['price'] - ($item['discount'] ?? 0)) * $item['quantity'];
 
                 $itemDiscount =
                     $item['discount'] ?? 0;
 
-                $itemTotal =
-                    $itemSubtotal - $itemDiscount;
+                $itemTotal = $itemSubtotal;
 
                 $newStock =
                     $product->stock - $item['quantity'];
@@ -268,16 +258,16 @@ class POSController extends Controller
 
             'payment_method' => 'required|string',
 
-            'paid_amount' => 'nullable|integer',
-            'change_amount' => 'nullable|integer',
+            'paid_amount' => 'nullable|numeric',
+            'change_amount' => 'nullable|numeric',
 
             'type' => 'required|string',
-            'charge' => 'nullable|integer',
+            'charge' => 'nullable|numeric',
 
-            'subtotal' => 'required|integer|min:0',
-            'discount' => 'nullable|integer|min:0',
-            'tax' => 'nullable|integer|min:0',
-            'total' => 'required|integer|min:0',
+            'subtotal' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'total' => 'required|numeric|min:0',
 
             'items' => 'required|array|min:1',
 
@@ -344,16 +334,8 @@ class POSController extends Controller
 
             $subtotal = collect($validated['items'])
                 ->sum(fn ($item) =>
-                    $item['price'] * $item['quantity']
+                    ($item['price'] - ($item['discount'] ?? 0)) * $item['quantity']
                 );
-
-            $itemDiscountTotal = collect($validated['items'])
-                ->sum(fn ($item) =>
-                    $item['discount'] ?? 0
-                );
-
-            $globalDiscount =
-                $validated['discount'] ?? 0;
 
             $tax =
                 $validated['tax'] ?? 0;
@@ -363,8 +345,6 @@ class POSController extends Controller
 
             $grandTotal =
                 $subtotal
-                - $itemDiscountTotal
-                - $globalDiscount
                 + $tax
                 + $charge;
 
@@ -377,7 +357,7 @@ class POSController extends Controller
 
                 'subtotal' => $subtotal,
 
-                'discount' => $globalDiscount,
+                'discount' => 0,
 
                 'tax' => $tax,
 
@@ -408,13 +388,12 @@ class POSController extends Controller
                     ->findOrFail($item['item_id']);
 
                 $itemSubtotal =
-                    $item['price'] * $item['quantity'];
+                    ($item['price'] - ($item['discount'] ?? 0)) * $item['quantity'];
 
                 $itemDiscount =
                     $item['discount'] ?? 0;
 
-                $itemTotal =
-                    $itemSubtotal - $itemDiscount;
+                $itemTotal = $itemSubtotal;
 
                 $newStock =
                     $product->stock - $item['quantity'];
