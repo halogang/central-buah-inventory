@@ -9,7 +9,7 @@ import PaymentModal, { SuccessModal } from "./components/PaymentModal";
 import ProductGrid from "./components/ProductGrid";
 import { ShoppingCart } from "lucide-react";
 import PosHistory from "./components/PosHistory";
-import { formatCurrency } from "@/helpers/format";
+import { formatCurrency, formatDecimal } from "@/helpers/format";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -205,7 +205,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         return `
           <div class="item">
               <div>
-                  ${item.product.name} x${item.qty}
+                  ${item.product.name} x${formatDecimal(item.qty)}
               </div>
               <div>
                   ${formatCurrency(linePrice)}
