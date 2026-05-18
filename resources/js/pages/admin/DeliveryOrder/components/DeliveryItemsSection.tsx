@@ -1,7 +1,7 @@
 import { Package, Plus, Trash2, Image, Dot } from "lucide-react"
 import { useState } from "react";
 import { FormInput, FormSelect } from "@/components/admin"
-import { formatCurrency, formatNumber } from "@/helpers/format"
+import { formatCurrency, formatDecimal, formatNumber } from "@/helpers/format"
 
 export default function DeliveryItemsSection({
     form,
@@ -120,7 +120,7 @@ export default function DeliveryItemsSection({
                                     <div className="flex items-center gap-1 text-xs font-light">
 
                                         <span>
-                                            {item.stock + " " + item.unit?.unit_code}
+                                            {formatDecimal(item.stock) + " " + item.unit?.unit_code}
                                         </span>
                                     </div>
                                 </div>

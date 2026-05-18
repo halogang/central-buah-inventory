@@ -133,7 +133,12 @@ export default function MoveStockModal({ warehouses, onClose }: MoveStockModalPr
         },
         onError: (errors: Record<string, string>) => {
             notify.dismiss(loading);
-            notify.error(Object.values(errors).join("\n") || "Gagal memindahkan stok");
+
+            console.log(errors);
+
+            notify.error(
+                Object.values(errors).join("\n")
+            );
         },
         }
     );

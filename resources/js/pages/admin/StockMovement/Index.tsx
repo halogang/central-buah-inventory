@@ -8,6 +8,7 @@ import AppLayout from "@/layouts/app-layout";
 import type { BreadcrumbItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import MoveStockModal from "./MoveStockModal";
+import { formatDecimal } from "@/helpers/format";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -178,15 +179,15 @@ export default function Index() {
                                         </td>
 
                                         <td className="p-3 text-center font-semibold">
-                                            {m.quantity}
+                                            {formatDecimal(m.quantity)}
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            {m.stock_before}
+                                            {formatDecimal(m.stock_before)}
                                         </td>
 
                                         <td className="p-3 text-center">
-                                            {m.stock_after}
+                                            {formatDecimal(m.stock_after)}
                                         </td>
 
                                         <td className="p-3 text-xs text-muted-foreground">
@@ -240,11 +241,11 @@ export default function Index() {
 
                                 <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
 
-                                    <Info label="Qty" value={m.quantity} />
+                                    <Info label="Qty" value={formatDecimal(m.quantity)} />
 
                                     <Info label="Gudang" value={m.warehouse?.name} />
 
-                                    <Info label="Before" value={m.stock_before} />
+                                    <Info label="Before" value={formatDecimal(m.stock_before)} />
 
                                     <Info label="After" value={m.stock_after} />
 

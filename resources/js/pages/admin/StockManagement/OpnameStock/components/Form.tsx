@@ -5,6 +5,7 @@ import {FormInput, FormTextarea} from "@/components/admin"
 import {Button} from "@/components/ui/button"
 import { notify } from "@/lib/notify"
 import {store, update} from "@/routes/stok/stok-opname"
+import { formatDecimal } from "@/helpers/format"
 
 interface Props {
     onClose: () => void
@@ -364,7 +365,7 @@ export default function Form({onClose, warehouses, items, opname, user, roleName
                                                 </td>
 
                                                 <td className="text-center">
-                                                    {row.system_stock}
+                                                    {formatDecimal(row.system_stock)}
                                                 </td>
 
                                                 <td>
@@ -387,7 +388,7 @@ export default function Form({onClose, warehouses, items, opname, user, roleName
 
                                                 <td className="text-center">
 
-                                                    {row.difference}
+                                                    {formatDecimal(row.difference)}
 
                                                 </td>
 

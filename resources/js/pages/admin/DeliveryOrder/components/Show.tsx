@@ -1,6 +1,6 @@
 import { X, Printer, Camera, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatCurrency } from "@/helpers/format"
+import { formatCurrency, formatDecimal } from "@/helpers/format"
 
 interface Props {
     data: any
@@ -200,7 +200,7 @@ export default function Show({ data, onClose }: Props) {
                                                         </span>
 
                                                         <div className="text-xs text-muted-foreground">
-                                                            {item.cart_qty || 0} x {item.cart_weight || 0} kg
+                                                            {formatDecimal(item.cart_qty) || 0} x {formatDecimal(item.cart_weight) || 0} kg
                                                         </div>
 
                                                     </div>
@@ -208,11 +208,11 @@ export default function Show({ data, onClose }: Props) {
                                                 </td>
 
                                                 <td className="p-3 text-center">
-                                                    {item.quantity}
+                                                    {formatDecimal(item.quantity)}
                                                 </td>
 
                                                 <td className="p-3 text-center text-red-500 font-medium">
-                                                    {item.bad_stock}
+                                                    {formatDecimal(item.bad_stock)}
                                                 </td>
 
                                                 <td className="p-3 text-center text-green-600 font-semibold">

@@ -9,6 +9,7 @@ use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -119,7 +120,8 @@ class StockMovementController extends Controller
 
             // OUT
             $stockBefore = $sourceItem->stock;
-            $sourceItem->decrement('stock', $quantity);
+            $sourceItem->stock = $sourceItem->stock - $quantity;
+            $sourceItem->save();
 
             StockMovement::create([
                 'item_id' => $sourceItem->id,
@@ -136,7 +138,8 @@ class StockMovementController extends Controller
 
             // IN
             $destBefore = $destinationItem->stock;
-            $destinationItem->increment('stock', $quantity);
+            $destinationItem->stock = $destinationItem->stock + $quantity;
+            $destinationItem->save();
 
             StockMovement::create([
                 'item_id' => $destinationItem->id,
@@ -155,11 +158,18 @@ class StockMovementController extends Controller
 
             return redirect()->back()->with('success', 'Stok berhasil dipindahkan');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
 
+            Log::error('Stock movement failed', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             throw ValidationException::withMessages([
-                'general' => 'Gagal memindahkan stok'
+                'general' => $e->getMessage(),
             ]);
         }
     }

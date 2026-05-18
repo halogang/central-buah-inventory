@@ -15,3 +15,7 @@ export function formatCurrency(value: any): string {
     maximumFractionDigits: 0,
   }).format(num)
 }
+
+export function formatDecimal(value: any): string {
+    return parseFloat(value).toString();
+}

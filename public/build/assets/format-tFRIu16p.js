@@ -1,0 +1,1 @@
+function n(r){const t=Number(r)||0;return new Intl.NumberFormat("id-ID",{maximumFractionDigits:0}).format(t)}function m(r){const t=Number(r)||0;return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(t)}function a(r){return parseFloat(r).toString()}export{a,n as b,m as f};

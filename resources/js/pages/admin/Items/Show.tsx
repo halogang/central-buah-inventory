@@ -11,6 +11,7 @@ import { destroy, index } from "@/routes/master/items";
 import type { BreadcrumbItem } from "@/types";
 import Form from "./components/Form";
 import { useCan } from "@/utils/permissions";
+import { formatDecimal } from "@/helpers/format";
 
 interface Category {
     id: number;
@@ -270,7 +271,7 @@ export default function Show({
                                         <span
                                             className="px-2 py-1 rounded-full text-xs font-medium text-yellow-700 dark:text-yellow-500"
                                         >
-                                            {item.min_stock}
+                                            {formatDecimal(item.min_stock)}
                                         </span>
                                     </td>
 
@@ -278,14 +279,14 @@ export default function Show({
                                         <span
                                             className={`px-2 py-1 rounded-full text-xs font-medium`}
                                         >
-                                            {item.stock}
+                                            {formatDecimal(item.stock)}
                                         </span>
                                     </td>
 
                                     <td className="p-3 text-center">
                                         <div className="flex items-center justify-center gap-1 text-yellow-500">
                                             <TriangleAlert className="h-3 w-3" />
-                                            {item.bad_stock}
+                                            {formatDecimal(item.bad_stock)}
                                         </div>
                                     </td>
 
@@ -295,7 +296,7 @@ export default function Show({
                                                     ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400"
                                                     : "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
                                             }`}>
-                                            {item.stock - item.bad_stock}
+                                            {formatDecimal(item.stock - item.bad_stock)}
                                         </span>
                                     </td>
 
